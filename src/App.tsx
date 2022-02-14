@@ -1,12 +1,14 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import StartPage from './pages/StartPage';
+import { lightTheme } from './themes';
+import HomeSpace from './pages/HomeSpace';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+    <div style={{height: "100%"}}> 
+      <header>
+        {/*<img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
@@ -17,8 +19,12 @@ function App() {
           rel="noopener noreferrer"
         >
           Learn React
-        </a>
+      </a>*/}
+        <CssBaseline />
       </header>
+      <ThemeProvider theme={lightTheme}>
+        <HomeSpace />
+      </ThemeProvider>
     </div>
   );
 }
