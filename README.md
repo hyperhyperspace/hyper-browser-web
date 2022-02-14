@@ -1,5 +1,7 @@
 # A web-based Hyper Browser
 
+WIP - this is just an HTML mock-up at the moment !
+
 A Hyper Browser lets you browse spaces using the Hyper Hyper Space library.
 
 This is an HTML5-based Hyper Browser, that bridges HHS' spaces into the regular, static webpage.
