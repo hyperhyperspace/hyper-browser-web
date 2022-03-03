@@ -34,10 +34,10 @@ function StartPage() {
                         gutterBottom
                     >*/}
                         {/*<img src="logo.png" style={{width: "3rem", height: "3rem", marginBottom: '-12px'}}/> Welcome to Hyper Hyper Space!*/}
-                        <Container sx={{width:{xs: '100%', sm:'100%', md: '95%', lg:'85%'}}}>
+                        <Container sx={{width:{xs: '90%', sm:'80%', md: '70%', lg:'65%'}}}>
                             <h3><img src="logo.png" style={{width: '100%'}}/></h3>
                         </Container>
-                    <Typography variant="h6" align="center" color="text.secondary" paragraph sx={{display: {xs:'none', sm: 'block', md: 'block'}}}>
+                    <Typography variant="body1" align="center" color="text.secondary" paragraph sx={{display: {xs:'none', sm: 'block', md: 'block'}}}>
                         Spaces can hold blogs, chats, wikis, etc. They are are stored on your own computer, like files, 
                         and are synchronized over the network.
                     </Typography>
@@ -59,7 +59,7 @@ function StartPage() {
                         <Button variant="contained">Lookup Space</Button>
                     </Stack>
                     <Box sx={{pt: 2, display: {xs: 'none', sm: 'none', md: 'block'}}}>
-                        <Typography align="center" paragraph gutterBottom>Spaces are looked up using 3-word codes, that you can enter above.</Typography>
+                        <Typography variant="body1" align="center" paragraph gutterBottom>Spaces are looked up using 3-word codes, that you can enter above.</Typography>
                     </Box>
                 </Container>
 

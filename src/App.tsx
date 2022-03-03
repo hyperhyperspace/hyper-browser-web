@@ -3,6 +3,8 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import StartPage from './pages/StartPage';
 import { lightTheme } from './themes';
 import HomeSpace from './pages/HomeSpace';
+import { Route, Routes } from 'react-router';
+
 
 function App() {
   return (
@@ -23,7 +25,11 @@ function App() {
         <CssBaseline />
       </header>
       <ThemeProvider theme={lightTheme}>
-        <HomeSpace />
+        <Routes>
+          <Route path="start" element={<StartPage />} />
+          <Route index element={<HomeSpace />} />
+          <Route path="/" element={<HomeSpace />} />
+        </Routes>
       </ThemeProvider>
     </div>
   );

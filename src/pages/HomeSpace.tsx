@@ -44,17 +44,25 @@ function HomeSpace() {
                                 spacing={0}
                                 style={{flexWrap: 'wrap'}}
                             >
-                                <HomeItem icon="📂" name="Shared Folder"></HomeItem>
+                                <HomeItem icon="streamline-icon-folder-empty@48x48.png" name="Public Folder"></HomeItem>
+                                <HomeItem icon="streamline-icon-common-file-empty@48x48.png" name="Personal Page"></HomeItem>
+                                <HomeItem icon="streamline-icon-pencil-write-1@48x48.png" name="Notes"></HomeItem>
+                                <HomeItem icon="streamline-icon-add-circle-bold@48x48.png" name=" "></HomeItem>
+
+                                {/*<HomeItem icon="📂" name="Public Folder"></HomeItem>
                                 <HomeItem icon="📄" name="Personal Page"></HomeItem>
                                 <HomeItem icon="✍️" name="Notes"></HomeItem>
-                                <HomeItem icon="➕" name=" "></HomeItem>
+            <HomeItem icon="➕" name=" "></HomeItem>*/}
+
+
+                                
                             
                             </Stack>
                             <Stack
                                 direction='row'
                                 spacing={2}
                             >
-                                <HomeItem icon="🗑" name="Trash" badge={4}></HomeItem>
+                                <HomeItem icon="streamline-icon-archive@48x48.png" name="Archived" badge={4}></HomeItem>
                             </Stack>
                             
 
@@ -94,11 +102,16 @@ function HomeSpace() {
                 <Container maxWidth="lg" sx={{pt:12, pl:0, pr:0}}>
                     <div style={{textAlign: 'center'}}>
                     <ButtonGroup style={{flexWrap: 'wrap'}} variant="contained" color="inherit">
-                        <HomeCommand icon="🙂" title="Profile"></HomeCommand>
+                        <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile"></HomeCommand>
+                        <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts"></HomeCommand>
+                        <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={4}></HomeCommand>
+                        <HomeCommand icon="streamline-icon-satellite-1@48x48.png" title="Spaces"></HomeCommand>
+                        <HomeCommand icon="streamline-icon-cog-1@48x48.png" title="Config"></HomeCommand>
+                        {/*<HomeCommand icon="🙂" title="Profile"></HomeCommand>
                         <HomeCommand icon="📒" title="Contacts"></HomeCommand>
                         <HomeCommand icon="💬" title="Chat" badge={4}></HomeCommand>
                         <HomeCommand icon="🛸" title="Spaces"></HomeCommand>
-                        <HomeCommand icon="⚙️" title="Config"></HomeCommand>
+                        <HomeCommand icon="⚙️" title="Config"></HomeCommand>*/}
                     </ButtonGroup>
                     </div>
                 </Container>
