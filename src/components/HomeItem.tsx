@@ -1,11 +1,11 @@
-import { Badge, Typography } from "@mui/material";
+import { IconButton, Typography } from '@mui/material';
 
 
 function HomeItem(props: {icon: string, name?: string, badge?: number}) {
     return <div style={{width: '4.5rem'}}>
             <div>
                 <div style={{display: 'flex', justifyContent: 'center'}}>
-                <img src={'icons/' + props.icon} style={{width:'32px', height:'32px'}}/>
+                <IconButton><img src={'icons/' + props.icon} style={{width:'32px', height:'32px'}}/></IconButton>
                 {/*<Typography fontSize="2rem" align="center">
                     {props.badge ?
                         <Badge badgeContent={props.badge} color="default"><a style={{textDecoration: 'none'}} href="#">{props.icon}</a></Badge>

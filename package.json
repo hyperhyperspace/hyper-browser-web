@@ -21,9 +21,13 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
     "typescript": "^4.4.2",
-    "web-vitals": "^2.1.0"
-  },
-  "scripts": {
+    "web-vitals": "^2.1.0",
+    "@hyper-hyper-space/core": "0.9.0",
+    "@hyper-hyper-space/react": "0.3.0",
+    "@hyper-hyper-space/home": "0.1.0",
+    "@hyper-hyper-space/p2p-chat": "0.2.0"
+},
+"scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
