@@ -1,21 +1,22 @@
-import { AppBar, ButtonGroup, Container, SwipeableDrawer, IconButton, InputAdornment, Stack, TextField, Toolbar, Typography, List, ListSubheader, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { AppBar, ButtonGroup, Container, SwipeableDrawer, IconButton, InputAdornment, Stack, TextField, Toolbar, Typography, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { Box } from '@mui/system';
 
 import { Fragment, useState, useEffect } from 'react';
-import { Outlet, useLocation, useParams } from 'react-router';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router';
 
-import HomeItem from '../components/HomeItem';
-import HomeCommand from '../components/HomeCommand';
-import { Hash, HashedObject, Identity, Mesh, MutableSet, Resources, Store, WorkerSafeIdbBackend } from '@hyper-hyper-space/core';
-import { HyperBrowserConfig } from '../model/HyperBrowserConfig';
-import { PeerComponent, StateObject, useStateObject, useStateObjectByHash } from '@hyper-hyper-space/react';
-import { Home, Folder, Device } from '@hyper-hyper-space/home';
+import HomeItem from './components/HomeItem';
+import HomeCommand from './components/HomeCommand';
+import { Hash, HashedObject, Identity, MutableArray, MutableReference, MutableSet, Resources } from '@hyper-hyper-space/core';
+import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
+import { PeerComponent, useStateObject } from '@hyper-hyper-space/react';
+import { Home, Folder, Device, FolderItem } from '@hyper-hyper-space/home';
+import CreateFolderDialog from './components/CreateFolderDialog';
+import RenameFolderDialog from './components/RenameFolderDialog';
 
 type HomeContext = {
     home: Home | undefined,
     owner: Identity | undefined,
-    devices: StateObject<MutableSet<Device>> | undefined,
-    desktop: StateObject<Folder> | undefined;
+    localDevice: Device | undefined
 }
 
 function HomeSpace() {
@@ -28,27 +29,117 @@ function HomeSpace() {
     const [loadError, setLoadError] = useState<string|undefined>(undefined);
 
     useEffect(() => {
-        initHomeResources(homeHash, setLoadError).then((r: Resources) => {
+        HyperBrowserConfig.initHomeResources(homeHash, setLoadError).then((r: Resources) => {
             setHomeResources(r);
         })
     }, []);
 
     
-    const [home, setHome]   = useState<Home|undefined>(undefined);
-    const [owner, setOwner] = useState<Identity|undefined>(undefined);
+    const [home, setHome]               = useState<Home|undefined>(undefined);
+    const [localDevice, setLocalDevice] = useState<Device|undefined>(undefined);
+    const [owner, setOwner]             = useState<Identity|undefined>(undefined);
+    const [desktopFolder, setDesktopFolder] = useState<Folder|undefined>(undefined);
 
-    const devices = useStateObject<MutableSet<Device>>(home?.devices);
-    const desktop = useStateObject<Folder>(home?.desktop);
+    const homeState = useStateObject<Home>(home);
+    const desktopFolderState = useStateObject<Folder>(desktopFolder);
+
+    useEffect(() => {
+        console.log('homeState')
+        console.log(homeState)
+        //console.log(Object.values((homeState?.fields['desktop']?.fields['root']?.fields['items'].contents) || {}));
+    }, [homeState]);
+
+    useEffect(() => {
+        console.log('desktopFolderState');
+        console.log(desktopFolderState);
+        console.log(desktopFolderState?.value?.items?.getMutableContents().size)
+    }, [desktopFolderState]);
+
+    //const [currentFolder, setCurrentFolder] = useState<Folder>(homeState?.fields['desktop']?.fields['root']?.current as Folder);
+
+    const [showCreateFolder, setShowCreateFolder] = useState(false);
+
+    const openCreateFolder = () => {
+        setShowCreateFolder(true);
+    }
+
+    const closeCreateFolder = () => {
+        setShowCreateFolder(false);
+    }
+
+    const [folderToRename, setFolderToRename] = useState<Folder|undefined>(undefined);
+
+    const openRenameFolder = (folder: Folder) => {
+        setFolderToRename(folder);
+    }
+
+    const closeRenameFolder = () => {
+        setFolderToRename(undefined);
+    }
 
     const homeContext: HomeContext = {
         home: home,
-        owner: owner,
-        devices: devices,
-        desktop: desktop
+        localDevice: localDevice,
+        owner: owner
     };
 
     useEffect(() => {
-        homeResources?.store.load(homeHash).then((obj?: HashedObject) => {
+
+        const initHome = async () => {
+
+            const obj = await homeResources?.store.load(homeHash, false);
+
+            if (obj === undefined) {
+                setLoadError('Error: The home object (hash ' + homeHash + ') is missing from the store.');
+                return;
+            }
+
+            if (!(obj instanceof Home)) {
+                setLoadError('Error: The home object is of the wrong type:' + obj?.getClassName());
+                return;
+            }
+
+            const newHome = obj as Home;
+
+            await newHome.findLocalDevice();
+
+            const newOwner = newHome?.getAuthor();
+    
+            if (newOwner === undefined) {
+                setLoadError('Error: the home object has no owner.');
+                return;
+            }
+    
+            setOwner(newOwner);
+
+            const rootHash = newHome?.desktop?.root?.hash() as Hash;
+            const desktopFolder = await homeResources?.store.loadAndWatchForChanges(rootHash) as Folder;
+
+            await desktopFolder.loadItemNamesAndWatchForChanges();
+
+            setDesktopFolder(desktopFolder);
+
+            await new Promise(r => setTimeout(r, 100));
+
+            //await newHome.loadAndWatchForChanges();
+            await newHome.startSync();
+
+            //await newHome.startSync();
+
+            setHome(newHome);
+            setLocalDevice(newHome._localDevice);
+
+        }
+
+        if (homeResources !== undefined && homeHash !== undefined) {
+
+            initHome().catch((reason: any) => {
+                setLoadError(String(reason))
+            });
+
+        }
+
+        /*homeResources?.store.load(homeHash).then((obj?: HashedObject) => {
 
             if (obj === undefined) {
                 setLoadError('Error: The home object (hash ' + homeHash + ' is missing from the store.');
@@ -62,22 +153,48 @@ function HomeSpace() {
 
             const newHome = obj as Home;
 
-            setHome(newHome);
+            
+            
 
-            const newOwner = newHome?.getAuthor();
+            newHome?.startSync().then(() => {
+                setHome(newHome);
+                setLocalDevice(newHome._localDevice);
 
-            if (newOwner === undefined) {
-                setLoadError('Error: the home object has no owner.');
-                return;
+                const newOwner = newHome?.getAuthor();
+    
+                if (newOwner === undefined) {
+                    setLoadError('Error: the home object has no owner.');
+                    return;
+                }
+    
+                setOwner(newOwner);
+            })();
+
+            return newHome;
+        }).then((home?: Home) => {
+
+            const rootHash = home?.desktop?.root?.hash()
+
+            if (rootHash !== undefined) {
+                homeResources?.store.loadAndWatchForChanges(rootHash).then((desktop?: HashedObject) => {
+
+                    const desktopFolder = desktop as Folder;
+
+                    desktopFolder.loadItemNamesAndWatchForChanges().then(() => {
+                        setDesktopFolder(desktopFolder);
+
+                        console.log('df')
+                        console.log(desktop);
+    
+                        console.log('yayy')
+                    });
+                });
             }
 
-            setOwner(newOwner);
-
-            home?.loadAndWatchForChanges();
-
-        }).catch((reason: any) => {
+        })
+        .catch((reason: any) => {
             setLoadError(String(reason))
-        });
+        });*/
 
     }, [homeHash, homeResources]);
 
@@ -95,27 +212,30 @@ function HomeSpace() {
         }
     }
 
-    const ready = !(homeResources === undefined || home === undefined || owner === undefined);
+    //const ready = !(homeResources === undefined || home === undefined || owner === undefined || homeState === undefined);
+    const ready = !(homeResources === undefined || desktopFolder === undefined || desktopFolderState === undefined || owner === undefined);
 
     const [showDrawer, setShowDrawer] = useState(false);
 
     const onCloseDrawer = (ev: React.SyntheticEvent) => {
         setShowDrawer(false);
-    }
+    };
 
     const onOpenDrawer = (ev: React.SyntheticEvent) => {
         setShowDrawer(true);
-    }
+    };
 
     const openDrawer = () => {
         setShowDrawer(true);
-    }
+    };
  
-    const location = useLocation();
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        console.log(location);
-    }, [location]);
+    const openManageLinkedDevicesDialog = () => {
+        navigate('./devices');
+    };
+
+    const location = useLocation();
 
     return (
     <Fragment>
@@ -166,19 +286,43 @@ function HomeSpace() {
                                 spacing={0}
                                 style={{flexWrap: 'wrap'}}
                             >
-                                
-                                {desktop?.value?.items?.contents().map((obj: HashedObject) => {
-                                    {obj instanceof Folder && 
-                                        <HomeItem icon="streamline-icon-folder-empty@48x48.png" name="Public Folder"></HomeItem>    
-                                    }
+                                {/*{Object.values((homeState?.fields['desktop']?.fields['root']?.fields['items']?.contents) || {}).map((proxy: StateProxy) => {*/}
+                                {/*{Object.values(((homeState?.value as Home)?.desktop?.root?.items?.contents()) || {}).map((proxy: FolderItem) => {*/}
+                                {Object.values(((desktopFolderState?.value as Folder)?.items?.contents()) || {}).map((proxy: FolderItem) => {
 
+                                        console.log('ok')
+
+                                        const showItem = (item: FolderItem) => {
+
+
+                                            
+
+                                            //const item = homeState?.fields['desktop']?.fields['items']?.contents['itemHash'];
+                                            //const name = item.fields['name'].current as MutableReference<string>;
+
+                                            if (item instanceof Folder) {
+                                                const name = item.name;
+                                                return <HomeItem 
+                                                            key={item.getLastHash()}
+                                                            icon="streamline-icon-folder-empty@48x48.png" 
+                                                            name={name?.getValue()} 
+                                                            menu={[{name: 'Open', action: () => {alert('open')}}, 
+                                                                   {name: 'Rename', action: () => {openRenameFolder(item)}}, 
+                                                                   {name: 'Delete', action: () => {alert('delete')}}]}
+                                                        />;
+                                            } else {
+                                                return <Fragment></Fragment>;
+                                            }
+                                        };
+
+                                        return showItem(proxy);
                                     })
                                 }
 
                                 <HomeItem icon="streamline-icon-folder-empty@48x48.png" name="Public Folder"></HomeItem>
                                 <HomeItem icon="streamline-icon-common-file-empty@48x48.png" name="Personal Page"></HomeItem>
                                 <HomeItem icon="streamline-icon-pencil-write-1@48x48.png" name="Notes"></HomeItem>
-                                <HomeItem icon="streamline-icon-add-circle-bold@48x48.png" name=" "></HomeItem>
+                                <HomeItem icon="streamline-icon-add-circle-bold@48x48.png" name=" " menu={[{name: 'New Folder', action: openCreateFolder}]} clickOpensMenu></HomeItem>
 
                                 {/*<HomeItem icon="📂" name="Public Folder"></HomeItem>
                                 <HomeItem icon="📄" name="Personal Page"></HomeItem>
@@ -273,7 +417,7 @@ function HomeSpace() {
                         <ListItemText primary="Settings" />
                     </ListItemButton>
                     <List component="div" disablePadding>
-                        <ListItemButton sx={{ pl: 4 }} onClick={openDrawer}>
+                        <ListItemButton sx={{ pl: 4 }} onClick={openManageLinkedDevicesDialog}>
                             <ListItemIcon>
                                 <img src="icons/streamline-icon-connect-device-exchange@48x48.png" style={{width:'28px', height:'28px', margin:'2px', padding: '2px'}}></img>
                             </ListItemIcon>
@@ -284,6 +428,16 @@ function HomeSpace() {
             
             </Box>
             </SwipeableDrawer>
+
+            { showCreateFolder &&
+                <CreateFolderDialog parent={desktopFolder as Folder} context={homeContext} onClose={closeCreateFolder}/>
+            }
+
+            { folderToRename !== undefined &&
+                <RenameFolderDialog folder={folderToRename} context={homeContext} onClose={closeRenameFolder}/>
+            }
+
+            {/*  homeState?.value?.desktop?.root */}
 
             <Outlet context={homeContext} />
 
@@ -299,25 +453,7 @@ function HomeSpace() {
 
 }
 
-const initHomeResources = async(homeHash: Hash, setLoadError: (err: string) => void) => {
-    const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHomeHash(homeHash));
 
-    try {
-        console.log('Initializing storage backend for home space ' + homeHash + '...');
-        await backend.ready();
-        console.log('Storage backend for home space ready');
-    } catch (e: any) {
-        console.log('Error initializing storage backend for starter page');
-        setLoadError('Error initializing storage backend: ' + e.toString());
-    }
-
-    const store = new Store(backend);
-    const mesh = new Mesh();
-
-    const resources = await Resources.create({mesh: mesh, store: store});
-
-    return resources;
-}
 
 export type { HomeContext };
 

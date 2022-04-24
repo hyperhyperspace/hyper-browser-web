@@ -2,8 +2,8 @@ import { Dialog, DialogContent, DialogTitle, Stack, Typography, TextField, Card,
 import InfoIcon from '@mui/icons-material/Info';
 import { useState, useRef, Fragment } from 'react';
 import { useNavigate } from 'react-router';
-import { HyperBrowserConfig } from '../model/HyperBrowserConfig';
-import { useHyperBrowserEnv } from '../context/HyperBrowserContext';
+import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
+import { useHyperBrowserEnv } from '../../../context/HyperBrowserContext';
 import { Hash, MutableSet } from '@hyper-hyper-space/core';
 
 function CreateHomeDialog() {
@@ -64,7 +64,7 @@ function CreateHomeDialog() {
     const confirmCreateHome = () => {
         setShowConfirmDialog(false);
         setShowCreatingDialog(true);
-        HyperBrowserConfig.create(name, deviceName, env.homes.value as MutableSet<Hash>).then(() => {
+        HyperBrowserConfig.create({name: name, type: 'person'}, deviceName, env.homes.value as MutableSet<Hash>).then(() => {
             navigate('/');
         });
     }
@@ -170,7 +170,7 @@ function CreateHomeDialog() {
           Creating {name}'s Home Space
       </DialogTitle>
       <DialogContentText style={{padding: 2}}>
-          You will be redirected to your new Home Space in a few seconds...
+        <Typography>You will be redirected to your new Home Space in a few seconds...</Typography>
       </DialogContentText>
   </Dialog>
 </Fragment>);

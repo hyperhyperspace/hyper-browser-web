@@ -1,4 +1,4 @@
-import { Badge, Button, Tooltip } from "@mui/material";
+import { Badge, Button, Tooltip } from '@mui/material';
 
 
 function HomeCommand(props: {icon: string, title: string, badge?: number}) {

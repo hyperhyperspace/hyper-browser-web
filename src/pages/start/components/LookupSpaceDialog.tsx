@@ -8,7 +8,7 @@ import { Box } from '@mui/system';
 import { useObjectDiscovery } from '@hyper-hyper-space/react';
 import { ObjectDiscoveryReply } from '@hyper-hyper-space/core';
 import { Fragment, useState, useEffect } from 'react';
-import { supportedSpaceNames, supportedSpaceColors } from '../model/SupportedSpaces';
+import { supportedSpaceNames, supportedSpaceColors } from '../../../model/SupportedSpaces';
 import { useNavigate, useParams } from 'react-router';
 
 function LookupSpaceDialog() {

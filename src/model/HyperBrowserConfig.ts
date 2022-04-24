@@ -1,4 +1,4 @@
-import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, IdbBackend, Store, RSAPublicKey } from "@hyper-hyper-space/core";
+import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, Store, WorkerSafeIdbBackend, Mesh, Resources } from "@hyper-hyper-space/core";
 import { Device, Home } from "@hyper-hyper-space/home";
 
 
@@ -29,18 +29,28 @@ class HyperBrowserConfig extends HashedObject {
         return this.getId() === HyperBrowserConfig.id && this.checkDerivedField('homes');
     }
 
-    static async create(ownerName: string, deviceName: string, homes: MutableSet<Hash>): Promise<Home> {
+    static async create(ownerInfo: any, deviceName: string, homes: MutableSet<Hash>, kp?: RSAKeyPair): Promise<Home> {
 
-        const kp: RSAKeyPair = await RSAKeyPair.generate(2048);
+        if (kp === undefined) {
+            kp = await RSAKeyPair.generate(2048);
+        }
 
-        const owner = Identity.fromKeyPair({name: ownerName, type: 'person'}, kp);
+        const owner = Identity.fromKeyPair(ownerInfo, kp);
+
+        console.log('owner hash is ')
+        console.log(owner.hash())
 
         const home = new Home(owner);
+
+        console.log('home hash is')
+        console.log(home.hash())
     
         const deviceKp: RSAKeyPair = await RSAKeyPair.generate(2048);
-        const device = new Device(owner, deviceKp);
+        const device = new Device(owner, deviceKp.makePublicKey());
 
-        const backend = new IdbBackend(HyperBrowserConfig.backendNameForHomeHash(home.hash()));
+        await device.name?.setValue(deviceName);
+
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHomeHash(home.hash()));
         let dbBackendError: (string|undefined) = undefined;
 
         try {
@@ -54,13 +64,18 @@ class HyperBrowserConfig extends HashedObject {
 
         const store = new Store(backend);
         await store.save(kp);
+        
         await store.save(home);
 
         await store.save(deviceKp);
+        await store.save(device);
 
         await home.addDevice(device, true);
 
+        home.forgetResources();
+
         await store.close();
+
 
         await homes.add(home.hash());
         await homes.saveQueuedOps();
@@ -71,6 +86,28 @@ class HyperBrowserConfig extends HashedObject {
 
     static backendNameForHomeHash(homeHash: Hash): string {
         return 'home-root-' + homeHash;
+    }
+
+    static async initHomeResources(homeHash: Hash, setLoadError: (err: string) => void) {
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHomeHash(homeHash));
+    
+        try {
+            console.log('Initializing storage backend for home space ' + homeHash + '...');
+            await backend.ready();
+            console.log('Storage backend for home space ready');
+        } catch (e: any) {
+            console.log('Error initializing storage backend for starter page');
+            setLoadError('Error initializing storage backend: ' + e.toString());
+        }
+    
+        const store = new Store(backend);
+        const mesh = new Mesh();
+    
+        const resources = await Resources.create({mesh: mesh, store: store});
+
+        store.setResources(resources);
+    
+        return resources;
     }
 
 }
