@@ -12,11 +12,19 @@ import { PeerComponent, useStateObject } from '@hyper-hyper-space/react';
 import { Home, Folder, Device, FolderItem } from '@hyper-hyper-space/home';
 import CreateFolderDialog from './components/CreateFolderDialog';
 import RenameFolderDialog from './components/RenameFolderDialog';
+import { Link } from 'react-router-dom';
 
 type HomeContext = {
     home: Home | undefined,
     owner: Identity | undefined,
-    localDevice: Device | undefined
+    localDevice: Device | undefined,
+    openFolder: (folder: Folder, path?: string) => void,
+    openCreateFolder: () => void,
+    openRenameFolder: (folder: Folder) => void,
+    deleteFolder: (folder: Folder, parent: Folder) => void,
+    setViewingFolder: (folder?: Folder) => void,
+    setViewingFolderByHash: (hash: Hash) => void,
+    viewingFolder: Folder | undefined
 }
 
 function HomeSpace() {
@@ -29,8 +37,11 @@ function HomeSpace() {
     const [loadError, setLoadError] = useState<string|undefined>(undefined);
 
     useEffect(() => {
-        HyperBrowserConfig.initHomeResources(homeHash, setLoadError).then((r: Resources) => {
+        HyperBrowserConfig.initHomeResources(homeHash, setLoadError, 'worker').then((r: Resources) => {
             setHomeResources(r);
+        }).catch((reason: any) => {
+            console.log('could not init home resources:');
+            console.log(reason);
         })
     }, []);
 
@@ -40,10 +51,11 @@ function HomeSpace() {
     const [owner, setOwner]             = useState<Identity|undefined>(undefined);
     const [desktopFolder, setDesktopFolder] = useState<Folder|undefined>(undefined);
 
-    const homeState = useStateObject<Home>(home);
-    const desktopFolderState = useStateObject<Folder>(desktopFolder);
+    const desktopFolderState = useStateObject<Folder>(desktopFolder, desktopFolder?.ownEventsFilter());
 
-    useEffect(() => {
+    const [viewingFolder, setViewingFolder] = useState<Folder|undefined>()
+
+    /*useEffect(() => {
         console.log('homeState')
         console.log(homeState)
         //console.log(Object.values((homeState?.fields['desktop']?.fields['root']?.fields['items'].contents) || {}));
@@ -54,6 +66,7 @@ function HomeSpace() {
         console.log(desktopFolderState);
         console.log(desktopFolderState?.value?.items?.getMutableContents().size)
     }, [desktopFolderState]);
+    */
 
     //const [currentFolder, setCurrentFolder] = useState<Folder>(homeState?.fields['desktop']?.fields['root']?.current as Folder);
 
@@ -77,10 +90,51 @@ function HomeSpace() {
         setFolderToRename(undefined);
     }
 
+    const deleteFolder = (folder: Folder, parent: Folder) => {
+        parent.items?.deleteElement(folder);
+        parent.items?.saveQueuedOps();
+    }
+
+    const openFolder = (folder: Folder, path?: string) => {
+
+
+        const pathPrefix = path === undefined? './folder/' : './folder/' + encodeURIComponent(path) + '_';
+
+        const url = pathPrefix + encodeURIComponent(folder.getLastHash());
+
+        navigate(url);
+    }
+
+
+    const setViewingFolderByHash = (hash: Hash) => {
+        const folder = home?.desktop?._currentFolderItems.get(hash) as (Folder|undefined);
+        if (folder !== undefined) {
+            setViewingFolder(folder);
+        } else {
+            console.log('fallback')
+            homeResources?.store.load(hash).then((obj?: HashedObject) => {
+                if (obj instanceof Folder) {
+                    console.log('fallback ok')
+                    obj.loadItemNamesAndWatchForChanges().then(() => {
+                        setViewingFolder(obj);
+                    });
+                }
+            })
+        }
+        
+    }
+
     const homeContext: HomeContext = {
         home: home,
         localDevice: localDevice,
-        owner: owner
+        owner: owner,
+        openFolder: openFolder,
+        openCreateFolder: openCreateFolder,
+        openRenameFolder: openRenameFolder,
+        deleteFolder: deleteFolder,
+        setViewingFolder: setViewingFolder,
+        setViewingFolderByHash: setViewingFolderByHash,
+        viewingFolder: viewingFolder
     };
 
     useEffect(() => {
@@ -98,6 +152,8 @@ function HomeSpace() {
                 setLoadError('Error: The home object is of the wrong type:' + obj?.getClassName());
                 return;
             }
+
+            console.log('obj is OK')
 
             const newHome = obj as Home;
 
@@ -122,7 +178,13 @@ function HomeSpace() {
             await new Promise(r => setTimeout(r, 100));
 
             //await newHome.loadAndWatchForChanges();
+            console.log('STARTING SYNC')
             await newHome.startSync();
+            console.log('DONE STARTING SYNC')
+
+            //await newHome.loadAndWatchForChanges();
+    
+            //await newHome.loadHomeDevice();
 
             //await newHome.startSync();
 
@@ -135,6 +197,8 @@ function HomeSpace() {
 
             initHome().catch((reason: any) => {
                 setLoadError(String(reason))
+                console.log('Error initializing home:');
+                console.log(reason);
             });
 
         }
@@ -254,7 +318,7 @@ function HomeSpace() {
         <PeerComponent resources={homeResources}>
         <AppBar position="fixed" color="default">
         <Toolbar sx={{display: 'flex', justifyContent: 'space-between'}}>
-                <img src="isologo.png" style={{height: 34, paddingRight: '0.75rem'}} />
+                <Link to="/start" style={{height: 34}}><img src="isologo.png" style={{height: 34, paddingRight: '0.75rem'}} /></Link>
                 <Typography style={{textAlign: 'center', flexGrow: 1}} variant="h6" noWrap>
                     🏠 {owner.info?.name}'s Home Space
                 </Typography>
@@ -290,8 +354,6 @@ function HomeSpace() {
                                 {/*{Object.values(((homeState?.value as Home)?.desktop?.root?.items?.contents()) || {}).map((proxy: FolderItem) => {*/}
                                 {Object.values(((desktopFolderState?.value as Folder)?.items?.contents()) || {}).map((proxy: FolderItem) => {
 
-                                        console.log('ok')
-
                                         const showItem = (item: FolderItem) => {
 
 
@@ -300,18 +362,19 @@ function HomeSpace() {
                                             //const item = homeState?.fields['desktop']?.fields['items']?.contents['itemHash'];
                                             //const name = item.fields['name'].current as MutableReference<string>;
 
-                                            if (item instanceof Folder) {
+                                            if (item instanceof Folder && item.name?.getValue() !== undefined) {
                                                 const name = item.name;
                                                 return <HomeItem 
                                                             key={item.getLastHash()}
                                                             icon="streamline-icon-folder-empty@48x48.png" 
-                                                            name={name?.getValue()} 
-                                                            menu={[{name: 'Open', action: () => {alert('open')}}, 
-                                                                   {name: 'Rename', action: () => {openRenameFolder(item)}}, 
-                                                                   {name: 'Delete', action: () => {alert('delete')}}]}
+                                                            name={name?.getValue()}
+                                                            click={() => { openFolder(item); }}
+                                                            menu={[{name: 'Open',   action: () => { openFolder(item); } }, 
+                                                                   {name: 'Rename', action: () => { openRenameFolder(item); }}, 
+                                                                   {name: 'Delete', action: () => { deleteFolder(item, desktopFolder); }}]}
                                                         />;
                                             } else {
-                                                return <Fragment></Fragment>;
+                                                return <Fragment key={item.getLastHash()}></Fragment>;
                                             }
                                         };
 
@@ -319,10 +382,22 @@ function HomeSpace() {
                                     })
                                 }
 
-                                <HomeItem icon="streamline-icon-folder-empty@48x48.png" name="Public Folder"></HomeItem>
-                                <HomeItem icon="streamline-icon-common-file-empty@48x48.png" name="Personal Page"></HomeItem>
-                                <HomeItem icon="streamline-icon-pencil-write-1@48x48.png" name="Notes"></HomeItem>
-                                <HomeItem icon="streamline-icon-add-circle-bold@48x48.png" name=" " menu={[{name: 'New Folder', action: openCreateFolder}]} clickOpensMenu></HomeItem>
+                                {/*<HomeItem icon="streamline-icon-folder-empty@48x48.png" name="Public Folder"></HomeItem>*/}
+                                <HomeItem icon="streamline-icon-common-file-empty@48x48.png" name="Personal Page" click={() => {alert('Pages will be available soon.')}}></HomeItem>
+                                <HomeItem icon="streamline-icon-pencil-write-1@48x48.png" name="Notes" click={() => {alert('Text documents will be available soon.')}}></HomeItem>
+                                <HomeItem
+                                    icon="streamline-icon-add-circle-bold@48x48.png" 
+                                    name=" " 
+                                    menu={[
+                                        {
+                                            name: 'New Folder',
+                                            action: openCreateFolder
+                                        },
+                                        {
+                                            name: 'New Space',
+                                            action: () => {alert('Available soon!')}
+                                        }]}
+                                    clickOpensMenu />
 
                                 {/*<HomeItem icon="📂" name="Public Folder"></HomeItem>
                                 <HomeItem icon="📄" name="Personal Page"></HomeItem>
@@ -337,7 +412,7 @@ function HomeSpace() {
                                 direction='row'
                                 spacing={2}
                             >
-                                <HomeItem icon="streamline-icon-archive@48x48.png" name="Archived" badge={4}></HomeItem>
+                                <HomeItem icon="streamline-icon-archive@48x48.png" name="Archived" badge={4} click={() => {alert('Archived items will be available soon.')}}></HomeItem>
                             </Stack>
                             
 
@@ -383,10 +458,10 @@ function HomeSpace() {
                     <Container maxWidth="lg" sx={{pt:12, pl:0, pr:0}}>
                         <div style={{textAlign: 'center'}}>
                         <ButtonGroup style={{flexWrap: 'wrap'}} variant="contained" color="inherit">
-                            <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile"></HomeCommand>
-                            <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts"></HomeCommand>
-                            <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={4}></HomeCommand>
-                            <HomeCommand icon="streamline-icon-satellite-1@48x48.png" title="Spaces"></HomeCommand>
+                            <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile" action={() => {alert('Profiles will be available soon.')}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts" action={() => {alert('Contacts will be available soon.')}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={4} action={() => {alert('Chat will be available soon.')}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-satellite-1@48x48.png" title="Spaces" action={() => {alert('Space updates will be available soon.')}}></HomeCommand>
                             {/*<HomeCommand icon="streamline-icon-cog-1@48x48.png" title="Config"></HomeCommand>
                             <HomeCommand icon="🙂" title="Profile"></HomeCommand>
                             <HomeCommand icon="📒" title="Contacts"></HomeCommand>
@@ -430,7 +505,7 @@ function HomeSpace() {
             </SwipeableDrawer>
 
             { showCreateFolder &&
-                <CreateFolderDialog parent={desktopFolder as Folder} context={homeContext} onClose={closeCreateFolder}/>
+                <CreateFolderDialog parent={(viewingFolder || desktopFolder) as Folder} context={homeContext} onClose={closeCreateFolder}/>
             }
 
             { folderToRename !== undefined &&

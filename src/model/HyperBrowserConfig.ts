@@ -1,6 +1,12 @@
-import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, Store, WorkerSafeIdbBackend, Mesh, Resources } from "@hyper-hyper-space/core";
-import { Device, Home } from "@hyper-hyper-space/home";
+import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, Store, WorkerSafeIdbBackend, Resources, WebWorkerMeshProxy, Mesh } from '@hyper-hyper-space/core';
+import { Device, Home } from '@hyper-hyper-space/home';
 
+//yadda yadda import / no - webpack - loader - syntax
+
+/* eslint-disable-next-line  */
+//import WebWorker from '../mesh.worker';
+
+//const x = WebWorker;
 
 class HyperBrowserConfig extends HashedObject {
 
@@ -88,7 +94,7 @@ class HyperBrowserConfig extends HashedObject {
         return 'home-root-' + homeHash;
     }
 
-    static async initHomeResources(homeHash: Hash, setLoadError: (err: string) => void) {
+    static async initHomeResources(homeHash: Hash, setLoadError: (err: string) => void, mode:('worker'|'normal')='normal') {
         const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHomeHash(homeHash));
     
         try {
@@ -99,9 +105,33 @@ class HyperBrowserConfig extends HashedObject {
             console.log('Error initializing storage backend for starter page');
             setLoadError('Error initializing storage backend: ' + e.toString());
         }
+
+        //const worker = new WebWorker();
+
+        let mesh: Mesh;
+
+        if (mode === 'worker') {
+            //const url    = new URL('../mesh.worker', import.meta.url);
+
+            //console.log(import.meta.url);
+            //console.log(url);
+
+            const worker = new Worker(new URL('../mesh.worker', import.meta.url));
+
+            const webWorkerMesh = new WebWorkerMeshProxy(worker);
+    
+            await webWorkerMesh.ready; // The MeshHost in the web worker will send a message once it is fully
+                                       // operational. We don't want to send any control messages before that,
+                                       // so we'll wait here until we get the 'go' message from the MeshHost.
+
+            mesh = webWorkerMesh.getMesh();
+        } else {
+            mesh = new Mesh();
+        }
+
     
         const store = new Store(backend);
-        const mesh = new Mesh();
+        //const mesh = new Mesh();
     
         const resources = await Resources.create({mesh: mesh, store: store});
 

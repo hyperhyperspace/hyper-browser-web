@@ -46,16 +46,17 @@ function CreateLinkDeviceOfferDialog() {
 
                 if (!gotReply) {
                     offer?.decodeReply().then(async (reply: {id: Identity, remoteDevice: Device} |undefined) => {
-                        alert('done!')
                         if (reply === undefined) {
-                            console.log('could not decode reply')
+                            alert('Error receiving your Home Space info.')
+                            offer?.replyReceivingStatus?.setValue('error');
                         } else {
                             reply.id.forgetResources();
                             reply.remoteDevice.forgetResources();
                             setReply(reply);
                             gotReply = true;
-                            console.log('successuflly decoded identity:')
+                            offer?.replyReceivingStatus?.setValue('success');
                         }
+                        offer?.replyReceivingStatus?.saveQueuedOps();
                     });
                 }
             });
@@ -88,18 +89,18 @@ function CreateLinkDeviceOfferDialog() {
     <Dialog open={true} scroll='paper' onClose={cancel}>
         <DialogTitle>Link this device to your Home Space</DialogTitle>
         <DialogContent>
-            <Card variant="outlined">
+            {/*<Card variant="outlined">
             <CardContent style={{background: 'lightgray'}}>
             <Typography>
                 If you've already set up a <b>Home Space</b>, you can import your Home Space here. It will be kept <b>synchronized automatically</b>!
             </Typography>
             </CardContent>
-            </Card>
+            </Card>*/}
             <Paper sx={{ mt: {xs: 2, sm: 4}, p: 2}}>
                 <Fragment>
                 {wordCode !== undefined &&
                     <Stack spacing={2}>
-                        <Typography>Open your existing <b>Home Space</b>, go to <span style={{background: 'yellow'}}>Settings &gt; Linked Devices</span> on the upper right corner and then click on <span style={{color: 'white', background: 'green'}}>add device</span>.</Typography>
+                        <Typography>Open your <b>Home Space</b> in your other device, go to <span style={{background: 'yellow'}}>Settings &gt; Linked Devices</span> on the upper right corner and then click on <span style={{color: 'white', background: 'green'}}>add device</span>.</Typography>
                         <Typography>Use the following <b>device code</b>:</Typography>
                         <Stack direction="row" justifyContent="center" spacing={2}>
                             <Typography style={{background:'yellow'}}>{wordCode[0]}</Typography>

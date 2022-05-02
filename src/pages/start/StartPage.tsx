@@ -1,12 +1,13 @@
-import { Mesh, Resources, Store, WordCode, WorkerSafeIdbBackend } from '@hyper-hyper-space/core';
-import { PeerComponent } from '@hyper-hyper-space/react';
+import { Hash, Mesh, MutableSet, Resources, Store, WordCode, WorkerSafeIdbBackend } from '@hyper-hyper-space/core';
+import { PeerComponent, StateObject, useStateObject } from '@hyper-hyper-space/react';
 import { AppBar, Button, Container, Link, Stack, TextField, Toolbar, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { Fragment, useRef, useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router';
+import { Link as RouterLink } from 'react-router-dom';
 
 
-function StartPage() {
+function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
 
     const navigate = useNavigate();
     const [starterResources, setStarterResources] = useState<Resources|undefined>(undefined);
@@ -129,6 +130,8 @@ function StartPage() {
         }
     };
 
+    const homes = useStateObject(props.homes) as StateObject<MutableSet<Hash>>;
+
     return (
     
         
@@ -140,13 +143,23 @@ function StartPage() {
         <Fragment>
         <PeerComponent resources={starterResources}>
         <AppBar position="relative" color="default">
-            <Toolbar sx={{display: 'flex', flexDirection: 'row-reverse'}}>
+            <Toolbar sx={{display: 'flex', justifyContent: 'space-between'}}>
+                <RouterLink to="/start" style={{height: 34}}><img src="isologo.png" style={{height: 34, paddingRight: '0.75rem'}} /></RouterLink>
+                <Stack direction='row' flexDirection='row-reverse' alignItems='baseline'>
                 { /*<CameraIcon sx={{ mr: 2 }} /> */}
-                <Button variant="contained" color="inherit" sx={{m:1}} style={{whiteSpace: 'nowrap'}} onClick={showLinkDeviceDialog}>Link Existing</Button>
-                <Button variant="contained" sx={{m:1}} style={{whiteSpace: 'nowrap'}} onClick={showCreateHomeDialog}>Create New</Button>
-                <Typography variant="h6" color="inherit" noWrap>
-                    Home Space:
-                </Typography>
+                { ((homes.value?.size() || 0) > 0) &&
+                    <Button variant="contained" sx={{m:1}} style={{whiteSpace: 'nowrap'}} onClick={() => {navigate('/home/' + encodeURIComponent(homes.value?.values().next().value));}}> Open Home Space</Button>
+                }
+                { ((homes.value?.size() || 0) === 0) &&
+                <Fragment>
+                    <Button variant="contained" color="inherit" sx={{m:1}} style={{whiteSpace: 'nowrap'}} onClick={showLinkDeviceDialog}>Link Existing</Button>
+                    <Button variant="contained" sx={{m:1}} style={{whiteSpace: 'nowrap'}} onClick={showCreateHomeDialog}>Create New</Button>
+                    <Typography variant="h6" color="inherit" noWrap>
+                        Home Space:
+                    </Typography>
+                </Fragment>
+                }
+                </Stack>
             </Toolbar>
         </AppBar>
         <main>

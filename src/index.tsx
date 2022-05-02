@@ -14,10 +14,9 @@ import '@fontsource/roboto/700.css';
 import { Hash, MutableSet, Store, WorkerSafeIdbBackend } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from './model/HyperBrowserConfig';
 
-
 EventRelay.logger.level = LogLevel.INFO;
-HeaderBasedSyncAgent.controlLog.level = LogLevel.DEBUG;
-HistorySynchronizer.controlLog.level = LogLevel.DEBUG;
+HeaderBasedSyncAgent.controlLog.level = LogLevel.INFO;
+HistorySynchronizer.controlLog.level = LogLevel.INFO;
 
 
 const main = async () => {

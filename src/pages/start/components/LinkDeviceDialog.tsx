@@ -1,11 +1,14 @@
 import { Dialog, DialogContent, DialogTitle, Stack, Typography, TextField, Card, CardContent, DialogActions, Button, Paper, IconButton, DialogContentText } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
 import { useState, useRef, Fragment } from 'react';
 import { useNavigate } from 'react-router';
-import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
-import { useHyperBrowserEnv } from '../../../context/HyperBrowserContext';
 import { Hash, Identity, MutableSet } from '@hyper-hyper-space/core';
 import { Device, Home, LinkDeviceOffer } from '@hyper-hyper-space/home';
+
+
+import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
+import { DeviceInfo } from '../../../model/DeviceInfo';
+import { useHyperBrowserEnv } from '../../../context/HyperBrowserContext';
+
 
 function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteDevice: Device}) {
 
@@ -19,7 +22,7 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
 
     const [showLinkingDialog, setShowLinkingDialog] = useState<boolean>(false);
 
-    const [deviceName, setDeviceName] = useState<string>(constructDeviceName());
+    const [deviceName, setDeviceName] = useState<string>(DeviceInfo.constructDeviceName());
 
     const deviceNameInput = useRef<HTMLInputElement>(null);
 
@@ -42,6 +45,8 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
                     
                     console.log('created home')
 
+                    console.log(home);
+
                     const store = params.offer.getStore();
                     await store.save(params.offer);
 
@@ -52,22 +57,35 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
                         console.log(err);
                     });
 
-                    home.setResources(resources);
                     
-                    await home.addDevice(params.remoteDevice);
+
+                    home.setResources(resources);
+
+                    const remoteDevice = params.remoteDevice.clone();
+                    remoteDevice.setResources(resources);
+                    remoteDevice.setAuthor(home.getAuthor() as Identity);
+                    remoteDevice.name?.setAuthor(home.getAuthor() as Identity);
+                    
+                    console.log(home.getAuthor() as Identity);
+
+                    await home.addDevice(/*params.*/remoteDevice);
 
                     console.log('added remote device, starting sync...')
 
-                    await home.startSync();
+                    await home.startSync(true);
                     
                     console.log('sync started')
                     
                     const localDevice = (await home.findLocalDevice()) as Device;
 
+                    localDevice.forgetResources();
+                    localDevice.setAuthor(home.getAuthor() as Identity);
+                    localDevice.name?.setAuthor(home.getAuthor() as Identity);
+
                     await params.offer.newDevice?.setValue(localDevice);
                     await params.offer.newDevice?.saveQueuedOps();
 
-                    console.log('added local devicem waiting for remote...')
+                    console.log('added local device, waiting for remote...')
 
                     const replRemoteDevice = home.devices?.get(params.remoteDevice.hash()) as Device;
 
@@ -76,10 +94,13 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
 
                     while (replRemoteDevice.name?.getValue() === undefined) {
                         console.log('waiting for sync...')
-                        await new Promise(r => setTimeout(r, 500)); 
+                        await new Promise(r => setTimeout(r, 500));
                     }
 
                     console.log('verified sync!');
+
+                    await new Promise(r => setTimeout(r, 1000)); // Give it a little while to try to complete sync
+                                                                 // of devices, will be finished after reload if not.
 
                     await home.stopSync();
 
@@ -142,73 +163,13 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
         <DialogTitle>
           Linking to {params.id.info?.name}'s Home Space
         </DialogTitle>
-        <DialogContentText style={{padding: 2}}>
-          <Typography>You will be redirected to your Home Space in a few seconds...</Typography>
+        <DialogContentText style={{padding: '2rem'}}>
+          You will be redirected to your Home Space in a few seconds...
         </DialogContentText>
     </Dialog>
 </Fragment>);
 }
 
-const deviceNamePatterns: Array<[RegExp, string]> = [
-    [/windows nt 10.0/i, 'Windows 10'],
-    [/windows nt 6.2/i, 'Windows 8'],
-    [/windows nt 6.1/i, 'Windows 7'],
-    [/windows nt 6.0/i, 'Windows Vista'],
-    [/windows nt 5.2/i, 'Windows Server 2003/XP x64'],
-    [/windows nt 5.1/i, 'Windows XP'],
-    [/windows xp/i, 'Windows XP'],
-    [/windows nt 5.0/i, 'Windows 2000'],
-    [/windows me/i, 'Windows ME'],
-    [/win98/i, 'Windows 98'],
-    [/win95/i, 'Windows 95'],
-    [/win16/i, 'Windows 3.11'],
-    [/macintosh|mac os x/i, 'Mac OS X'],
-    [/mac_powerpc/i, 'Mac OS 9'],
-    [/linux/i, 'Linux'],
-    [/ubuntu/i, 'Ubuntu'],
-    [/iphone/i, 'iPhone'],
-    [/ipod/i, 'iPod'],
-    [/ipad/i, 'iPad'],
-    [/android/i, 'Android'],
-    [/blackberry/i, 'BlackBerry'],
-    [/webos/i, 'Mobile']
-];
 
-const browserNamePatterns: Array<[RegExp, string]> = [
-    [/opera/i, 'Opera'],
-    [/edg/i, 'Edge'],
-    [/chrome/i, 'Chrome'],
-    [/safari/i, 'Safari'],
-    [/firefox/i, 'Firefox'],
-    [/msie/i, 'IE']
-];
-
-function constructDeviceName() {
-
-    let name = '';
-
-    const agent = navigator.userAgent;
-
-    for (const [pattern, browser] of browserNamePatterns) {
-        if (pattern.test(agent)) {
-            name = browser + ' on ';
-            break;
-        }
-    }
-
-    for (const [pattern, os] of deviceNamePatterns) {
-        if (pattern.test(agent)) {
-            name = name + os;
-            break;
-        }
-    }
-
-    if (name === '') {
-        name = 'My first device';
-    }
-
-    return name;
-
-}
 
 export default LinkDeviceDialog;

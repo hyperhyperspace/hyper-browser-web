@@ -1,9 +1,9 @@
 import { Badge, Button, Tooltip } from '@mui/material';
 
 
-function HomeCommand(props: {icon: string, title: string, badge?: number}) {
+function HomeCommand(props: {icon: string, title: string, badge?: number, action: () => void}) {
 
-    const image = <img  src={'icons/' + props.icon} style={{width:'30px', height:'30px', margin:'2px', padding: '2px'}}/>;
+    const image = <a onClick={(ev) => {ev.preventDefault(); props.action()}} href="#"><img  src={'icons/' + props.icon} style={{width:'30px', height:'30px', margin:'2px', padding: '2px'}}/></a>;
 
     let inner = image;
 

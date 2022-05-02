@@ -4,7 +4,8 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "esnext",
+      "webworker"
     ],
     "downlevelIteration": true,
     "allowJs": true,
@@ -23,5 +24,6 @@
   },
   "include": [
     "src"
-  ]
+  ],
+  "baseUrl": "./src"
 }

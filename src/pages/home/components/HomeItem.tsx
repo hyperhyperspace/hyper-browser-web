@@ -3,16 +3,20 @@ import React from 'react';
 import { SyntheticEvent } from 'react';
 
 
-function HomeItem(props: {icon: string, name?: string, badge?: number, menu?:Array<{name: string, action:(ev: SyntheticEvent) => void}>, clickOpensMenu?: boolean}) {
+function HomeItem(props: {icon: string, name?: string, badge?: number, click?: () => void, menu?:Array<{name: string, action:(ev: SyntheticEvent) => void}>, clickOpensMenu?: boolean}) {
 
     const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>(undefined);
 
     const open = anchorEl !== undefined;
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement|HTMLAnchorElement>) => {
         if (props.clickOpensMenu) {
             setAnchorEl(event.currentTarget);
+        } else if (props.click !== undefined) {
+            props.click();
         }
+
+        event.preventDefault();
     };
 
     const handleContextClick = (event: React.MouseEvent<HTMLButtonElement|HTMLAnchorElement>) => {
@@ -38,8 +42,8 @@ function HomeItem(props: {icon: string, name?: string, badge?: number, menu?:Arr
             </div>
             {props.name && 
             <div style={{paddingTop:'0.5rem'}}>
-                <Typography align="center" fontSize="small">
-                <a style={{textDecoration: 'none'}} onContextMenu={handleContextClick} href="#">{props.name}</a>
+                <Typography align="center" fontSize="small" style={{overflowWrap:'break-word'}}>
+                <a style={{textDecoration: 'none'}} onClick={handleClick} onContextMenu={handleContextClick} href="#">{props.name}</a>
                 </Typography>
             </div>
             }

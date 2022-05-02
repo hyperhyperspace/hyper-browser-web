@@ -12,6 +12,7 @@ import CreateHomeDialog from './pages/start/components/CreateHomeDialog';
 import LinkDeviceDialog from './pages/start/components/CreateLinkDeviceOfferDialog';
 import HyperBrowserEnv from './context/HyperBrowserContext';
 import ManageDevicesDialog from './pages/home/components/ManageDevicesDialog';
+import ViewFolderDialog from './pages/home/components/ViewFolderDialog';
 
 
 function App(props: {homes: MutableSet<Hash>, config: Store}) {
@@ -35,15 +36,16 @@ function App(props: {homes: MutableSet<Hash>, config: Store}) {
                 props.homes?.size() === 0?
                   <Navigate replace to="/start" />
                 : 
-                  <Navigate replace to ={'/home/' + encodeURIComponent(props.homes.values().next().value)}/>
+                  <Navigate replace to={'/home/' + encodeURIComponent(props.homes.values().next().value)}/>
               }/>
-            <Route path="start" element={<StartPage />}>
+            <Route path="start" element={<StartPage homes={props.homes} config={props.config}/>}>
               <Route path="lookup/:words" element={<LookupSpaceDialog />} />
               <Route path="create-home" element={<CreateHomeDialog />} />
               <Route path="link-device" element={<LinkDeviceDialog />} />
             </Route>
             <Route path="home/:hash" element={<HomeSpace />}>
               <Route path="devices" element={<ManageDevicesDialog />} />
+              <Route path="folder/:path" element={<ViewFolderDialog />} />
             </Route>
             <Route path="space/:hash" element={<HomeSpace />} />
           </Routes>

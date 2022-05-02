@@ -4,6 +4,7 @@ import { useNavigate, useOutletContext } from 'react-router';
 import { Hash, HeaderBasedSyncAgent, Identity, LogLevel, MemoryBackend, Mesh, MutableSet, PeerGroupAgent, Resources, RNGImpl, RSAKeyPair, StateGossipAgent, Store, WordCode } from '@hyper-hyper-space/core';
 import { Device, LinkDeviceOffer } from '@hyper-hyper-space/home';
 import { HomeContext } from '../HomeSpace';
+import { useStateObject } from '@hyper-hyper-space/react';
 
 function ReceiveLinkOffer(props: {close: () => void}) {
 
@@ -100,13 +101,27 @@ function ReceiveLinkOffer(props: {close: () => void}) {
     }
 
     const fetchOffer = () => {
-        setWordCode(WordCode.english.decode([currentWord1, currentWord2, currentWord3, currentWord4]))
+
+        const e1 = !WordCode.english.check(currentWord1);
+        const e2 = !WordCode.english.check(currentWord2);
+        const e3 = !WordCode.english.check(currentWord3);
+        const e4 = !WordCode.english.check(currentWord4);
+
+        setWord1Error(e1);
+        setWord2Error(e2);
+        setWord3Error(e3);
+        setWord4Error(e4);
+
+        if (!(e1 || e2 || e3 || e4)) {
+            setWordCode(WordCode.english.decode([currentWord1, currentWord2, currentWord3, currentWord4]))
+        }
     }
 
     const { home } = useOutletContext<HomeContext>();
 
     const [wordCode, setWordCode] = useState<string>();
     const [offer, setOffer]       = useState<LinkDeviceOffer>();
+    const offerState              = useStateObject<LinkDeviceOffer>(offer);
 
     useEffect(() => {
 
@@ -127,6 +142,7 @@ function ReceiveLinkOffer(props: {close: () => void}) {
 
                 offer.setResources(resources);
                 store.save(offer);
+                
 
                 const localDevice = await home.findLocalDevice() as Device;
 
@@ -144,9 +160,9 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                 //StateGossipAgent.peerMessageLog.setLevel(LogLevel.DEBUG);
 
                 console.log('starting sync...')
-                await offer.startSync();
-
+                
                 await store.save(offer);
+                await offer.startSync();
 
                 while (offer.newDevice?.getValue() === undefined) {
 
@@ -212,11 +228,16 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                                 </Stack>
                             </Fragment>
                         }
-                        {wordCode !== undefined &&
-                            <Fragment>
-                                <Typography>OK WORKING THE MAGIC FOR {wordCode}</Typography>
-                            </Fragment>
+                        {wordCode !== undefined && offerState?.getValue()?.replyReceivingStatus?.getValue() === undefined &&
+                            <Typography>Waiting for your new device to connect...</Typography>
                         }
+                        {wordCode !== undefined && offerState?.getValue()?.replyReceivingStatus?.getValue() === 'success' &&
+                            <Typography><b>Connected!</b> Please go back to your new device to configure it.</Typography>
+                        }
+                        {wordCode !== undefined && offerState?.getValue()?.replyReceivingStatus?.getValue() === 'error' &&
+                            <Typography><b>Linking devince failed.</b> Please try again later or contact us for support.</Typography>
+                        }
+
                         </Fragment>
                     </DialogContent>
                     <DialogActions>

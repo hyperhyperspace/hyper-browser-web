@@ -2,9 +2,13 @@ import { Dialog, DialogContent, DialogTitle, Stack, Typography, TextField, Card,
 import InfoIcon from '@mui/icons-material/Info';
 import { useState, useRef, Fragment } from 'react';
 import { useNavigate } from 'react-router';
-import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
-import { useHyperBrowserEnv } from '../../../context/HyperBrowserContext';
 import { Hash, MutableSet } from '@hyper-hyper-space/core';
+
+import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
+import { DeviceInfo } from '../../../model/DeviceInfo';
+import { useHyperBrowserEnv } from '../../../context/HyperBrowserContext';
+
+
 
 function CreateHomeDialog() {
 
@@ -35,7 +39,7 @@ function CreateHomeDialog() {
     const [showCreatingDialog, setShowCreatingDialog] = useState<boolean>(false);
 
     const [name, setName] = useState<string>('');
-    const [deviceName, setDeviceName] = useState<string>(constructDeviceName());
+    const [deviceName, setDeviceName] = useState<string>(DeviceInfo.constructDeviceName('My first device'));
 
     const nameInput = useRef<HTMLInputElement>(null);
     const deviceNameInput = useRef<HTMLInputElement>(null);
@@ -162,80 +166,18 @@ function CreateHomeDialog() {
         </Card>  
       </DialogContent>
       <DialogActions>
-        <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button variant="outlined" onClick={confirmCreateHome} autoFocus>Continue as {name}</Button><Button onClick={closeConfirmDialog}>Go back</Button></Stack>
+        <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button variant="outlined" onClick={confirmCreateHome}>Continue as {name}</Button><Button onClick={closeConfirmDialog}>Go back</Button></Stack>
       </DialogActions>
   </Dialog>
   <Dialog open={showCreatingDialog}>
       <DialogTitle>
           Creating {name}'s Home Space
       </DialogTitle>
-      <DialogContentText style={{padding: 2}}>
-        <Typography>You will be redirected to your new Home Space in a few seconds...</Typography>
+      <DialogContentText style={{padding: '2rem'}}>
+        You will be redirected to your new Home Space in a few seconds...
       </DialogContentText>
   </Dialog>
 </Fragment>);
-}
-
-const deviceNamePatterns: Array<[RegExp, string]> = [
-    [/windows nt 10.0/i, 'Windows 10'],
-    [/windows nt 6.2/i, 'Windows 8'],
-    [/windows nt 6.1/i, 'Windows 7'],
-    [/windows nt 6.0/i, 'Windows Vista'],
-    [/windows nt 5.2/i, 'Windows Server 2003/XP x64'],
-    [/windows nt 5.1/i, 'Windows XP'],
-    [/windows xp/i, 'Windows XP'],
-    [/windows nt 5.0/i, 'Windows 2000'],
-    [/windows me/i, 'Windows ME'],
-    [/win98/i, 'Windows 98'],
-    [/win95/i, 'Windows 95'],
-    [/win16/i, 'Windows 3.11'],
-    [/macintosh|mac os x/i, 'Mac OS X'],
-    [/mac_powerpc/i, 'Mac OS 9'],
-    [/linux/i, 'Linux'],
-    [/ubuntu/i, 'Ubuntu'],
-    [/iphone/i, 'iPhone'],
-    [/ipod/i, 'iPod'],
-    [/ipad/i, 'iPad'],
-    [/android/i, 'Android'],
-    [/blackberry/i, 'BlackBerry'],
-    [/webos/i, 'Mobile']
-];
-
-const browserNamePatterns: Array<[RegExp, string]> = [
-    [/opera/i, 'Opera'],
-    [/edg/i, 'Edge'],
-    [/chrome/i, 'Chrome'],
-    [/safari/i, 'Safari'],
-    [/firefox/i, 'Firefox'],
-    [/msie/i, 'IE']
-];
-
-function constructDeviceName() {
-
-    let name = '';
-
-    const agent = navigator.userAgent;
-
-    for (const [pattern, browser] of browserNamePatterns) {
-        if (pattern.test(agent)) {
-            name = browser + ' on ';
-            break;
-        }
-    }
-
-    for (const [pattern, os] of deviceNamePatterns) {
-        if (pattern.test(agent)) {
-            name = name + os;
-            break;
-        }
-    }
-
-    if (name === '') {
-        name = 'My first device';
-    }
-
-    return name;
-
 }
 
 export default CreateHomeDialog;
