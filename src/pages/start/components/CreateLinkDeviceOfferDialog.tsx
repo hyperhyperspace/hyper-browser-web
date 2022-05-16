@@ -5,6 +5,7 @@ import { Device, LinkDeviceOffer } from '@hyper-hyper-space/home';
 import { Identity, MemoryBackend, Mesh, Resources, RNGImpl, RSAKeyPair, Store, WordCode } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
 import LinkDeviceDialog from './LinkDeviceDialog';
+import { DateUtils } from '../../../model/DateUtils';
 
 
 function CreateLinkDeviceOfferDialog() {
@@ -34,7 +35,9 @@ function CreateLinkDeviceOfferDialog() {
 
             const code  = new RNGImpl().randomHexString(48);
 
-            offer = new LinkDeviceOffer(code);
+            const today = DateUtils.getCurrentDay();
+
+            offer = new LinkDeviceOffer(code + DateUtils.dayToHex(today));
 
             setOffer(offer);
 

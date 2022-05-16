@@ -5,6 +5,7 @@ import { Hash, HeaderBasedSyncAgent, Identity, LogLevel, MemoryBackend, Mesh, Mu
 import { Device, LinkDeviceOffer } from '@hyper-hyper-space/home';
 import { HomeContext } from '../HomeSpace';
 import { useStateObject } from '@hyper-hyper-space/react';
+import { DateUtils } from '../../../model/DateUtils';
 
 function ReceiveLinkOffer(props: {close: () => void}) {
 
@@ -120,8 +121,31 @@ function ReceiveLinkOffer(props: {close: () => void}) {
     const { home } = useOutletContext<HomeContext>();
 
     const [wordCode, setWordCode] = useState<string>();
-    const [offer, setOffer]       = useState<LinkDeviceOffer>();
-    const offerState              = useStateObject<LinkDeviceOffer>(offer);
+    
+
+    const [todaysOffer, setTodaysOffer] = useState<LinkDeviceOffer>();
+    const todaysOfferState              = useStateObject<LinkDeviceOffer>(todaysOffer);
+
+    const [yesterdaysOffer, setYesterdaysOffer] = useState<LinkDeviceOffer>();
+    const yesterdaysOfferState                  = useStateObject<LinkDeviceOffer>(yesterdaysOffer);
+
+    const [tomorrowsOffer, setTomorrowsOffer] = useState<LinkDeviceOffer>();
+    const tomorrowsOfferState                 = useStateObject<LinkDeviceOffer>(tomorrowsOffer);
+
+    const [offer, setOffer] = useState<LinkDeviceOffer>();
+    const offerState        = useStateObject<LinkDeviceOffer>(offer);
+
+    const gatherOfferState = () => {
+
+        for (const offerState of [todaysOfferState, yesterdaysOfferState, tomorrowsOfferState]) {
+            const receivingStatus = offerState?.getValue()?.replyReceivingStatus?.getValue();
+            if (receivingStatus !== undefined) {
+                return receivingStatus;
+            }
+        }
+
+        return undefined;
+    }
 
     useEffect(() => {
 
@@ -137,22 +161,36 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                 const mesh = new Mesh();
 
                 const resources = await Resources.create({mesh: mesh, store: store});
-                
-                const offer = new LinkDeviceOffer(wordCode);
+
+                const today = DateUtils.getCurrentDay();
+
+                const todaysOffer     = new LinkDeviceOffer(wordCode + DateUtils.dayToHex(today));
+                const yesterdaysOffer = new LinkDeviceOffer(wordCode + DateUtils.dayToHex(today-1));
+                const tomorrowsOffer  = new LinkDeviceOffer(wordCode + DateUtils.dayToHex(today+1));
+
+                setTodaysOffer(todaysOffer);
+                setYesterdaysOffer(yesterdaysOffer);
+                setTomorrowsOffer(tomorrowsOffer);
+
+                const offers = [todaysOffer, yesterdaysOffer, tomorrowsOffer]
 
                 //offer.setResources(resources);
                 store.setResources(resources);
-                await store.save(offer);
-                
+
+                for (const offer of offers) {
+                    await store.save(offer);
+                }                
 
                 const localDevice = await home.findLocalDevice() as Device;
 
-                offer.createReply(home.getAuthor() as Identity, home.getAuthor()?._keyPair as RSAKeyPair, localDevice);
+                for (const offer of offers) {
+                    offer.createReply(home.getAuthor() as Identity, home.getAuthor()?._keyPair as RSAKeyPair, localDevice);
+                    await store.save(offer);
+                }
 
-                await store.save(offer);
 
 
-                setOffer(offer);
+                
                 //PeerGroupAgent.controlLog.setLevel(LogLevel.DEBUG);
                 //PeerGroupAgent.peersLog.setLevel(LogLevel.DEBUG);
                 //HeaderBasedSyncAgent.controlLog.setLevel(LogLevel.DEBUG);
@@ -162,25 +200,38 @@ function ReceiveLinkOffer(props: {close: () => void}) {
 
                 console.log('starting sync...')
                 
-                await store.save(offer);
-                await offer.startSync();
-
-                while (offer.newDevice?.getValue() === undefined) {
-
-                    console.log('waiting for remote device...')
-                    await new Promise(r => setTimeout(r, 500)); 
-
+                for (const offer of offers) {
+                    await offer.startSync();
                 }
 
-                console.log('got new device')
-                console.log(offer.newDevice?.getValue());
+                //await store.save(offer);
 
-                await home.addDevice((offer.newDevice?.getValue() as Device));
+                let rightOffer = undefined;
+
+                while (rightOffer === undefined) {
+
+                    console.log('waiting for remote device...')
+                    await new Promise(r => setTimeout(r, 500));
+
+                    for (const offer of offers) {
+                        if (offer.newDevice?.getValue() !== undefined) {
+                            rightOffer = offer;
+                            break;
+                        }
+                    }
+                }
+
+                setOffer(rightOffer);
+
+                console.log('got new device')
+                console.log(rightOffer.newDevice?.getValue());
+
+                await home.addDevice((rightOffer.newDevice?.getValue() as Device));
 
                 //await home.devices?.add((offer.newDevice?.getValue() as Device).clone());
                 //await home.devices?.saveQueuedOps();
                 
-                const newDevice = await home.getStore().load((offer.newDevice?.getValue() as Device).hash()) as Device;
+                const newDevice = await home.getStore().load((rightOffer.newDevice?.getValue() as Device).hash()) as Device;
 
                 console.log('re-loaded new device locally')
                 console.log(newDevice);
@@ -229,13 +280,13 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                                 </Stack>
                             </Fragment>
                         }
-                        {wordCode !== undefined && offerState?.getValue()?.replyReceivingStatus?.getValue() === undefined &&
+                        {wordCode !== undefined && gatherOfferState() === undefined &&
                             <Typography>Waiting for your new device to connect...</Typography>
                         }
-                        {wordCode !== undefined && offerState?.getValue()?.replyReceivingStatus?.getValue() === 'success' &&
+                        {wordCode !== undefined && gatherOfferState() === 'success' &&
                             <Typography><b>Connected!</b> Please go back to your new device to configure it.</Typography>
                         }
-                        {wordCode !== undefined && offerState?.getValue()?.replyReceivingStatus?.getValue() === 'error' &&
+                        {wordCode !== undefined && gatherOfferState() === 'error' &&
                             <Typography><b>Linking devince failed.</b> Please try again later or contact us for support.</Typography>
                         }
 
