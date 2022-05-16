@@ -65,7 +65,7 @@ function TextSpacePage(props: {entryPoint: TextSpace}) {
                 <FullHeightTextField disabled={!canEdit} value={text} onChange={handleTextChange} multiline fullWidth style={{height:'100%', padding: '1rem'}} inputProps={{style: {height: '100%'}}}></FullHeightTextField>
                 <Stack direction="row" style={{justifyContent: 'center', padding: 2}}>
                     {canEdit && <Button disabled={!initialized} variant="contained" size="large" onClick={saveText}>Save</Button>}
-                    {(!canEdit && author!==undefined) && <Typography style={{color:'grey'}}>Only its owner can edit this file.</Typography>}
+                    {(!canEdit && author!==undefined) && <Typography style={{color:'grey'}}>Only {author.info?.name || 'its owner'} can edit this file.</Typography>}
                 </Stack>
             </Stack>
         }

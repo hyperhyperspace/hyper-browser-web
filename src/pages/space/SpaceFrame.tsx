@@ -77,7 +77,7 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
                             if (isSaved) {
                                 console.log(home.desktop?.currentLinksForSpace(spaceEntryPointHash));
                                 const spaceLink = home.desktop?.currentLinksForSpace(spaceEntryPointHash)[0] as SpaceLink;
-                                const savedSpaceResources = await HyperBrowserConfig.initSavedSpaceResources(home, spaceLink);
+                                const savedSpaceResources = await HyperBrowserConfig.initSavedSpaceResources(home, spaceLink.spaceEntryPoint as HashedObject);
                                 const knownEntryPoint = await savedSpaceResources.store.load(spaceEntryPointHash);
                                 if (knownEntryPoint !== undefined) {
                                     setSpaceResources(savedSpaceResources);

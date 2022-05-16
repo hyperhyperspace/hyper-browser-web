@@ -181,21 +181,21 @@ class HyperBrowserConfig extends HashedObject {
         return mesh;
     }
 
-    static async initSavedSpaceStore(home: Home, spaceLink: SpaceLink): Promise<Store> {
+    static async initSavedSpaceStore(home: Home, spaceEntryPoint: HashedObject): Promise<Store> {
 
-        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(home.getLastHash(), spaceLink.spaceEntryPoint?.getLastHash() as Hash));
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(home.getLastHash(), spaceEntryPoint.getLastHash()));
         const store = new Store(backend);
 
-        await store.save(spaceLink.spaceEntryPoint as HashedObject)
+        await store.save(spaceEntryPoint)
         await store.save((home.getAuthor() as Identity).getKeyPair())
 
         return store;
     }
 
-    static async initSavedSpaceResources(home: Home, spaceLink: SpaceLink): Promise<Resources> {
+    static async initSavedSpaceResources(home: Home, spaceEntryPoint: HashedObject): Promise<Resources> {
 
-        const mesh  = await HyperBrowserConfig.initSavedSpaceMesh(home.getLastHash(), spaceLink.spaceEntryPoint?.getLastHash() as Hash);
-        const store = await HyperBrowserConfig.initSavedSpaceStore(home, spaceLink);
+        const mesh  = await HyperBrowserConfig.initSavedSpaceMesh(home.getLastHash(), spaceEntryPoint.getLastHash());
+        const store = await HyperBrowserConfig.initSavedSpaceStore(home, spaceEntryPoint);
     
         const resources = await Resources.create({mesh: mesh, store: store});
 

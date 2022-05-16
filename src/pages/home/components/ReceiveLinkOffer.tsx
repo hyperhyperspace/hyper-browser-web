@@ -115,7 +115,15 @@ function ReceiveLinkOffer(props: {close: () => void}) {
 
         if (!(e1 || e2 || e3 || e4)) {
             setWordCode(WordCode.english.decode([currentWord1, currentWord2, currentWord3, currentWord4]))
+            setDiscoveryTimeout(window.setTimeout(discoveryTimeoutCallback, 15000));
         }
+
+        return () => {
+            if (discoveryTimeout !== undefined) {
+                window.clearTimeout(discoveryTimeout);
+                setDiscoveryTimeout(undefined);
+            }
+        };
     }
 
     const { home } = useOutletContext<HomeContext>();
@@ -253,9 +261,12 @@ function ReceiveLinkOffer(props: {close: () => void}) {
             createOffer();
 
             return () => {
-                resources?.mesh?.pod.shutdown();
-                resources?.store.close();
-            };
+                        setTimeout(() => {
+                        resources?.mesh?.pod.shutdown();
+                        resources?.store.close();
+                        
+                    }, 60000);
+                };
         }
 
     }, [wordCode, home]);

@@ -6,10 +6,10 @@ import { Outlet, useNavigate, useParams } from 'react-router';
 
 import HomeItem from './components/HomeItem';
 import HomeCommand from './components/HomeCommand';
-import { Hash, HashedObject, Identity, ObjectDiscoveryReply, Resources, WordCode } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Identity, MutationEvent, MutationObserver, ObjectDiscoveryReply, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 import { PeerComponent, useObjectDiscovery, useObjectDiscoveryWithResources, useStateObject } from '@hyper-hyper-space/react';
-import { Home, Folder, Device, FolderItem, SpaceLink } from '@hyper-hyper-space/home';
+import { Home, Folder, Device, FolderItem, SpaceLink, FolderTree, FolderTreeEvents } from '@hyper-hyper-space/home';
 import CreateFolderDialog from './components/CreateFolderDialog';
 import RenameFolderItemDialog from './components/RenameFolderDialog';
 import { Link } from 'react-router-dom';
@@ -157,6 +157,8 @@ function HomeSpace() {
         viewingFolder: viewingFolder
     };
 
+    const spaceEntryPoints = new Map<Hash, HashedObject & SpaceEntryPoint>();
+
     useEffect(() => {
 
         const initHome = async () => {
@@ -174,6 +176,42 @@ function HomeSpace() {
             }
 
             const newHome = obj as Home;
+
+            const spacesObserver: MutationObserver = (ev: MutationEvent) => {
+
+                if (ev.emitter === newHome.desktop) {
+                    if (ev.action === FolderTreeEvents.AddSpace) {
+
+                        HyperBrowserConfig.initSavedSpaceResources(newHome, ev.data as HashedObject).then((r: Resources) => {
+                            const entryPoint = (ev.data as HashedObject & SpaceEntryPoint).clone();
+
+                            const entryPointHash = entryPoint.getLastHash();
+                            spaceEntryPoints.set(entryPointHash, entryPoint);
+                            entryPoint.setResources(r);
+                            entryPoint.startSync();
+                            console.log('started sync of space ' + entryPointHash);
+                        });
+
+                    } else if (ev.action === FolderTreeEvents.RemoveSpace) {
+                        const entryPointHash = (ev.data as HashedObject).getLastHash();
+                        const entryPoint = spaceEntryPoints.get(entryPointHash);
+                        entryPoint?.stopSync();
+                        console.log('X')
+                        console.log(entryPoint);
+                        console.log(entryPoint?.getResources())
+                        //entryPoint?.getResources()?.mesh?.pod.shutdown(); // FIXME
+                        setTimeout(() => {
+                            entryPoint?.getResources()?.store.close();
+                        }, 5000);
+                        spaceEntryPoints.delete(entryPointHash);
+                        console.log('stopped sync of space ' + entryPointHash);
+                    }
+                }
+        
+            };
+
+            newHome.desktop?.addMutationObserver(spacesObserver);
+            
 
             await newHome.findLocalDevice();
 
@@ -220,6 +258,26 @@ function HomeSpace() {
             });
 
         }
+
+        return () => {
+            console.log('stopping sync for all spaces')
+            const toDelete: Array<Hash> = []
+            for (const [entryPointHash, entryPoint] of spaceEntryPoints.entries()) {
+                toDelete.push(entryPointHash);
+
+                entryPoint?.stopSync();
+                entryPoint?.getResources()?.mesh?.pod.shutdown();
+                setTimeout(() => {
+                    entryPoint?.getResources()?.store.close();
+                }, 5000);
+                spaceEntryPoints.delete(entryPointHash);
+                console.log('stopped sync of space ' + entryPointHash);
+            }
+
+            for (const entryPointHash of toDelete) {
+                spaceEntryPoints.delete(entryPointHash);
+            }
+        };
 
     }, [homeHash, homeResources]);
 

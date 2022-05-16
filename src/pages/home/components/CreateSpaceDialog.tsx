@@ -88,7 +88,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 await props.folder.items?.saveQueuedOps();
                 console.log('saved folder items')
 
-                const store = await HyperBrowserConfig.initSavedSpaceStore(home, link);
+                const store = await HyperBrowserConfig.initSavedSpaceStore(home, link.spaceEntryPoint as HashedObject);
                 await store.save(entryPoint, false);
                 await store.save(home.getAuthor()?._keyPair as RSAKeyPair);
 
