@@ -1,8 +1,9 @@
 // mesh.worker.ts
 /// <reference lib="webworker" />
 
-import { NetworkAgent, PeerGroupAgent, StateGossipAgent, HeaderBasedSyncAgent, WebRTCConnection, WebWorkerMeshHost, LogLevel, Mesh } from '@hyper-hyper-space/core';
+import { NetworkAgent, PeerGroupAgent, StateGossipAgent, HeaderBasedSyncAgent, WebRTCConnection, WebWorkerMeshHost, LogLevel, Mesh, ObjectDiscoveryAgent } from '@hyper-hyper-space/core';
 import { } from '@hyper-hyper-space/home';
+import { } from './model/text/TextSpace';
 
 // log control:
 
@@ -13,7 +14,9 @@ StateGossipAgent.peerMessageLog.level = LogLevel.INFO;
 
 PeerGroupAgent.controlLog.level = LogLevel.INFO;
 
-HeaderBasedSyncAgent.controlLog.level = LogLevel.DEBUG;
+HeaderBasedSyncAgent.controlLog.level = LogLevel.INFO;
+
+ObjectDiscoveryAgent.log.level = LogLevel.DEBUG;
 
 WebRTCConnection.logger.level = 5;
 NetworkAgent.connLogger.level = 5;

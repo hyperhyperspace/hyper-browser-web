@@ -1,5 +1,5 @@
-import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, Store, WorkerSafeIdbBackend, Resources, WebWorkerMeshProxy, Mesh } from '@hyper-hyper-space/core';
-import { Device, Home } from '@hyper-hyper-space/home';
+import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, WorkerSafeIdbBackend, Resources, WebWorkerMeshProxy, Mesh, Store, Backend, MemoryBackend } from '@hyper-hyper-space/core';
+import { Device, Home, SpaceLink } from '@hyper-hyper-space/home';
 
 //yadda yadda import / no - webpack - loader - syntax
 
@@ -35,7 +35,7 @@ class HyperBrowserConfig extends HashedObject {
         return this.getId() === HyperBrowserConfig.id && this.checkDerivedField('homes');
     }
 
-    static async create(ownerInfo: any, deviceName: string, homes: MutableSet<Hash>, kp?: RSAKeyPair): Promise<Home> {
+    static async createHome(ownerInfo: any, deviceName: string, homes: MutableSet<Hash>, kp?: RSAKeyPair): Promise<Home> {
 
         if (kp === undefined) {
             kp = await RSAKeyPair.generate(2048);
@@ -56,7 +56,7 @@ class HyperBrowserConfig extends HashedObject {
 
         await device.name?.setValue(deviceName);
 
-        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHomeHash(home.hash()));
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHome(home.hash()));
         let dbBackendError: (string|undefined) = undefined;
 
         try {
@@ -90,12 +90,8 @@ class HyperBrowserConfig extends HashedObject {
 
     }
 
-    static backendNameForHomeHash(homeHash: Hash): string {
-        return 'home-root-' + homeHash;
-    }
-
-    static async initHomeResources(homeHash: Hash, setLoadError: (err: string) => void, mode:('worker'|'normal')='normal') {
-        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHomeHash(homeHash));
+    static async initHomeStore(homeHash: Hash, setLoadError: (err: string) => void): Promise<Store> {
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForHome(homeHash));
     
         try {
             console.log('Initializing storage backend for home space ' + homeHash + '...');
@@ -106,7 +102,12 @@ class HyperBrowserConfig extends HashedObject {
             setLoadError('Error initializing storage backend: ' + e.toString());
         }
 
-        //const worker = new WebWorker();
+        return new Store(backend);
+    }
+
+    static async initHomeResources(homeHash: Hash, setLoadError: (err: string) => void, mode:('worker'|'normal')='normal'): Promise<Resources> {
+
+        const store = await this.initHomeStore(homeHash, setLoadError);
 
         let mesh: Mesh;
 
@@ -128,14 +129,117 @@ class HyperBrowserConfig extends HashedObject {
         } else {
             mesh = new Mesh();
         }
-
-    
-        const store = new Store(backend);
-        //const mesh = new Mesh();
     
         const resources = await Resources.create({mesh: mesh, store: store});
 
         store.setResources(resources);
+    
+        return resources;
+    }
+
+    static backendNameForHome(homeHash: Hash): string {
+        return 'home-' + homeHash;
+    }
+
+    static backendNameForSpace(homeHash: Hash, spaceHash: Hash) {
+        return 'space-' + spaceHash + '-in-' + homeHash;
+    }
+
+    static backendNameForTransientSpace(spaceHash: Hash) {
+        return 'transient-space-' + spaceHash;
+    }
+
+    static async createSpaceStore(homeHash: Hash, entryPoint: HashedObject): Promise<Store> {
+        const spaceHash = entryPoint.hash();
+
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(homeHash, spaceHash));
+
+        await backend.ready();
+
+        const store = new Store(backend);
+
+        await store.save(entryPoint);
+
+        return store;
+    }
+
+    //static async initSpaceResources(homeHash: Hash, spaceHash: Hash) {
+    //    let backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(homeHash, spaceHash));
+    //}
+
+    static async initSavedSpaceMesh(homeHash: Hash, spaceHash: Hash): Promise<Mesh> {
+        const worker = new Worker(new URL('../mesh.worker', import.meta.url));
+
+        const webWorkerMesh = new WebWorkerMeshProxy(worker);
+    
+        await webWorkerMesh.ready; // The MeshHost in the web worker will send a message once it is fully
+                                   // operational. We don't want to send any control messages before that,
+                                   // so we'll wait here until we get the 'go' message from the MeshHost.
+
+        const mesh = webWorkerMesh.getMesh();
+
+        return mesh;
+    }
+
+    static async initSavedSpaceStore(home: Home, spaceLink: SpaceLink): Promise<Store> {
+
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(home.getLastHash(), spaceLink.spaceEntryPoint?.getLastHash() as Hash));
+        const store = new Store(backend);
+
+        await store.save(spaceLink.spaceEntryPoint as HashedObject)
+        await store.save((home.getAuthor() as Identity).getKeyPair())
+
+        return store;
+    }
+
+    static async initSavedSpaceResources(home: Home, spaceLink: SpaceLink): Promise<Resources> {
+
+        const mesh  = await HyperBrowserConfig.initSavedSpaceMesh(home.getLastHash(), spaceLink.spaceEntryPoint?.getLastHash() as Hash);
+        const store = await HyperBrowserConfig.initSavedSpaceStore(home, spaceLink);
+    
+        const resources = await Resources.create({mesh: mesh, store: store});
+
+        store.setResources(resources);
+    
+        return resources;
+    }
+
+    static async initTransientSpaceResources(spaceHash: Hash, entryPoint?: HashedObject): Promise<Resources> {
+        const backend = new MemoryBackend(HyperBrowserConfig.backendNameForTransientSpace(spaceHash));
+
+        const store = new Store(backend);
+        const mesh = new Mesh();
+    
+        const resources = await Resources.create({mesh: mesh, store: store});
+
+        store.setResources(resources);
+    
+        return resources;
+    }
+
+
+    
+
+    static async initStarterResources() {
+        const backend = new WorkerSafeIdbBackend('start-page');
+        let dbBackendError: (string|undefined) = undefined;
+    
+    
+        try {
+            console.log('Initializing storage backend for starter page...');
+            await backend.ready();
+            console.log('Storage backend for starter page ready');
+        } catch (e: any) {
+            dbBackendError = e.toString();
+            console.log('Error initializing storage backend for starter page');
+            throw new Error(dbBackendError);
+        }
+      
+    
+        const store = new Store(backend);
+        const mesh = new Mesh();
+    
+        const resources = await Resources.create({mesh: mesh, store: store});
     
         return resources;
     }

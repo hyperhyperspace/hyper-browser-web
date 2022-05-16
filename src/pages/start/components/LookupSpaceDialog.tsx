@@ -6,9 +6,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box } from '@mui/system';
 
 import { useObjectDiscovery } from '@hyper-hyper-space/react';
-import { ObjectDiscoveryReply } from '@hyper-hyper-space/core';
+import { Hash, ObjectDiscoveryReply } from '@hyper-hyper-space/core';
 import { Fragment, useState, useEffect } from 'react';
-import { supportedSpaceNames, supportedSpaceColors } from '../../../model/SupportedSpaces';
+import { SpaceDisplayInfo, supportedSpaces } from '../../../model/SupportedSpaces';
 import { useNavigate, useParams } from 'react-router';
 
 function LookupSpaceDialog() {
@@ -20,11 +20,15 @@ function LookupSpaceDialog() {
 
     const wait = discovered === undefined || discovered.size === 0;
 
-    const errors = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => (r.object === undefined || supportedSpaceNames.get(r.object.getClassName()) === undefined)) : [];
-    const results = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => r.object !== undefined && supportedSpaceNames.get(r.object.getClassName()) !== undefined) : [];
+    const errors = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => (r.object === undefined || supportedSpaces.get(r.object.getClassName()) === undefined)) : [];
+    const results = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => r.object !== undefined && supportedSpaces.get(r.object.getClassName()) !== undefined) : [];
 
     const closeLookupDialog = () => {
         navigate('/start');
+    }
+
+    const openSpace = (entryPointHash: Hash) => {
+        window.open('./#/space/' + encodeURIComponent(entryPointHash), '_blank');
     }
 
     return (
@@ -62,17 +66,17 @@ function LookupSpaceDialog() {
                 {results.length > 0 &&
                     <Stack divider={<Divider orientation="horizontal" flexItem />}>
                         {results.map((r: ObjectDiscoveryReply) => 
-                                                <Stack key={r.object?.getLastHash()} style={{justifyContent: 'space-between'}} direction="row">
+                                                <Stack key={r.object?.getLastHash()} style={{justifyContent: 'space-between'}} direction="row"  spacing={2}>
                                                     <Typography style={{alignSelf: 'center'}}>
-                                                        Found a <span style={{background: supportedSpaceColors.get(r.object?.getClassName() as string)}}>{supportedSpaceNames.get(r.object?.getClassName() as string)}</span>{r.object?.getAuthor()?.info?.name && <Fragment>  by r.object?.getAuthor()?.info?.name</Fragment> }
+                                                        Found a <span style={{background: (supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).color, color: 'white'}}>{(supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).name}</span>{r.object?.getAuthor()?.info?.name && <Fragment> space by {r.object?.getAuthor()?.info?.name}</Fragment> }
                                                     </Typography>  
-                                                    <Button variant="contained">Open</Button>
+                                                    <Button variant="contained" onClick={() => { openSpace(r.object?.getLastHash() as Hash); }}>Open</Button>
                                                 </Stack>
                         )}
 
                         
                     </Stack>
-                }            
+                }
                 </Fragment>
                 }
             </DialogContent>

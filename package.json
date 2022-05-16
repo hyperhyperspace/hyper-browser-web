@@ -9,7 +9,12 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@fontsource/roboto": "^4.5.1",
+    "@hyper-hyper-space/core": "0.9.0",
+    "@hyper-hyper-space/home": "0.1.0",
+    "@hyper-hyper-space/p2p-chat": "0.2.0",
+    "@hyper-hyper-space/react": "0.3.0",
     "@mui/icons-material": "^5.3.1",
+    "@mui/lab": "^5.0.0-alpha.81",
     "@mui/material": "^5.3.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
@@ -24,13 +29,9 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
     "typescript": "^4.4.2",
-    "web-vitals": "^2.1.0",
-    "@hyper-hyper-space/core": "0.9.0",
-    "@hyper-hyper-space/react": "0.3.0",
-    "@hyper-hyper-space/home": "0.1.0",
-    "@hyper-hyper-space/p2p-chat": "0.2.0"
-},
-"scripts": {
+    "web-vitals": "^2.1.0"
+  },
+  "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

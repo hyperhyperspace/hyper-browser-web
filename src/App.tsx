@@ -1,18 +1,25 @@
 import './App.css';
 import { Fragment } from 'react';
-import { CssBaseline, ThemeProvider } from '@mui/material';
-import StartPage from './pages/start/StartPage';
-import { lightTheme } from './themes';
-import HomeSpace from './pages/home/HomeSpace';
 import { Navigate, Route, Routes } from 'react-router';
-import { Hash, MutableSet, Store } from '@hyper-hyper-space/core';
+
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { lightTheme } from './themes';
+
+import { Hash, MutableSet, Store }     from '@hyper-hyper-space/core';
 import { StateObject, useStateObject } from '@hyper-hyper-space/react';
+
+import StartPage         from './pages/start/StartPage';
 import LookupSpaceDialog from './pages/start/components/LookupSpaceDialog';
-import CreateHomeDialog from './pages/start/components/CreateHomeDialog';
-import LinkDeviceDialog from './pages/start/components/CreateLinkDeviceOfferDialog';
-import HyperBrowserEnv from './context/HyperBrowserContext';
+import CreateHomeDialog  from './pages/start/components/CreateHomeDialog';
+import LinkDeviceDialog  from './pages/start/components/CreateLinkDeviceOfferDialog';
+
+import HomeSpace           from './pages/home/HomeSpace';
 import ManageDevicesDialog from './pages/home/components/ManageDevicesDialog';
-import ViewFolderDialog from './pages/home/components/ViewFolderDialog';
+import ViewFolderDialog    from './pages/home/components/ViewFolderDialog';
+
+import SpaceFrame from './pages/space/SpaceFrame';
+
+import HyperBrowserEnv from './context/HyperBrowserContext';
 
 
 function App(props: {homes: MutableSet<Hash>, config: Store}) {
@@ -47,7 +54,7 @@ function App(props: {homes: MutableSet<Hash>, config: Store}) {
               <Route path="devices" element={<ManageDevicesDialog />} />
               <Route path="folder/:path" element={<ViewFolderDialog />} />
             </Route>
-            <Route path="space/:hash" element={<HomeSpace />} />
+            <Route path="space/:hash" element={<SpaceFrame homes={props.homes}/>} />
           </Routes>
         </HyperBrowserEnv>
       </ThemeProvider>

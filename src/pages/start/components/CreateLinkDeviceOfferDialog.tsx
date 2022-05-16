@@ -33,12 +33,14 @@ function CreateLinkDeviceOfferDialog() {
             resources = await Resources.create({mesh: mesh, store: store});
 
             const code  = new RNGImpl().randomHexString(48);
+
             offer = new LinkDeviceOffer(code);
 
             setOffer(offer);
 
-            offer.setResources(resources);
+            store.setResources(resources);
             await store.save(offer);
+            //offer.setResources(resources);
 
             let gotReply = false;
 

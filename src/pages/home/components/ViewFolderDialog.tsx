@@ -1,5 +1,5 @@
-import { MutationEvent } from '@hyper-hyper-space/core';
-import { Folder, FolderItem } from '@hyper-hyper-space/home';
+import { Hash, MutationEvent } from '@hyper-hyper-space/core';
+import { Folder, FolderItem, SpaceLink } from '@hyper-hyper-space/home';
 import { useStateObject } from '@hyper-hyper-space/react';
 import { AppBar, Container, Dialog, DialogActions, DialogContent, IconButton, Stack, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Fragment, useState, useEffect } from 'react';
@@ -27,7 +27,7 @@ function ViewFolderDialog() {
         navigate('..');
     }
 
-    const { home, openFolder, openCreateFolder, openRenameFolder, deleteFolder, setViewingFolder, setViewingFolderByHash, viewingFolder } = useOutletContext<HomeContext>();
+    const { home, openFolder, openCreateFolder, openRenameFolder, openCreateSpace, openSpace, deleteFolder, setViewingFolder, setViewingFolderByHash, viewingFolder } = useOutletContext<HomeContext>();
 
     const resources = home?.getResources();
 
@@ -122,6 +122,17 @@ function ViewFolderDialog() {
                                                     {name: 'Rename', action: () => { openRenameFolder(item); }}, 
                                                     {name: 'Delete', action: () => { deleteFolder(item, folderState?.value as Folder); }}]}
                                             />;
+                                } else if (item instanceof SpaceLink && item.name?.getValue() !== undefined) { 
+                                    const name = item.name;
+                                    return <HomeItem 
+                                    key={item.getLastHash()}
+                                    icon="streamline-icon-pencil-write-1@48x48.png" 
+                                    name={name?.getValue()}
+                                    click={() => { openSpace(item.spaceEntryPoint?.getLastHash() as Hash); }}
+                                    /*menu={[{name: 'Open',   action: () => { openFolder(item); } }, 
+                                           {name: 'Rename', action: () => { openRenameFolder(item); }}, 
+                                           {name: 'Delete', action: () => { deleteFolder(item, desktopFolder); }}]}*/
+                                />;
                                 } else {
                                     return <Fragment key={item.getLastHash()}></Fragment>;
                                 }
@@ -141,7 +152,7 @@ function ViewFolderDialog() {
                             },
                             {
                                 name: 'New Space',
-                                action: () => {alert('Available soon!')}
+                                action: openCreateSpace
                             }]}
                         clickOpensMenu />
                     </Stack>

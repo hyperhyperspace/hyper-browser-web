@@ -2,11 +2,13 @@ import { Dialog, DialogContent, DialogTitle, Stack, Typography, TextField, Card,
 import InfoIcon from '@mui/icons-material/Info';
 import { useState, useRef, Fragment } from 'react';
 import { useNavigate } from 'react-router';
-import { Hash, MutableSet } from '@hyper-hyper-space/core';
+import { Hash, Identity, MutableSet } from '@hyper-hyper-space/core';
 
 import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
 import { DeviceInfo } from '../../../model/DeviceInfo';
 import { useHyperBrowserEnv } from '../../../context/HyperBrowserContext';
+import { Home, SpaceLink } from '@hyper-hyper-space/home';
+import { TextSpace } from '../../../model/text/TextSpace';
 
 
 
@@ -68,7 +70,25 @@ function CreateHomeDialog() {
     const confirmCreateHome = () => {
         setShowConfirmDialog(false);
         setShowCreatingDialog(true);
-        HyperBrowserConfig.create({name: name, type: 'person'}, deviceName, env.homes.value as MutableSet<Hash>).then(() => {
+        HyperBrowserConfig.createHome({name: name, type: 'person'}, deviceName, env.homes.value as MutableSet<Hash>).then(async (home: Home) => {
+
+            // create a "My Notes" space and place it on the desktop
+
+            const store = await HyperBrowserConfig.initHomeStore(home.getLastHash(), (err: string) => { throw(err); })
+
+            const myNotes = new TextSpace();
+            myNotes.setAuthor((home.getAuthor()) as Identity);
+
+            const link = new SpaceLink(home.getAuthor() as Identity, myNotes);
+            await link.name?.setValue('My Notes');
+            await store.save(link);
+
+            home.desktop?.root?.items?.setStore(store);
+            await home.desktop?.root?.items?.push(link);
+            await home.desktop?.root?.items?.saveQueuedOps();
+
+            await store.close();
+
             navigate('/');
         });
     }

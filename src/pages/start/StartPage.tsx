@@ -5,6 +5,7 @@ import { Box } from '@mui/system';
 import { Fragment, useRef, useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router';
 import { Link as RouterLink } from 'react-router-dom';
+import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 
 
 function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
@@ -13,7 +14,7 @@ function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
     const [starterResources, setStarterResources] = useState<Resources|undefined>(undefined);
 
     useEffect(() => {
-                initStarterResources().then((r: Resources) => {
+                HyperBrowserConfig.initStarterResources().then((r: Resources) => {
                     setStarterResources(r);
                 });
     }, []);
@@ -207,7 +208,7 @@ function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
                         {[{icon:'📗', iconTitle: 'feed', iconColor: 'lightblue', text:'About Hyper Hyper Space', title: 'tandem sticker bag'},
                         {icon:'💬', iconTitle: 'feed', iconColor: 'green', text:'Welcome chat and Q&A', title: 'ambar lemon tack'},
                         {icon:'🗒', iconTitle: 'feed', iconColor: 'yellow', text:'New spaces', title: 'puma kicker backlog'}].map((e) => 
-                            <span key={e.title}> <a href="#" title={e.title}><span style={{backgroundColor:e.iconColor, padding:2, borderRadius: 3}} title={e.iconTitle}>{e.icon}</span>&nbsp;{e.text}</a> </span>
+                            <span key={e.title}> <a href="javascript:alert('coming soon!')" title={e.title}><span style={{backgroundColor:e.iconColor, padding:2, borderRadius: 3}} title={e.iconTitle}>{e.icon}</span>&nbsp;{e.text}</a> </span>
                         )} 
                     </Typography>
                     </span>
@@ -227,30 +228,6 @@ function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
     </Fragment>
     );
 
-}
-
-const initStarterResources = async () => {
-    const backend = new WorkerSafeIdbBackend('start-page');
-    let dbBackendError: (string|undefined) = undefined;
-
-
-    try {
-        console.log('Initializing storage backend for starter page...');
-        await backend.ready();
-        console.log('Storage backend for starter page ready');
-    } catch (e: any) {
-        dbBackendError = e.toString();
-        console.log('Error initializing storage backend for starter page');
-        throw new Error(dbBackendError);
-    }
-  
-
-    const store = new Store(backend);
-    const mesh = new Mesh();
-
-    const resources = await Resources.create({mesh: mesh, store: store});
-
-    return resources;
 }
 
 export default StartPage;

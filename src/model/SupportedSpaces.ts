@@ -1,11 +1,11 @@
 import { ChatRoom } from '@hyper-hyper-space/p2p-chat';
+import { TextSpace } from './text/TextSpace';
 
-const supportedSpaceNames = new Map<string, string>();
+type SpaceDisplayInfo = { name: string, color: string };
 
-supportedSpaceNames.set(ChatRoom.className, "Chat Room");
+const supportedSpaces: Map<string, SpaceDisplayInfo> = new Map();
 
-const supportedSpaceColors = new Map<string, string>();
+supportedSpaces.set(TextSpace.className, { name: 'Plain Text', color: 'green'});
 
-supportedSpaceColors.set(ChatRoom.className, 'lightgreen');
-
-export { supportedSpaceNames, supportedSpaceColors };
+export { supportedSpaces };
+export type { SpaceDisplayInfo };

@@ -1,7 +1,7 @@
 import { Store } from '@hyper-hyper-space/core';
 import { Folder } from '@hyper-hyper-space/home';
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from '@mui/material';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 
 import { HomeContext } from '../HomeSpace';
 
@@ -15,7 +15,7 @@ function CreateFolderDialog(props: {parent: Folder, context: HomeContext, onClos
     const close = () => {
         setOpen(false);
         props.onClose();
-    }
+    };
 
     const [name, setName] = useState('');
     const [nameError, setNameError] = useState(false);
@@ -49,7 +49,7 @@ function CreateFolderDialog(props: {parent: Folder, context: HomeContext, onClos
             await store.save(folder);
 
             await props.parent.items?.push(folder);
-            props.parent.items?.saveQueuedOps();
+            await props.parent.items?.saveQueuedOps();
             close();
         }
 
@@ -57,31 +57,29 @@ function CreateFolderDialog(props: {parent: Folder, context: HomeContext, onClos
 
 
     return (
-        <Fragment>
-            <Dialog open={open} scroll='paper' onClose={close}>
-                <DialogTitle>Create New Folder</DialogTitle>
-                
-                
-                <DialogContent>
-                    <TextField 
-                        value={name} onChange={handleNameChange} 
-                        onKeyPress={handleNameKeyPress} 
-                        error={nameError} 
-                        helperText={nameError? 'Please enter a name' : 'Folder name'}
-                        autoFocus
-                        disabled={creating}
-                    />
-                </DialogContent>
-                <DialogActions>
-                {!creating &&
-                    <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button variant="outlined" onClick={createFolder} disabled={home===undefined}>Create</Button><Button onClick={close}>Cancel</Button></Stack>
-                }
-                {creating &&
-                    <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><CircularProgress style={{margin: 'auto'}}/></Stack>
-                }
-                </DialogActions>
-            </Dialog>
-        </Fragment>
+        <Dialog open={open} scroll='paper' onClose={close}>
+            <DialogTitle>Create New Folder</DialogTitle>
+            
+            
+            <DialogContent>
+                <TextField 
+                    value={name} onChange={handleNameChange} 
+                    onKeyPress={handleNameKeyPress} 
+                    error={nameError} 
+                    helperText={nameError? 'Please enter a name' : 'Folder name'}
+                    autoFocus
+                    disabled={creating}
+                />
+            </DialogContent>
+            <DialogActions>
+            {!creating &&
+                <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button variant="outlined" onClick={createFolder} disabled={home===undefined}>Create</Button><Button onClick={close}>Cancel</Button></Stack>
+            }
+            {creating &&
+                <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><CircularProgress style={{margin: 'auto'}}/></Stack>
+            }
+            </DialogActions>
+        </Dialog>
     );
 }
 

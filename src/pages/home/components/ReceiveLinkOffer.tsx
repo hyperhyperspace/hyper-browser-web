@@ -140,15 +140,16 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                 
                 const offer = new LinkDeviceOffer(wordCode);
 
-                offer.setResources(resources);
-                store.save(offer);
+                //offer.setResources(resources);
+                store.setResources(resources);
+                await store.save(offer);
                 
 
                 const localDevice = await home.findLocalDevice() as Device;
 
                 offer.createReply(home.getAuthor() as Identity, home.getAuthor()?._keyPair as RSAKeyPair, localDevice);
 
-                store.save(offer);
+                await store.save(offer);
 
 
                 setOffer(offer);
