@@ -149,6 +149,8 @@ function ReceiveLinkOffer(props: {close: () => void}) {
 
     useEffect(() => {
 
+        let resources: Resources|undefined = undefined;
+
         if (wordCode !== undefined && home !== undefined) {
             const createOffer = async () => {
 
@@ -160,7 +162,7 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                 const store = new Store(backend);
                 const mesh = new Mesh();
 
-                const resources = await Resources.create({mesh: mesh, store: store});
+                resources = await Resources.create({mesh: mesh, store: store});
 
                 const today = DateUtils.getCurrentDay();
 
@@ -250,9 +252,32 @@ function ReceiveLinkOffer(props: {close: () => void}) {
 
             createOffer();
 
+            return () => {
+                resources?.mesh?.pod.shutdown();
+                resources?.store.close();
+            };
         }
 
-    }, [wordCode, home])
+    }, [wordCode, home]);
+
+    const [discoveryTimeout, setDiscoveryTimeout] = useState<number|undefined>(undefined);
+
+    const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
+
+    const discoveryTimeoutCallback = () => {
+        setShowTimeoutMessage(true);
+        setDiscoveryTimeout(undefined);
+    }
+
+    useEffect(() => {
+        setDiscoveryTimeout(window.setTimeout(discoveryTimeoutCallback, 15000));
+        return () => {
+            if (discoveryTimeout !== undefined) {
+                window.clearTimeout(discoveryTimeout);
+                setDiscoveryTimeout(undefined);
+            }
+        };
+    }, []);
 
     return (<Fragment>
                 <Dialog open={open} scroll='paper' onClose={close}>
@@ -281,7 +306,15 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                             </Fragment>
                         }
                         {wordCode !== undefined && gatherOfferState() === undefined &&
+                            <Fragment>
                             <Typography>Waiting for your new device to connect...</Typography>
+                            { showTimeoutMessage &&
+                                <Card style={{marginTop: '1.5rem', marginBottom: '1.5rem'}}><CardContent>
+                                <Typography>This is taking longer than expected. Are the words you entered correct: <span style={{backgroundColor: 'yellow'}}>{currentWord1} {currentWord2} {currentWord3} {currentWord4}</span>? You need to keep the page open on your new device while linking is under way.</Typography>
+                                </CardContent>
+                                </Card>
+                            }
+                            </Fragment>
                         }
                         {wordCode !== undefined && gatherOfferState() === 'success' &&
                             <Typography><b>Connected!</b> Please go back to your new device to configure it.</Typography>

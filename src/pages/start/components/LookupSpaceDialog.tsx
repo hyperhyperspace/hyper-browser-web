@@ -31,14 +31,41 @@ function LookupSpaceDialog() {
         window.open('./#/space/' + encodeURIComponent(entryPointHash), '_blank');
     }
 
+    const [discoveryTimeout, setDiscoveryTimeout] = useState<number|undefined>(undefined);
+
+    const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
+
+    const discoveryTimeoutCallback = () => {
+        setShowTimeoutMessage(true);
+        setDiscoveryTimeout(undefined);
+    }
+
+    useEffect(() => {
+        setDiscoveryTimeout(window.setTimeout(discoveryTimeoutCallback, 8000));
+        return () => {
+            if (discoveryTimeout !== undefined) {
+                window.clearTimeout(discoveryTimeout);
+                setDiscoveryTimeout(undefined);
+            }
+        };
+    }, []);
+
     return (
         <Dialog open={true} scroll='paper' onClose={closeLookupDialog}>
             <DialogTitle>Looking up {params.words}</DialogTitle>
             <DialogContent style={{}} dividers>
+
                 {wait &&
-                <Box sx={{display: 'flex', minHeight: '300px'}}>
-                    <CircularProgress style={{margin: 'auto'}}/>
-                </Box>
+                    <Fragment>
+                    { showTimeoutMessage && 
+                    <Box sx={{display: 'flex', marginTop: '1rem'}}>
+                        <Typography>This is taking longer than expected. Are your 3-words correct? Poke someone to open this space then.</Typography>
+                    </Box>
+                    }
+                    <Box sx={{display: 'flex', minHeight: '300px'}}>
+                        <CircularProgress style={{margin: 'auto'}}/>
+                    </Box>
+                    </Fragment>
                 }
                 {!wait &&
                 <Fragment>

@@ -238,6 +238,7 @@ function HomeSpace() {
     const searching = searchValue !== '';
 
     const [wordsForDiscovery, setWordsForDiscovery] = useState<string|undefined>(undefined);
+    const [noDiscovery, setNoDiscovery] = useState(false); 
 
     const discovered = useObjectDiscoveryWithResources(resourcesForDiscovery, wordsForDiscovery, 'en', 10, true);
     const results = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => r.object !== undefined && supportedSpaces.get(r.object.getClassName()) !== undefined) : [];
@@ -263,6 +264,7 @@ function HomeSpace() {
         const words = value.toLowerCase().split(/[ -]+/);
         if (words.length === 3 && WordCode.english.check(words[0]) && WordCode.english.check(words[1]) && WordCode.english.check(words[2])) {
             setWordsForDiscovery(words[0] + '-' + words[1] + '-' + words[2]);
+            setDiscoveryTimeout(window.setTimeout(discoveryTimeoutCallback, 8000));
         } else {
             setWordsForDiscovery(undefined);
         }
@@ -278,6 +280,12 @@ function HomeSpace() {
     const searchValueChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.currentTarget.value;
         setSearchValue(newValue);
+        setNoDiscovery(false);
+        setShowTimeoutMessage(false);
+        if (discoveryTimeout !== undefined) {
+            window.clearTimeout(discoveryTimeout);
+        }
+        setDiscoveryTimeout(undefined);
 
         if (searchTimeout !== undefined) {
             window.clearTimeout(searchTimeout);
@@ -317,6 +325,19 @@ function HomeSpace() {
     };
 
     const [searchTimeout, setSearchTimeout] = useState<number|undefined>(undefined);
+
+    const [discoveryTimeout, setDiscoveryTimeout] = useState<number|undefined>(undefined);
+
+    const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
+
+    const discoveryTimeoutCallback = () => {
+        setShowTimeoutMessage(true);
+        setDiscoveryTimeout(undefined);
+    }
+
+    const noLookup = () => {
+        setNoDiscovery(true);
+    }
 
     return (
     <Fragment>
@@ -481,27 +502,42 @@ function HomeSpace() {
                                 </TextField>
                             </Stack>
                         </Container>
-                        { searching && wordsForDiscovery !== undefined &&
+                        { searching && wordsForDiscovery !== undefined && !noDiscovery &&
                         <Container maxWidth="lg" style={{marginTop:'2rem'}} >
                             <Card variant='outlined' sx={{width: {xs: '100%', sm: '70%', md: '60%', lg: '50%'}}} style={{margin: 'auto'}}>
                                 <CardContent>
-                                    <Typography variant='body1'>Matches of 3-word code <span style={{backgroundColor: 'yellow'}}>{wordsForDiscovery.replaceAll('-', ' ')}</span></Typography>
+                                    <Typography variant='body1'>Matches for 3-word code <span style={{backgroundColor: 'yellow'}}>{wordsForDiscovery.replaceAll('-', ' ')}</span></Typography>
                                     {results.length === 0 && 
-                                        <Box sx={{display: 'flex', marginTop: '2rem'}}>
-                                            <CircularProgress style={{margin: 'auto'}}/>
-                                        </Box>
+                                        <Fragment>
+                                            <Box sx={{display: 'flex', marginTop: '2rem'}}>
+                                                <CircularProgress style={{margin: 'auto'}}/>
+                                            </Box>
+                                            { showTimeoutMessage && 
+                                            <Box sx={{display: 'flex', marginTop: '1rem'}}>
+                                                <Typography>This is taking longer than expected. Are your 3-words correct? Poke someone to open this space then.</Typography>
+                                            </Box>
+                                            }
+                                            <Box sx={{display: 'flex', marginTop: '1rem'}}>
+                                                <Button style={{margin: 'auto'}} onClick={noLookup}>Cancel</Button>
+                                            </Box>
+                                        </Fragment>
                                     }
                                     {results.length > 0 &&
-                                    <Stack divider={<Divider orientation="horizontal" flexItem />} style={{marginTop: '1rem'}} >
-                                        {results.map((r: ObjectDiscoveryReply) => 
-                                                                <Stack key={r.object?.getLastHash()} style={{justifyContent: 'space-between'}} direction="row"  spacing={2}>
-                                                                    <Typography style={{alignSelf: 'center'}}>
-                                                                        <span style={{background: (supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).color, color: 'white'}}>{(supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).name}</span>{r.object?.getAuthor()?.info?.name && <Fragment> space by {r.object?.getAuthor()?.info?.name}</Fragment> }
-                                                                    </Typography>  
-                                                                    <Button variant="contained" onClick={() => { openSpace(r.object?.getLastHash() as Hash); }}>Open</Button>
-                                                                </Stack>
-                                        )}
-                                    </Stack>
+                                    <Fragment>
+                                        <Stack divider={<Divider orientation="horizontal" flexItem />} style={{marginTop: '1rem'}} >
+                                            {results.map((r: ObjectDiscoveryReply) => 
+                                                                    <Stack key={r.object?.getLastHash()} style={{justifyContent: 'space-between'}} direction="row"  spacing={2}>
+                                                                        <Typography style={{alignSelf: 'center'}}>
+                                                                            <span style={{background: (supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).color, color: 'white'}}>{(supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).name}</span>{r.object?.getAuthor()?.info?.name && <Fragment> space by {r.object?.getAuthor()?.info?.name}</Fragment> }
+                                                                        </Typography>  
+                                                                        <Button variant="contained" onClick={() => { openSpace(r.object?.getLastHash() as Hash); }}>Open</Button>
+                                                                    </Stack>
+                                            )}
+                                        </Stack>
+                                        <Box sx={{display: 'flex', marginTop: '1rem'}}>
+                                            <Button style={{margin: 'auto'}} onClick={noLookup}>Close</Button>
+                                        </Box>
+                                        </Fragment>
                                     }
                                 </CardContent>
                             </Card>

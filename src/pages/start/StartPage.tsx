@@ -153,11 +153,11 @@ function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
                 }
                 { ((homes.value?.size() || 0) === 0) &&
                 <Fragment>
-                    <Button variant="contained" color="inherit" sx={{m:1}} style={{whiteSpace: 'nowrap'}} onClick={showLinkDeviceDialog}>Link Existing</Button>
-                    <Button variant="contained" sx={{m:1}} style={{whiteSpace: 'nowrap'}} onClick={showCreateHomeDialog}>Create New</Button>
-                    <Typography variant="h6" color="inherit" noWrap>
+                    <Button variant="contained" color="inherit" sx={{m:1}} /*style={{whiteSpace: 'nowrap'}}*/ onClick={showLinkDeviceDialog}>Link Existing</Button>
+                    <Button variant="contained" sx={{m:1}} /*style={{whiteSpace: 'nowrap'}}*/ onClick={showCreateHomeDialog}>Create New Home</Button>
+                    {/*<Typography variant="h6" color="inherit" noWrap style={{textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>
                         Home Space:
-                    </Typography>
+                    </Typography>*/}
                 </Fragment>
                 }
                 </Stack>
