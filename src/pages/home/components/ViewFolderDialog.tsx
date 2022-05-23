@@ -19,9 +19,6 @@ function ViewFolderDialog() {
     const path = params.path?.split('_').map((h: string) => decodeURIComponent(h)) as Array<string>;
     const topLevelFolder   = path.length === 1;
 
-    console.log('params.path');
-    console.log(params.path)
-
     const close = () => {
         setViewingFolder(undefined);
         navigate('..');
@@ -36,11 +33,6 @@ function ViewFolderDialog() {
         ( folder !== undefined && 
           folder.items !== undefined && 
           folder.items.indexOfByHash(ev.emitter.getLastHash()) >= 0));
-
-    useEffect(() => {
-        console.log('viewing folder:')
-        console.log(viewingFolder)
-    }, [viewingFolder]);
 
     const folderState = useStateObject<Folder>(viewingFolder, viewingFolder?.ownEventsFilter());
 
@@ -77,7 +69,6 @@ function ViewFolderDialog() {
                     </Typography>
                     <IconButton onClick={() => { 
                         if (topLevelFolder) {
-                            console.log('IUP')
                             close();
                         } else {
                             navigate('../folder/' + params.path?.split('_').slice(0, -1).map((hash: string) => encodeURIComponent(hash)).join('_'));
@@ -103,8 +94,6 @@ function ViewFolderDialog() {
                     style={{flexWrap: 'wrap'}}
                     >
                     {Object.values(((folderState?.value as Folder)?.items?.contents()) || {}).map((proxy: FolderItem) => {
-
-                            console.log('ok2')
 
                             //const newPath = (path === undefined? '' : path + '_') + encodeURIComponent(folderState?.value?.getLastHash() as string)
 

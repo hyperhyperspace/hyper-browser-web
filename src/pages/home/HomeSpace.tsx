@@ -16,6 +16,8 @@ import { Link } from 'react-router-dom';
 import CreateSpaceDialog from './components/CreateSpaceDialog';
 import { SpaceDisplayInfo, supportedSpaces } from '../../model/SupportedSpaces';
 import { FolderTreeSearch } from '../../model/FolderTreeSearch';
+import AskForPersistentStorageDialog from './components/AskForPersistentStorageDialog';
+import StorageDialog from './components/StorageDialog';
 
 type HomeContext = {
     home: Home | undefined,
@@ -50,6 +52,15 @@ function HomeSpace() {
         })
     }, []);
 
+    const [showAskForPersistentStorageDialog, setShowAskForPersistentStorageDialog] = useState(false);
+
+    const closeAskForPersistentStorageDialog = () => {
+        setShowAskForPersistentStorageDialog(false);
+    }
+
+    const openAskForPersistentStorageDialog = () => {
+        setShowAskForPersistentStorageDialog(true);
+    }
     
     const [home, setHome]               = useState<Home|undefined>(undefined);
     const homeState = useStateObject(home);
@@ -199,9 +210,11 @@ function HomeSpace() {
                         console.log('X')
                         console.log(entryPoint);
                         console.log(entryPoint?.getResources())
-                        //entryPoint?.getResources()?.mesh?.pod.shutdown(); // FIXME
                         setTimeout(() => {
-                            entryPoint?.getResources()?.store.close();
+                            entryPoint?.getResources()?.mesh?.shutdown();
+                            setTimeout(() => {
+                                entryPoint?.getResources()?.store.close();
+                            }, 2500);
                         }, 5000);
                         spaceEntryPoints.delete(entryPointHash);
                         console.log('stopped sync of space ' + entryPointHash);
@@ -266,7 +279,7 @@ function HomeSpace() {
                 toDelete.push(entryPointHash);
 
                 entryPoint?.stopSync();
-                entryPoint?.getResources()?.mesh?.pod.shutdown();
+                entryPoint?.getResources()?.mesh?.shutdown();
                 setTimeout(() => {
                     entryPoint?.getResources()?.store.close();
                 }, 5000);
@@ -291,6 +304,21 @@ function HomeSpace() {
             alert('Error initializing discovery resources: ' + reason);
         })
     }, [])
+
+    useEffect(() => {
+
+        console.log('checking for persistent storage...')
+
+        navigator.storage.persisted().then((persisted: boolean) => {
+            if (!persisted) {
+                console.log('persistent storage not granted')
+                openAskForPersistentStorageDialog();    
+            } else {
+                console.log('persistent storage granted')
+            }
+        });
+
+    }, [home])
 
     const [searchValue, setSearchValue] = useState('');
     const searching = searchValue !== '';
@@ -395,6 +423,10 @@ function HomeSpace() {
 
     const noLookup = () => {
         setNoDiscovery(true);
+    }
+
+    const openStorageDialog = () => {
+        navigate('./storage');
     }
 
     return (
@@ -672,10 +704,23 @@ function HomeSpace() {
                             <ListItemText primary="Linked Devices" />
                         </ListItemButton>
                     </List>
+                    <List component="div" disablePadding>
+                        <ListItemButton sx={{ pl: 4 }} onClick={openStorageDialog}>
+                            <ListItemIcon>
+                                <img src="icons/streamline-icon-hard-drive@48x48.png" style={{width:'28px', height:'28px', margin:'2px', padding: '2px'}}></img>
+                            </ListItemIcon>
+                            <ListItemText primary="Storage" />
+                        </ListItemButton>
+                    </List>
                 </List>
+
             
             </Box>
             </SwipeableDrawer>
+
+            { showAskForPersistentStorageDialog && 
+                <AskForPersistentStorageDialog onClose={closeAskForPersistentStorageDialog} />
+            }
 
             { showCreateSpace && 
                 <CreateSpaceDialog folder={(viewingFolder || desktopFolder) as Folder} context={homeContext} onClose={closeCreateSpace}/>

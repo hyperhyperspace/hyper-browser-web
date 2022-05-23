@@ -20,6 +20,7 @@ import ViewFolderDialog    from './pages/home/components/ViewFolderDialog';
 import SpaceFrame from './pages/space/SpaceFrame';
 
 import HyperBrowserEnv from './context/HyperBrowserContext';
+import StorageDialog from './pages/home/components/StorageDialog';
 
 
 function App(props: {homes: MutableSet<Hash>, config: Store}) {
@@ -52,6 +53,7 @@ function App(props: {homes: MutableSet<Hash>, config: Store}) {
             </Route>
             <Route path="home/:hash" element={<HomeSpace />}>
               <Route path="devices" element={<ManageDevicesDialog />} />
+              <Route path="storage" element={<StorageDialog />} />
               <Route path="folder/:path" element={<ViewFolderDialog />} />
             </Route>
             <Route path="space/:hash" element={<SpaceFrame homes={props.homes}/>} />

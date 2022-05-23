@@ -31,11 +31,6 @@ function ManageDevicesDialog() {
         setShowReceiveDialog(false);
     }
 
-    useEffect(() => {
-        console.log('devices');
-        console.log((homeState?.value as Home)?.devices)
-    });
-
     return (
         <Fragment>
             <Dialog open={true} scroll='paper' onClose={close}>

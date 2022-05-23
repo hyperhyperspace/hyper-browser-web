@@ -262,7 +262,7 @@ function ReceiveLinkOffer(props: {close: () => void}) {
 
             return () => {
                         setTimeout(() => {
-                        resources?.mesh?.pod.shutdown();
+                        resources?.mesh?.shutdown();
                         resources?.store.close();
                         
                     }, 60000);

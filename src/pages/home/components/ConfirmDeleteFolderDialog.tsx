@@ -5,6 +5,8 @@ import { Fragment, useState } from 'react';
 
 import { HomeContext } from '../HomeSpace';
 
+// FIXME: this is incomplete!
+
 
 function ConfirmDeleteFolderDialog(props: {folder: Folder, context: HomeContext, onClose: () => void}) {
 
@@ -53,7 +55,7 @@ function ConfirmDeleteFolderDialog(props: {folder: Folder, context: HomeContext,
     return (
         <Fragment>
             <Dialog open={open} scroll='paper' onClose={close}>
-                <DialogTitle>Rename Folder</DialogTitle>
+                <DialogTitle>Delete Folder?</DialogTitle>
                 
                 
                 <DialogContent>
