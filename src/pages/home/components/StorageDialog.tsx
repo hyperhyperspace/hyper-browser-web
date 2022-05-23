@@ -63,7 +63,7 @@ function StorageDialog()  {
                 }
                 {error === undefined && !(bytesAvailable === undefined || bytesUsed === undefined || useNavigationType === undefined) &&
                 <Fragment>
-                    <Typography>Using {Math.round(bytesUsed/1024)} kb {bytesAvailable>0 && <span>({Math.round(bytesUsed/bytesAvailable*100)}%)</span>} out of a maximum of {bytesAvailable >= 1024*1024*1024 && <span>{Math.round(bytesAvailable/(1024*1024*1024))} gb</span>}{bytesAvailable >= 1024*1024 && bytesAvailable < 1024*1024*1024 && <span>{Math.round(bytesAvailable/(1024*1024))} mb</span>}{bytesAvailable < 1024 && <span>{Math.round(bytesAvailable/(1024))} kb</span>}.</Typography>
+                    <Typography>Using {bytesUsed < 1024*1024 && <span>{Math.round(bytesUsed/1024)} kb</span>}{bytesUsed >= 1024*1024 && bytesUsed < 1024*1024*1024 && <span>{Math.round(bytesUsed/(1024*1024))} mb</span>}{bytesUsed >= 1024*1024*1024 && <span>{Math.round(bytesUsed/(1024*1024*1024))} gb</span>} {bytesAvailable>0 && <span>({Math.round(bytesUsed/bytesAvailable*100)}%)</span>} out of a maximum of {bytesAvailable >= 1024*1024*1024 && <span>{Math.round(bytesAvailable/(1024*1024*1024))} gb</span>}{bytesAvailable >= 1024*1024 && bytesAvailable < 1024*1024*1024 && <span>{Math.round(bytesAvailable/(1024*1024))} mb</span>}{bytesAvailable < 1024 && <span>{Math.round(bytesAvailable/(1024))} kb</span>}.</Typography>
                     <br />
                     {usingPersist &&
                         <Typography>Persistent storage has been enabled.</Typography>
