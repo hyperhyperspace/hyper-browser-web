@@ -4,7 +4,7 @@ import { useNavigate, useOutletContext } from 'react-router';
 import { Hash, HeaderBasedSyncAgent, Identity, LogLevel, MemoryBackend, Mesh, MutableSet, PeerGroupAgent, Resources, RNGImpl, RSAKeyPair, StateGossipAgent, Store, WordCode } from '@hyper-hyper-space/core';
 import { Device, LinkDeviceOffer } from '@hyper-hyper-space/home';
 import { HomeContext } from '../HomeSpace';
-import { useStateObject } from '@hyper-hyper-space/react';
+import { useObjectState } from '@hyper-hyper-space/react';
 import { DateUtils } from '../../../model/DateUtils';
 
 function ReceiveLinkOffer(props: {close: () => void}) {
@@ -132,16 +132,16 @@ function ReceiveLinkOffer(props: {close: () => void}) {
     
 
     const [todaysOffer, setTodaysOffer] = useState<LinkDeviceOffer>();
-    const todaysOfferState              = useStateObject<LinkDeviceOffer>(todaysOffer);
+    const todaysOfferState              = useObjectState<LinkDeviceOffer>(todaysOffer);
 
     const [yesterdaysOffer, setYesterdaysOffer] = useState<LinkDeviceOffer>();
-    const yesterdaysOfferState                  = useStateObject<LinkDeviceOffer>(yesterdaysOffer);
+    const yesterdaysOfferState                  = useObjectState<LinkDeviceOffer>(yesterdaysOffer);
 
     const [tomorrowsOffer, setTomorrowsOffer] = useState<LinkDeviceOffer>();
-    const tomorrowsOfferState                 = useStateObject<LinkDeviceOffer>(tomorrowsOffer);
+    const tomorrowsOfferState                 = useObjectState<LinkDeviceOffer>(tomorrowsOffer);
 
     const [offer, setOffer] = useState<LinkDeviceOffer>();
-    const offerState        = useStateObject<LinkDeviceOffer>(offer);
+    const offerState        = useObjectState<LinkDeviceOffer>(offer);
 
     const gatherOfferState = () => {
 

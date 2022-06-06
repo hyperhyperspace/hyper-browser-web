@@ -1,6 +1,6 @@
 import { Hash, MutableReference, MutableSet } from '@hyper-hyper-space/core';
 import { Device, Home } from '@hyper-hyper-space/home';
-import { useStateObject } from '@hyper-hyper-space/react';
+import { useObjectState } from '@hyper-hyper-space/react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, List, Stack, Typography } from '@mui/material';
 import { Fragment, useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router';
@@ -18,7 +18,7 @@ function ManageDevicesDialog() {
 
     const { home, localDevice } = useOutletContext<HomeContext>();
 
-    const homeState = useStateObject(home);
+    const homeState = useObjectState(home);
 
     let [showReceiveDialog, setShowReceiveDialog] = useState<boolean>(false);
 

@@ -5,7 +5,7 @@ import { Box } from '@mui/system';
 
 
 import { Hash, HashedObject, Space } from '@hyper-hyper-space/core';
-import { useStateObject } from '@hyper-hyper-space/react';
+import { useObjectState } from '@hyper-hyper-space/react';
 import { FolderItem, Home, SpaceLink } from '@hyper-hyper-space/home';
 
 import CreateHomeDialog from './CreateHomeDialog';
@@ -16,7 +16,7 @@ import { supportedSpaces } from '../../model/SupportedSpaces';
 
 function SpaceFrameToolbar(props: {home?: Home, spaceEntryPointHash: Hash, spaceEntryPoint?: HashedObject}) {
 
-    const homeState = useStateObject(props.home);
+    const homeState = useObjectState(props.home);
 
     const links = homeState?.value?.desktop?.currentLinksForSpace(props.spaceEntryPointHash) || [] as Array<SpaceLink>;
 

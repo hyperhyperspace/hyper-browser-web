@@ -8,7 +8,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 import { Folder, FolderItem, FolderTree } from '@hyper-hyper-space/home';
 import { Hash } from '@hyper-hyper-space/core';
-import { useStateObject } from '@hyper-hyper-space/react';
+import { useObjectState } from '@hyper-hyper-space/react';
 
 function FolderTreeComponent(props: {tree: FolderTree, onFolderSelect?: (folder: Folder) => void, style: React.CSSProperties | undefined}) {
 
@@ -17,7 +17,7 @@ function FolderTreeComponent(props: {tree: FolderTree, onFolderSelect?: (folder:
     const [expanded, setExpanded] = useState<string[]>([rootHash]);
     const [selected, setSelected] = useState<Hash[]>([rootHash]);
 
-    const treeState = useStateObject(props.tree);
+    const treeState = useObjectState(props.tree);
 
     const renderFolder = (folderHash: Hash, parentId='') => {
 

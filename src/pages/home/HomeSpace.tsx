@@ -8,7 +8,7 @@ import HomeItem from './components/HomeItem';
 import HomeCommand from './components/HomeCommand';
 import { Hash, HashedObject, Identity, MutationEvent, MutationObserver, ObjectDiscoveryReply, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
-import { PeerComponent, useObjectDiscovery, useObjectDiscoveryWithResources, useStateObject } from '@hyper-hyper-space/react';
+import { PeerComponent, useObjectDiscovery, useObjectDiscoveryWithResources, useObjectState } from '@hyper-hyper-space/react';
 import { Home, Folder, Device, FolderItem, SpaceLink, FolderTree, FolderTreeEvents } from '@hyper-hyper-space/home';
 import CreateFolderDialog from './components/CreateFolderDialog';
 import RenameFolderItemDialog from './components/RenameFolderDialog';
@@ -63,12 +63,12 @@ function HomeSpace() {
     }
     
     const [home, setHome]               = useState<Home|undefined>(undefined);
-    const homeState = useStateObject(home);
+    const homeState = useObjectState(home);
     const [localDevice, setLocalDevice] = useState<Device|undefined>(undefined);
     const [owner, setOwner]             = useState<Identity|undefined>(undefined);
     const [desktopFolder, setDesktopFolder] = useState<Folder|undefined>(undefined);
 
-    const desktopFolderState = useStateObject<Folder>(desktopFolder, desktopFolder?.ownEventsFilter());
+    const desktopFolderState = useObjectState<Folder>(desktopFolder, desktopFolder?.ownEventsFilter());
     
 
     const [viewingFolder, setViewingFolder] = useState<Folder|undefined>()

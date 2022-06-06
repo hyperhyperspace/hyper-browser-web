@@ -6,7 +6,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { lightTheme } from './themes';
 
 import { Hash, MutableSet, Store }     from '@hyper-hyper-space/core';
-import { StateObject, useStateObject } from '@hyper-hyper-space/react';
+import { StateObject, useObjectState } from '@hyper-hyper-space/react';
 
 import StartPage         from './pages/start/StartPage';
 import LookupSpaceDialog from './pages/start/components/LookupSpaceDialog';
@@ -25,7 +25,7 @@ import StorageDialog from './pages/home/components/StorageDialog';
 
 function App(props: {homes: MutableSet<Hash>, config: Store}) {
 
-  const homes = useStateObject(props.homes) as StateObject<MutableSet<Hash>>;
+  const homes = useObjectState(props.homes) as StateObject<MutableSet<Hash>>;
 
   const confReady = props.config && homes && homes.value;
 

@@ -1,4 +1,4 @@
-import { ClassRegistry, HashedObject, Identity, MutableReference, PeerNode, Resources, SpaceEntryPoint, Types } from '@hyper-hyper-space/core';
+import { ClassRegistry, HashedObject, Identity, MutableReference, MeshNode, Resources, SpaceEntryPoint, Types } from '@hyper-hyper-space/core';
 
 
 class TextSpace extends HashedObject implements SpaceEntryPoint 
@@ -8,7 +8,7 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 
     content?: MutableReference<string>;
 
-    _node?: PeerNode;
+    _node?: MeshNode;
 
     constructor() {
         super();
@@ -65,7 +65,7 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 
         await this.loadAndWatchForChanges();
 
-        this._node = new PeerNode(this.getResources() as Resources);
+        this._node = new MeshNode(this.getResources() as Resources);
         
         this._node.broadcast(this);
         this._node.sync(this);

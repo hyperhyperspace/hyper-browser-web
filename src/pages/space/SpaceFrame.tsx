@@ -1,6 +1,6 @@
 import { Hash, HashedObject, MutableSet, Resources } from '@hyper-hyper-space/core';
 import { Home, SpaceLink } from '@hyper-hyper-space/home';
-import { useObjectDiscoveryIfNecessary, useStateObject } from '@hyper-hyper-space/react';
+import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
 import { useEffect, useState, Fragment } from 'react';
 import { useParams } from 'react-router';
 
@@ -18,12 +18,12 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
 
     const params = useParams();
 
-    const localHomesState = useStateObject(props.homes);
+    const localHomesState = useObjectState(props.homes);
     
     const [homeResources, setHomeResources] = useState<Resources|undefined>(undefined);
     const [home, setHome] = useState<Home|undefined>(undefined);
     
-    const homeState = useStateObject(home);
+    const homeState = useObjectState(home);
 
     const [initParams, setInitParams] = useState<InitParams|undefined>(undefined);
 

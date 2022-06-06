@@ -1,5 +1,5 @@
 import { HashedObject } from '@hyper-hyper-space/core';
-import { useStateObject } from '@hyper-hyper-space/react';
+import { useObjectState } from '@hyper-hyper-space/react';
 import { Button, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState, Fragment } from 'react';
 import { TextSpace } from '../../../model/text/TextSpace';
@@ -20,7 +20,7 @@ function TextSpacePage(props: {entryPoint: TextSpace}) {
     const author = props.entryPoint.getAuthor();
     const canEdit = author === undefined || author.hasKeyPair();
 
-    const textState = useStateObject(props.entryPoint.content);
+    const textState = useObjectState(props.entryPoint.content);
 
     const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setText(event.target.value);

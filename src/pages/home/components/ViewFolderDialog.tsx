@@ -1,6 +1,6 @@
 import { Hash, MutationEvent } from '@hyper-hyper-space/core';
 import { Folder, FolderItem, SpaceLink } from '@hyper-hyper-space/home';
-import { useStateObject } from '@hyper-hyper-space/react';
+import { useObjectState } from '@hyper-hyper-space/react';
 import { AppBar, Container, Dialog, DialogActions, DialogContent, IconButton, Stack, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Fragment, useState, useEffect } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router';
@@ -34,7 +34,7 @@ function ViewFolderDialog() {
           folder.items !== undefined && 
           folder.items.indexOfByHash(ev.emitter.getLastHash()) >= 0));
 
-    const folderState = useStateObject<Folder>(viewingFolder, viewingFolder?.ownEventsFilter());
+    const folderState = useObjectState<Folder>(viewingFolder, viewingFolder?.ownEventsFilter());
 
     useEffect(() => {
         setViewingFolderByHash(path[path.length-1])
