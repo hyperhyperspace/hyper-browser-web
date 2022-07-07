@@ -116,6 +116,7 @@ function ReceiveLinkOffer(props: {close: () => void}) {
         if (!(e1 || e2 || e3 || e4)) {
             setWordCode(WordCode.english.decode([currentWord1, currentWord2, currentWord3, currentWord4]))
             setDiscoveryTimeout(window.setTimeout(discoveryTimeoutCallback, 15000));
+            console.log('set 15s timeout')
         }
 
         return () => {
@@ -140,8 +141,8 @@ function ReceiveLinkOffer(props: {close: () => void}) {
     const [tomorrowsOffer, setTomorrowsOffer] = useState<LinkDeviceOffer>();
     const tomorrowsOfferState                 = useObjectState<LinkDeviceOffer>(tomorrowsOffer);
 
-    const [offer, setOffer] = useState<LinkDeviceOffer>();
-    const offerState        = useObjectState<LinkDeviceOffer>(offer);
+    //const [offer, setOffer] = useState<LinkDeviceOffer>();
+    //const offerState        = useObjectState<LinkDeviceOffer>(offer);
 
     const gatherOfferState = () => {
 
@@ -231,7 +232,13 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                     }
                 }
 
-                setOffer(rightOffer);
+                if (discoveryTimeout !== undefined) {
+                    window.clearTimeout(discoveryTimeout);
+                    setDiscoveryTimeout(undefined);
+                    setShowTimeoutMessage(false);
+                    console.log('cleared')
+                }
+                //setOffer(rightOffer);
 
                 console.log('got new device')
                 console.log(rightOffer.newDevice?.getValue());

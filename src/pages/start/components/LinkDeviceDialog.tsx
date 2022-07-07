@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogTitle, Stack, Typography, TextField, Card, CardContent, DialogActions, Button, Paper, IconButton, DialogContentText } from '@mui/material';
 import { useState, useRef, Fragment } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Hash, Identity, MutableSet } from '@hyper-hyper-space/core';
 import { Device, Home, LinkDeviceOffer } from '@hyper-hyper-space/home';
 
@@ -27,6 +27,8 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
     const deviceNameInput = useRef<HTMLInputElement>(null);
 
     const [deviceNameError, setDeviceNameError] = useState(false);
+
+    const { next } = useParams();
 
     const replicateHome = () => {
 
@@ -65,6 +67,7 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
                     remoteDevice.setResources(resources);
                     remoteDevice.setAuthor(home.getAuthor() as Identity);
                     remoteDevice.name?.setAuthor(home.getAuthor() as Identity);
+                    remoteDevice.name?.setWriter(home.getAuthor() as Identity);
                     
                     console.log(home.getAuthor() as Identity);
 
@@ -81,6 +84,7 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
                     localDevice.forgetResources();
                     localDevice.setAuthor(home.getAuthor() as Identity);
                     localDevice.name?.setAuthor(home.getAuthor() as Identity);
+                    localDevice.name?.setWriter(home.getAuthor() as Identity);
 
                     await params.offer.newDevice?.setValue(localDevice);
                     await params.offer.newDevice?.saveQueuedOps();
@@ -109,7 +113,11 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
 
                 })
                 .then(() => {
-                    navigate('/');
+                    if (next === undefined) {
+                        navigate('/');
+                    } else {
+                        navigate('/' + next);
+                    }
                 });
         }
         

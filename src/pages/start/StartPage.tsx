@@ -1,4 +1,4 @@
-import { Hash, Mesh, MutableSet, Resources, Store, WordCode, WorkerSafeIdbBackend } from '@hyper-hyper-space/core';
+import { Hash, MutableSet, Resources, Store, WordCode } from '@hyper-hyper-space/core';
 import { PeerComponent, StateObject, useObjectState } from '@hyper-hyper-space/react';
 import { AppBar, Button, Container, Link, Stack, TextField, Toolbar, Typography } from '@mui/material';
 import { Box } from '@mui/system';
@@ -212,13 +212,15 @@ function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
                         )} 
                     </Typography>
                     </span>
+                    { ((homes.value?.size() || 0) === 0) &&
                     <Container style={{paddingLeft:0, paddingRight: 0, textAlign: 'center'}} sx={{marginLeft: {xs: 1, sm: 'center'}, pt: {xs:'1rem', sm: '1.5rem', md: '1.5rem'}}}><Button onClick={showCreateHomeDialog} component={Link} variant="contained" size="medium" color="success">Create your own</Button></Container>
+                    }
                 </Container>
             </Box>
         </main>
             
 
-        <Outlet />        
+        <Outlet />
             
         </PeerComponent>
         </Fragment>

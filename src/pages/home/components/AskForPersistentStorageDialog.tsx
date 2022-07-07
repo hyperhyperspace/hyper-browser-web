@@ -16,6 +16,8 @@ function AskForPersistentStorageDialog(props: {onClose?: () => void}) {
         }
     }
 
+    const persistenceSupport = navigator.storage?.persisted !== undefined;
+
     const ask = () => {
         setWaiting(true);
         navigator.storage.persist().then((granted: boolean) => {
@@ -33,7 +35,10 @@ function AskForPersistentStorageDialog(props: {onClose?: () => void}) {
         <DialogContent>
             <Card variant="outlined">
                 <CardContent style={{background: 'lightgray'}}>
-        { !waiting && (granted === undefined) && (error === undefined) &&
+        { !persistenceSupport &&
+            <Typography>Your browser does not support persistent storage.</Typography>
+        }
+        { persistenceSupport && !waiting && (granted === undefined) && (error === undefined) && 
             <Typography>It'd be wise to ask your browser to use <b>permanent storage</b> for your Home Space.<br /> <br /> Otherwise, you may lose the contents of yor home when you close this window.</Typography>
         }
         { waiting &&

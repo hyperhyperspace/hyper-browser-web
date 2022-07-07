@@ -1,4 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
+import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import { AppBar, Button, IconButton, List, ListItem, ListItemIcon, ListItemText, Stack, SwipeableDrawer, Toolbar, Typography } from '@mui/material';
 import { Box } from '@mui/system';
@@ -15,6 +16,8 @@ import { supportedSpaces } from '../../model/SupportedSpaces';
 
 
 function SpaceFrameToolbar(props: {home?: Home, spaceEntryPointHash: Hash, spaceEntryPoint?: HashedObject}) {
+
+    const navigate = useNavigate();
 
     const homeState = useObjectState(props.home);
 
@@ -54,6 +57,12 @@ function SpaceFrameToolbar(props: {home?: Home, spaceEntryPointHash: Hash, space
         } else {
             openSaveSpaceDialog();
         }
+    }
+
+    const viewAuthorProfile = () => {
+
+        navigate('./view-author');
+
     }
 
     // drawer
@@ -171,7 +180,7 @@ function SpaceFrameToolbar(props: {home?: Home, spaceEntryPointHash: Hash, space
                         <ListItemText primary="Owner" />
                     </ListItem>
                     <ListItem>
-                        <div style={{paddingLeft: '1rem'}}>
+                        <div style={{paddingLeft: '1rem', width: '100%'}}>
                             {props.spaceEntryPoint?.getAuthor()?.info?.name === undefined &&
                                 <Box paddingBottom='0.5rem'><Typography>This space has no owner</Typography></Box>
                             }
@@ -183,6 +192,7 @@ function SpaceFrameToolbar(props: {home?: Home, spaceEntryPointHash: Hash, space
                                     <Typography><b>code</b>: <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(props.spaceEntryPoint?.getAuthor()?.getLastHash() as Hash).join(' ')}</span> </Typography>
                                     <Typography><b>name</b>: {props.spaceEntryPoint?.getAuthor()?.info?.name}</Typography>
                                 </Box>
+                                <Stack direction="row" style={{margin: 'auto', paddingTop: '1rem'}} spacing={2}><Button variant='contained' style={{margin: 'auto'}} onClick={viewAuthorProfile}>View Profile</Button></Stack>
                                 </Fragment>
                             }
                         </div>
@@ -197,7 +207,7 @@ function SpaceFrameToolbar(props: {home?: Home, spaceEntryPointHash: Hash, space
                     {!isSaved && <ListItem>
                     <div style={{paddingLeft: '1rem', width: '100%'}}>
 
-                        <Stack direction="row" style={{margin: 'auto'}}><Typography style={{backgroundColor: 'green', color: 'white', margin: 'auto', padding: '2px'}}>Using temporary storage</Typography></Stack>
+                        <Stack direction="row" style={{margin: 'auto'}}><Typography style={{backgroundColor: 'green', color: 'white', margin: 'auto', padding: '2px'}}>Using a temporary copy</Typography></Stack>
                         <Stack direction="row" style={{margin: 'auto', paddingTop: '1rem'}} spacing={2}><Button variant='contained' style={{margin: 'auto'}} onClick={save}>Save this space</Button></Stack>
                     </div>
                     

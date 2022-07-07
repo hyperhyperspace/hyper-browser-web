@@ -1,7 +1,7 @@
 import { Hash, MutationEvent } from '@hyper-hyper-space/core';
 import { Folder, FolderItem, SpaceLink } from '@hyper-hyper-space/home';
 import { useObjectState } from '@hyper-hyper-space/react';
-import { AppBar, Container, Dialog, DialogActions, DialogContent, IconButton, Stack, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { AppBar, Dialog, DialogActions, DialogContent, IconButton, Stack, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Fragment, useState, useEffect } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router';
 
@@ -24,15 +24,13 @@ function ViewFolderDialog() {
         navigate('..');
     }
 
-    const { home, openFolder, openCreateFolder, openRenameFolder, openCreateSpace, openSpace, deleteFolder, setViewingFolder, setViewingFolderByHash, viewingFolder } = useOutletContext<HomeContext>();
+    const { openFolder, openCreateFolder, openRenameFolder, openCreateSpace, openSpace, deleteFolder, setViewingFolder, setViewingFolderByHash, viewingFolder } = useOutletContext<HomeContext>();
 
-    const resources = home?.getResources();
-
-    const isEventForFolder = (folder?: Folder) => (ev: MutationEvent) => 
+    /*const isEventForFolder = (folder?: Folder) => (ev: MutationEvent) => 
         (ev.emitter.getLastHash() === folder?.getLastHash() || 
         ( folder !== undefined && 
           folder.items !== undefined && 
-          folder.items.indexOfByHash(ev.emitter.getLastHash()) >= 0));
+          folder.items.indexOfByHash(ev.emitter.getLastHash()) >= 0));*/
 
     const folderState = useObjectState<Folder>(viewingFolder, viewingFolder?.ownEventsFilter());
 

@@ -3,7 +3,7 @@ import { Badge, Button, Tooltip } from '@mui/material';
 
 function HomeCommand(props: {icon: string, title: string, badge?: number, action: () => void}) {
 
-    const image = <a onClick={(ev) => {ev.preventDefault(); props.action()}} href="#"><img  src={'icons/' + props.icon} style={{width:'30px', height:'30px', margin:'2px', padding: '2px'}}/></a>;
+    const image = <a href="#"><img  src={'icons/' + props.icon} style={{width:'30px', height:'30px', margin:'2px', padding: '2px'}}/></a>;
 
     let inner = image;
 
@@ -11,7 +11,7 @@ function HomeCommand(props: {icon: string, title: string, badge?: number, action
         inner = <Badge badgeContent={props.badge} color="success">{inner}</Badge>;
     }
 
-    const button = <Button size="medium">
+    const button = <Button size="medium" onClick={(ev) => {ev.preventDefault(); props.action()}}>
                     {inner}
                   </Button>;
 

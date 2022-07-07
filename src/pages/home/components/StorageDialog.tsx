@@ -21,6 +21,8 @@ function StorageDialog()  {
 
     const [waitingForPersist, setWaitingForPersist] = useState(false);
 
+    const persistenceSupport = navigator.storage?.persisted !== undefined;
+
     const ask = () => {
         
         setWaitingForPersist(true);
@@ -65,14 +67,18 @@ function StorageDialog()  {
                 <Fragment>
                     <Typography>Using {bytesUsed < 1024*1024 && <span>{Math.round(bytesUsed/1024)} kb</span>}{bytesUsed >= 1024*1024 && bytesUsed < 1024*1024*1024 && <span>{Math.round(bytesUsed/(1024*1024))} mb</span>}{bytesUsed >= 1024*1024*1024 && <span>{Math.round(bytesUsed/(1024*1024*1024))} gb</span>} {bytesAvailable>0 && <span>({Math.round(bytesUsed/bytesAvailable*100)}%)</span>} out of a maximum of {bytesAvailable >= 1024*1024*1024 && <span>{Math.round(bytesAvailable/(1024*1024*1024))} gb</span>}{bytesAvailable >= 1024*1024 && bytesAvailable < 1024*1024*1024 && <span>{Math.round(bytesAvailable/(1024*1024))} mb</span>}{bytesAvailable < 1024 && <span>{Math.round(bytesAvailable/(1024))} kb</span>}.</Typography>
                     <br />
-                    {usingPersist &&
-                        <Typography>Persistent storage has been enabled.</Typography>
-                    }
-                    {!usingPersist && !waitingForPersist &&
-                        <Typography>Persistent storage has not been enabled (your browser may delete your Home at any time).</Typography>
-                    }
-                    {!usingPersist && waitingForPersist && 
-                        <Typography>Please authorize the use of <b>persistent storage</b> (your browser should be asking for your confirmation now).</Typography>
+                    { persistenceSupport && 
+                        <Fragment>
+                        {usingPersist &&
+                            <Typography>Persistent storage has been enabled.</Typography>
+                        }
+                        {!usingPersist && !waitingForPersist &&
+                            <Typography>Persistent storage has not been enabled (your browser may delete your Home at any time).</Typography>
+                        }
+                        {!usingPersist && waitingForPersist && 
+                            <Typography>Please authorize the use of <b>persistent storage</b> (your browser should be asking for your confirmation now).</Typography>
+                        }
+                        </Fragment>
                     }
                 </Fragment>
                 }
@@ -81,7 +87,7 @@ function StorageDialog()  {
             </Card>
         </DialogContent>
         <DialogActions>
-                <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}>{usingPersist !== undefined && !usingPersist && !usingPersist && <Button onClick={ask}>Use Persistent Storage</Button>}<Button onClick={close}>Close</Button></Stack>
+                <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}>{persistenceSupport && usingPersist !== undefined && !usingPersist && !usingPersist && <Button onClick={ask}>Use Persistent Storage</Button>}<Button onClick={close}>Close</Button></Stack>
         </DialogActions>
 
     </Dialog>;

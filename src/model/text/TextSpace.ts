@@ -31,17 +31,25 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 
     setAuthor(author: Identity) {
         super.setAuthor(author);
-        this.content?.setAuthor(author);
+        this.content?.setWriter(author);
     }
 
-    async validate(references: Map<string, HashedObject>): Promise<boolean> {
+    async validate(_references: Map<string, HashedObject>): Promise<boolean> {
         
         if (!(this.content instanceof MutableReference)) {
             return false;
         }
 
+        if (this.content.hasAuthor()) {
+            return false;
+        }
+
         if (this.getAuthor() === undefined) {
-            if (this.content.getAuthor() === undefined) {
+            if (this.content.hasWriter()) {
+                return false;
+            }
+        } else {
+            if (!this.getAuthor()?.equals(this.content.writer)) {
                 return false;
             }
         }

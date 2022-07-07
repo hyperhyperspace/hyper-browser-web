@@ -6,10 +6,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box } from '@mui/system';
 
 import { useObjectDiscovery } from '@hyper-hyper-space/react';
-import { Hash, ObjectDiscoveryReply } from '@hyper-hyper-space/core';
+import { Hash, Identity, ObjectDiscoveryReply } from '@hyper-hyper-space/core';
 import { Fragment, useState, useEffect } from 'react';
 import { SpaceDisplayInfo, supportedSpaces } from '../../../model/SupportedSpaces';
 import { useNavigate, useParams } from 'react-router';
+import { encode } from 'punycode';
 
 function LookupSpaceDialog() {
 
@@ -20,8 +21,8 @@ function LookupSpaceDialog() {
 
     const wait = discovered === undefined || discovered.size === 0;
 
-    const errors = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => (r.object === undefined || supportedSpaces.get(r.object.getClassName()) === undefined)) : [];
-    const results = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => r.object !== undefined && supportedSpaces.get(r.object.getClassName()) !== undefined) : [];
+    const errors = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => (r.object === undefined || (!(r.object instanceof Identity) && supportedSpaces.get(r.object.getClassName()) === undefined))) : [];
+    const results = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => r.object !== undefined && (r.object instanceof Identity || supportedSpaces.get(r.object.getClassName()) !== undefined)) : [];
 
     const closeLookupDialog = () => {
         navigate('/start');
@@ -94,10 +95,22 @@ function LookupSpaceDialog() {
                     <Stack divider={<Divider orientation="horizontal" flexItem />}>
                         {results.map((r: ObjectDiscoveryReply) => 
                                                 <Stack key={r.object?.getLastHash()} style={{justifyContent: 'space-between'}} direction="row"  spacing={2}>
-                                                    <Typography style={{alignSelf: 'center'}}>
-                                                        Found a <span style={{background: (supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).color, color: 'white'}}>{(supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).name}</span>{r.object?.getAuthor()?.info?.name && <Fragment> space by {r.object?.getAuthor()?.info?.name}</Fragment> }
-                                                    </Typography>  
-                                                    <Button variant="contained" onClick={() => { openSpace(r.object?.getLastHash() as Hash); }}>Open</Button>
+                                                    {r.object instanceof Identity && 
+                                                        <Fragment>
+                                                            <Typography style={{alignSelf: 'center'}}>
+                                                                <span style={{background: 'orange', color: 'white'}}>{(r.object as Identity)?.info?.type || 'Identity'}</span> named <Fragment>{(r.object as Identity)?.info?.name}</Fragment>
+                                                            </Typography>
+                                                            <Button variant="contained" onClick={() => { navigate('/start/view-profile/' + encodeURIComponent(r.object?.getLastHash() as string)); }}>Open</Button>
+                                                        </Fragment>
+                                                    }
+                                                    {!(r.object instanceof Identity) &&
+                                                        <Fragment>
+                                                            <Typography style={{alignSelf: 'center'}}>
+                                                                Found a <span style={{background: (supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).color, color: 'white'}}>{(supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).name}</span>{r.object?.getAuthor()?.info?.name && <Fragment> space by {r.object?.getAuthor()?.info?.name}</Fragment> }
+                                                            </Typography>  
+                                                            <Button variant="contained" onClick={() => { openSpace(r.object?.getLastHash() as Hash); }}>Open</Button>
+                                                        </Fragment>
+                                                    }
                                                 </Stack>
                         )}
 

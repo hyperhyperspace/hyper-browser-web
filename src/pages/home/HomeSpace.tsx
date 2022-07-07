@@ -1,4 +1,4 @@
-import { AppBar, ButtonGroup, Card, CardContent, Container, SwipeableDrawer, IconButton, InputAdornment, Stack, TextField, Toolbar, Typography, List, ListItemButton, ListItemIcon, ListItemText, Divider, Button, CircularProgress, Paper } from '@mui/material';
+import { AppBar, ButtonGroup, Card, CardContent, Container, SwipeableDrawer, IconButton, InputAdornment, Stack, TextField, Toolbar, Typography, List, ListItemButton, ListItemIcon, ListItemText, Divider, Button, CircularProgress } from '@mui/material';
 import { Box } from '@mui/system';
 
 import { Fragment, useState, useEffect } from 'react';
@@ -6,10 +6,10 @@ import { Outlet, useNavigate, useParams } from 'react-router';
 
 import HomeItem from './components/HomeItem';
 import HomeCommand from './components/HomeCommand';
-import { Hash, HashedObject, Identity, MutationEvent, MutationObserver, ObjectDiscoveryReply, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Identity, LinkupAddress, MutableSet, MutableSetEvents, MutationEvent, MutationObserver, ObjectBroadcastAgent, ObjectDiscoveryReply, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
-import { PeerComponent, useObjectDiscovery, useObjectDiscoveryWithResources, useObjectState } from '@hyper-hyper-space/react';
-import { Home, Folder, Device, FolderItem, SpaceLink, FolderTree, FolderTreeEvents } from '@hyper-hyper-space/home';
+import { PeerComponent, useObjectDiscoveryWithResources, useObjectState } from '@hyper-hyper-space/react';
+import { Home, Folder, Device, FolderItem, SpaceLink, FolderTreeEvents, Profile } from '@hyper-hyper-space/home';
 import CreateFolderDialog from './components/CreateFolderDialog';
 import RenameFolderItemDialog from './components/RenameFolderDialog';
 import { Link } from 'react-router-dom';
@@ -17,9 +17,11 @@ import CreateSpaceDialog from './components/CreateSpaceDialog';
 import { SpaceDisplayInfo, supportedSpaces } from '../../model/SupportedSpaces';
 import { FolderTreeSearch } from '../../model/FolderTreeSearch';
 import AskForPersistentStorageDialog from './components/AskForPersistentStorageDialog';
-import StorageDialog from './components/StorageDialog';
+import { AsyncStream } from '@hyper-hyper-space/core/dist/util/streams';
 
 type HomeContext = {
+    resources: Resources | undefined,
+    resourcesForDiscovery: Resources | undefined,
     home: Home | undefined,
     owner: Identity | undefined,
     localDevice: Device | undefined,
@@ -153,7 +155,20 @@ function HomeSpace() {
         
     }
 
+    const [resourcesForDiscovery, setResourcesForDiscovery] = useState<Resources|undefined>(undefined);
+
+    useEffect(() => {
+        HyperBrowserConfig.initStarterResources().then((r: Resources) => {
+            setResourcesForDiscovery(r);
+        },
+        (reason: any) => {
+            alert('Error initializing discovery resources: ' + reason);
+        })
+    }, []);
+
     const homeContext: HomeContext = {
+        resources: homeResources,
+        resourcesForDiscovery: resourcesForDiscovery,
         home: home,
         localDevice: localDevice,
         owner: owner,
@@ -244,12 +259,40 @@ function HomeSpace() {
 
             setDesktopFolder(desktopFolder);
 
+            const contactsObserver: MutationObserver = (ev: MutationEvent) => {
+
+                if (ev.emitter === newHome.contacts?.current) {
+                    const p = (ev.data as Profile);
+                    if (ev.action === MutableSetEvents.Add) {
+                        p.about?.loadAndWatchForChanges();
+                        p.picture?.loadAndWatchForChanges();
+                        p.pictureMIMEType?.loadAndWatchForChanges();
+                    } else if (ev.action === MutableSetEvents.Delete) {
+                        p.about?.dontWatchForChanges();
+                        p.picture?.dontWatchForChanges();
+                        p.pictureMIMEType?.dontWatchForChanges();
+                    }
+                }
+            };
+
+            newHome.contacts?.addMutationObserver(contactsObserver);
+
             await new Promise(r => setTimeout(r, 100));
+
+
 
             //await newHome.loadAndWatchForChanges();
             console.log('STARTING SYNC')
             await newHome.startSync();
             console.log('DONE STARTING SYNC')
+
+            newHome.contacts?.addMutationObserver(contactsObserver);
+
+            for (const p of (newHome.contacts?.current as MutableSet<Profile>)._elements.values()) {
+                p.about?.loadAndWatchForChanges();
+                p.picture?.loadAndWatchForChanges();
+                p.pictureMIMEType?.loadAndWatchForChanges();
+            }
 
             //await newHome.loadAndWatchForChanges();
     
@@ -294,29 +337,22 @@ function HomeSpace() {
 
     }, [homeHash, homeResources]);
 
-    const [resourcesForDiscovery, setResourcesForDiscovery] = useState<Resources|undefined>(undefined);
-
-    useEffect(() => {
-        HyperBrowserConfig.initStarterResources().then((r: Resources) => {
-            setResourcesForDiscovery(r);
-        },
-        (reason: any) => {
-            alert('Error initializing discovery resources: ' + reason);
-        })
-    }, [])
-
     useEffect(() => {
 
         console.log('checking for persistent storage...')
 
-        navigator.storage.persisted().then((persisted: boolean) => {
-            if (!persisted) {
-                console.log('persistent storage not granted')
-                openAskForPersistentStorageDialog();    
-            } else {
-                console.log('persistent storage granted')
-            }
-        });
+        if (navigator.storage?.persisted !== undefined) {
+            navigator.storage.persisted().then((persisted: boolean) => {
+                if (!persisted) {
+                    console.log('persistent storage not granted')
+                    openAskForPersistentStorageDialog();    
+                } else {
+                    console.log('persistent storage granted')
+                }
+            });    
+        } else {
+            console.log('persistent storage is not supported by this browser')
+        }
 
     }, [home])
 
@@ -327,11 +363,83 @@ function HomeSpace() {
     const [noDiscovery, setNoDiscovery] = useState(false); 
 
     const discovered = useObjectDiscoveryWithResources(resourcesForDiscovery, wordsForDiscovery, 'en', 10, true);
-    const results = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => r.object !== undefined && supportedSpaces.get(r.object.getClassName()) !== undefined) : [];
+    const results = discovered? Array.from(discovered.values()).filter((r: ObjectDiscoveryReply) => r.object !== undefined && (supportedSpaces.has(r.object.getClassName()) || r.object.getClassName() === Identity.className)) : [];
 
     const [wordsForLocalSearch, setWordsForLocalSearch] = useState<string|undefined>(undefined);
 
     const [searchResults, setSearchResults] = useState<Array<SpaceLink>>([]);
+
+
+    // This effect pre-fetches the identities that were returned from discovery.
+    // Since querying for the profile and synchronizing its mutalbe parts takesa few seconds,
+    // this prefetch helps make the display of the profile apperar more snappy.
+
+    const [profilesToPreload, setProfilesToPreload] = useState<Array<Profile>>([]);
+
+    useEffect(() => {
+        if (profilesToPreload.length === 0) {
+            const profiles: Array<Profile> = [];    
+    
+            for (const reply of discovered.values()) {
+                if (reply.object instanceof Identity) {
+                    let p = new Profile(reply.object);
+                    profiles.push(p);
+                }
+            }
+            
+            if (profiles.length > 0) {
+                setProfilesToPreload(profiles);
+            }
+        }
+    }, [discovered]);
+
+    useEffect(() => {
+
+        let cancelled = false;
+        const preloadedProfiles: Array<Profile> = [];
+
+        for (const profile of profilesToPreload) {
+            HyperBrowserConfig  .initTransientSpaceResources(profile.getLastHash())
+                                .then((tmpResources: Resources) => {
+                                    if (!cancelled) {
+                                        const preloadedProfile = profile.clone();
+                                        preloadedProfile.setResources(tmpResources);
+
+                                        tmpResources.store.save(preloadedProfile).then(() => {
+                                            if (!cancelled) {
+                                                preloadedProfile.loadAndWatchForChanges().then(() => {
+                                                    if (!cancelled) {
+                                                        preloadedProfile.startSync();
+                                                        preloadedProfiles.push(preloadedProfile);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                    
+                                });
+        
+        }
+
+        return () => {
+
+            cancelled = true;
+
+            for (const profile of preloadedProfiles) {
+                profile.stopSync().then(() => {
+                    profile.dontWatchForChanges();
+                    const r = profile.getResources();
+
+                    if (r !== undefined) {
+                        r.store.close();
+                        r.mesh.shutdown();
+                    }
+    
+                });
+            }
+        };
+
+    }, [profilesToPreload, resourcesForDiscovery]);
 
     useEffect(() => {
 
@@ -382,6 +490,7 @@ function HomeSpace() {
     };
 
     const searchKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        setProfilesToPreload([]);
         if (e.key === 'Escape') {
             setSearchValue('');
         }
@@ -615,13 +724,25 @@ function HomeSpace() {
                                     {results.length > 0 &&
                                     <Fragment>
                                         <Stack divider={<Divider orientation="horizontal" flexItem />} style={{marginTop: '1rem'}} >
-                                            {results.map((r: ObjectDiscoveryReply) => 
+                                            {results.map((r: ObjectDiscoveryReply) => (
+                                                                    <Fragment>
+                                                                    { r.object?.getClassName() !== Identity.className &&
                                                                     <Stack key={r.object?.getLastHash()} style={{justifyContent: 'space-between'}} direction="row"  spacing={2}>
                                                                         <Typography style={{alignSelf: 'center'}}>
                                                                             <span style={{background: (supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).color, color: 'white'}}>{(supportedSpaces.get(r.object?.getClassName() as string) as SpaceDisplayInfo).name}</span>{r.object?.getAuthor()?.info?.name && <Fragment> space by {r.object?.getAuthor()?.info?.name}</Fragment> }
                                                                         </Typography>  
                                                                         <Button variant="contained" onClick={() => { openSpace(r.object?.getLastHash() as Hash); }}>Open</Button>
                                                                     </Stack>
+                                                                    }
+                                                                    { r.object?.getClassName() === Identity.className &&
+                                                                    <Stack key={r.object?.getLastHash()} style={{justifyContent: 'space-between'}} direction="row"  spacing={2}>
+                                                                        <Typography style={{alignSelf: 'center'}}>
+                                                                            <span style={{background: 'orange', color: 'white'}}>{(r.object as Identity)?.info?.type || 'Identity'}</span> named <Fragment>{(r.object as Identity)?.info?.name}</Fragment>
+                                                                        </Typography>  
+                                                                        <Button variant="contained" onClick={() => { navigate('./view-profile/' + encodeURIComponent(r.object?.getLastHash() as Hash)); }}>Open</Button>
+                                                                    </Stack>
+                                                                    }
+                                                                    </Fragment>)
                                             )}
                                         </Stack>
                                         <Box sx={{display: 'flex', marginTop: '1rem'}}>
@@ -663,8 +784,8 @@ function HomeSpace() {
                     <Container maxWidth="lg" sx={{pt:12, pl:0, pr:0}}>
                         <div style={{textAlign: 'center'}}>
                         <ButtonGroup style={{flexWrap: 'wrap'}} variant="contained" color="inherit">
-                            <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile" action={() => {alert('Profiles will be available soon.')}}></HomeCommand>
-                            <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts" action={() => {alert('Contacts will be available soon.')}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile" action={() => {navigate('./edit-profile')}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts" action={() => {navigate('./contacts')}}></HomeCommand>
                             <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={4} action={() => {alert('Chat will be available soon.')}}></HomeCommand>
                             <HomeCommand icon="streamline-icon-satellite-1@48x48.png" title="Spaces" action={() => {alert('Space updates will be available soon.')}}></HomeCommand>
                             {/*<HomeCommand icon="streamline-icon-cog-1@48x48.png" title="Config"></HomeCommand>

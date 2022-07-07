@@ -1,8 +1,8 @@
-import { Hash, HashedObject, MutableSet, Resources } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Identity, MutableSet, Resources } from '@hyper-hyper-space/core';
 import { Home, SpaceLink } from '@hyper-hyper-space/home';
 import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
 import { useEffect, useState, Fragment } from 'react';
-import { useParams } from 'react-router';
+import { Outlet, useParams } from 'react-router';
 
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 
@@ -14,16 +14,20 @@ import TextSpacePage from './text/TextSpacePage';
 
 type InitParams = {hash?: Hash, resourcesForDiscovery?: Resources, knownEntryPoint?: HashedObject};
 
+type SpaceContext = {
+    entryPoint?: HashedObject;
+    resources?: Resources;
+    home?:  Home;
+    homeResources?: Resources;
+};
+
 function SpaceFrame(props: {homes: MutableSet<Hash>}) {
 
     const params = useParams();
 
     const localHomesState = useObjectState(props.homes);
     
-    const [homeResources, setHomeResources] = useState<Resources|undefined>(undefined);
     const [home, setHome] = useState<Home|undefined>(undefined);
-    
-    const homeState = useObjectState(home);
 
     const [initParams, setInitParams] = useState<InitParams|undefined>(undefined);
 
@@ -33,6 +37,7 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
 
     const [spaceEntryPoint, setSpaceEntryPoint] = useState<HashedObject|undefined>(undefined);
     const [spaceResources, setSpaceResources]   = useState<Resources|undefined>(undefined);
+    const [homeResources, setHomeResources]   = useState<Resources|undefined>(undefined);
 
     //const [spaceComponent, setSpaceComponent] = useState<JSX.Element|undefined>(undefined);
 
@@ -135,6 +140,13 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
         }
     }, [initResult]);*/
 
+    const spaceContext: SpaceContext = {
+        entryPoint: spaceEntryPoint,
+        resources: spaceResources,
+        home: home,
+        homeResources: homeResources
+    }
+
     return <Fragment>
         { initResult === undefined && 
             <p>Initializing space...</p>
@@ -150,8 +162,12 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
             <TextSpacePage entryPoint={spaceEntryPoint} />
         }
         
+        <Outlet context={spaceContext} />
+
     </Fragment>;
 
 }
+
+export type { SpaceContext };
 
 export default SpaceFrame;

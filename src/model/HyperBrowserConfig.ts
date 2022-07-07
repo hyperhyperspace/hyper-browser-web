@@ -48,6 +48,8 @@ class HyperBrowserConfig extends HashedObject {
 
         const home = new Home(owner);
 
+        home.contacts?.profileIsPublic?.setValue(true);
+
         console.log('home hash is')
         console.log(home.hash())
     
@@ -116,7 +118,7 @@ class HyperBrowserConfig extends HashedObject {
 
             //console.log(import.meta.url);
             //console.log(url);
-
+            
             const worker = new Worker(new URL('../mesh.worker', import.meta.url));
 
             const webWorkerMesh = new WebWorkerMeshProxy(worker);

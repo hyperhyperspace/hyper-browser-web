@@ -1,8 +1,8 @@
 import { Dialog, DialogContent, DialogTitle, Stack, Typography, TextField, Card, CardContent, DialogActions, Button, Paper, IconButton, DialogContentText } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import { useState, useRef, Fragment } from 'react';
-import { useNavigate } from 'react-router';
-import { Hash, Identity, MutableSet } from '@hyper-hyper-space/core';
+import { useState, useEffect, useRef, Fragment } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { Hash, Identity, MutableSet, RSAKeyPair, Space } from '@hyper-hyper-space/core';
 
 import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
 import { DeviceInfo } from '../../../model/DeviceInfo';
@@ -49,6 +49,8 @@ function CreateHomeDialog() {
     const [nameError, setNameError] = useState(false);
     const [deviceNameError, setDeviceNameError] = useState(false);
 
+    const { next } = useParams();
+
     const createHome = () => {
 
         let go = true;
@@ -70,7 +72,7 @@ function CreateHomeDialog() {
     const confirmCreateHome = () => {
         setShowConfirmDialog(false);
         setShowCreatingDialog(true);
-        HyperBrowserConfig.createHome({name: name, type: 'person'}, deviceName, env.homes.value as MutableSet<Hash>).then(async (home: Home) => {
+        HyperBrowserConfig.createHome({name: name, type: 'Person'}, deviceName, env.homes.value as MutableSet<Hash>, keypair).then(async (home: Home) => {
 
             // create a "My Notes" space and place it on the desktop
 
@@ -89,7 +91,12 @@ function CreateHomeDialog() {
 
             await store.close();
 
-            navigate('/');
+            if (next === undefined) {
+                navigate('/');
+            } else {
+                navigate('/' + next);
+            }
+            
         });
     }
 
@@ -115,6 +122,33 @@ function CreateHomeDialog() {
         }
     };
 
+    const [code, setCode] = useState<string>('');
+    const [keypair, setKeypair] = useState<RSAKeyPair>();
+
+    useEffect(() => {
+        RSAKeyPair.generate(2048).then((kp: RSAKeyPair) => {
+            setKeypair(kp);
+        });
+    }, []);
+
+    const shuffle = () => {
+        if (keypair !== undefined) {
+            setKeypair(undefined);
+            RSAKeyPair.generate(2048).then((kp: RSAKeyPair) => {
+                setKeypair(kp);
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (keypair !== undefined) {
+            setCode(Space.getWordCodingForHash(Identity.fromKeyPair({type: 'Person', name: name}, keypair).hash()).join(' '));
+        } else {
+            setCode('...')
+        }
+        
+    }, [name, keypair]);
+
     return (
 <Fragment>
     <Dialog open={true} scroll='paper' onClose={cancel}>
@@ -123,7 +157,7 @@ function CreateHomeDialog() {
             <Card variant="outlined">
             <CardContent style={{background: 'lightgray'}}>
             <Typography>
-                A <b>Home Space</b> uses in-browser storage to create a local, secure environment where you can create, save and sync spaces: both across all your devices and with other people's.
+                A <b>Home Space</b> enables you to use your web browser to host your spaces, and keeps them in sync.
             </Typography>
             </CardContent>
             </Card>
@@ -133,6 +167,7 @@ function CreateHomeDialog() {
                 <Typography>🏠 Home Info: </Typography> <IconButton onClick={openInfoDialog} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon color="info" /> </IconButton>
                 </Stack>
                 <TextField value={name} inputRef={nameInput} onChange={handleNameChange} onKeyPress={handleNameKeyPress} autoFocus  error={nameError} helperText={nameError? 'Please enter your name' : 'Your Name'}/>
+                <Stack direction="row" style={{alignItems: 'baseline'}}><TextField style={{flexGrow: 1}}value={code} helperText="Your 3-word code"/><Button onClick={shuffle}>Shuffle</Button></Stack>
                 <TextField value={deviceName} inputRef={deviceNameInput} onChange={handleDeviceNameChange} onKeyPress={handleDeviceNameKeyPress} error={deviceNameError} helperText={deviceNameError? "Please enter this device's name" : "This Device's Name"}/>
             </Stack>
             </Paper>
@@ -177,9 +212,7 @@ function CreateHomeDialog() {
         <Card variant="outlined">
             <CardContent style={{background: 'lightgray'}}>
                 <Typography>
-                    For security reasons, <b>the name you just entered can't be changed later</b>. While it 
-                    doesn't have to be your real name, it'd be helpful if your friends can easily 
-                    associate this name with you.
+                    For security reasons, the <b>name</b> you just entered <b>can't be changed</b> later.
                 </Typography>
 
             </CardContent>
