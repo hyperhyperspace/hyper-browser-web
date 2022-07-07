@@ -17,8 +17,6 @@ import CreateSpaceDialog from './components/CreateSpaceDialog';
 import { SpaceDisplayInfo, supportedSpaces } from '../../model/SupportedSpaces';
 import { FolderTreeSearch } from '../../model/FolderTreeSearch';
 import AskForPersistentStorageDialog from './components/AskForPersistentStorageDialog';
-import { AsyncStream } from '@hyper-hyper-space/core/dist/util/streams';
-
 type HomeContext = {
     resources: Resources | undefined,
     resourcesForDiscovery: Resources | undefined,
