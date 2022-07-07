@@ -1,8 +1,7 @@
 import { Hash, HashedObject, Resources } from '@hyper-hyper-space/core';
 import { Home } from '@hyper-hyper-space/home';
 import { createContext, ReactNode } from 'react';
-import { useContext } from 'react-transition-group/node_modules/@types/react';
-
+import { useContext } from 'react';
 
 type SpaceContextParams = {
     hash: Hash;
