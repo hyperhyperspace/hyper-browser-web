@@ -2,17 +2,20 @@
 
 import { useState, useEffect, useRef, Fragment } from 'react';
 import { useNavigate, useOutletContext } from 'react-router';
-import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Stack,
+import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack,
          TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
+
+import InfoIcon from '@mui/icons-material/Info';
 
 import { useObjectState } from '@hyper-hyper-space/react';
 
-import { Profile } from '@hyper-hyper-space/home';
+import { Contacts, Profile } from '@hyper-hyper-space/home';
 
 import { HomeContext } from '../HomeSpace';
 
 import { Hash, HashedObject, Space } from '@hyper-hyper-space/core';
 import { Box } from '@mui/system';
+import InfoDialog from '../../../components/InfoDialog';
 
 
 function EditProfileDialog() {
@@ -31,7 +34,7 @@ function EditProfileDialog() {
         navigate('..');
     };
 
-    const { owner, resources } = useOutletContext<HomeContext>();
+    const { home, owner, resources } = useOutletContext<HomeContext>();
 
     const [profile, setProfile] = useState<Profile>();
     const profileState = useObjectState(profile);
@@ -202,8 +205,60 @@ function EditProfileDialog() {
         next();
     }
 
+    const [contacts, setContacts] = useState<Contacts>();
+    const contactsState = useObjectState<Contacts>(contacts);
+
+    useEffect(() => {
+
+        if (home !== undefined && resources !== undefined) {
+            const contactsHash = home.contacts?.hash() as Hash;
+            resources.store?.load(contactsHash).then((loaded?: HashedObject) => {
+
+                const c = loaded as (Contacts | undefined);
+
+                if (c === undefined) {
+                    throw new Error('Could not load contacts for this home account!');
+                } else {
+                    setContacts(c);
+                }
+            });
+        }
+        
+
+    }, [home, resources]);
+
+    const [showWordCodeInfo, setShowWordCodeInfo] = useState(false);
+
     return (
         <Fragment>
+            {showWordCodeInfo && 
+                <InfoDialog 
+                    open={showWordCodeInfo}
+                    title="About your 3-word code"
+                    content={
+                        <Fragment>
+                            { contactsState?.value?.profileIsPublic?._value &&
+                                <Stack spacing={1}>
+                                    <Typography>People can look up your profile by entering the code <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner?.getLastHash() as Hash).join(' ')}</span> into Hyper Hyper Space.</Typography>
+                                    
+                                    <Typography>You can disable profile lookup in your <Button onClick={() => { navigate('../share-profile')}} variant="text" size="small">Sharing settings</Button>.</Typography>
+                                </Stack>
+                            }
+                            { !(contactsState?.value?.profileIsPublic?._value) &&
+                                <Stack spacing={1}>
+                                    <Typography>You have <b>disabled</b> profile lookup, so people can't look up your profile by entering <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner?.getLastHash() as Hash).join(' ')}</span> into Hyper Hyper Space.</Typography>
+                                
+                                    <Typography>You can enable profile lookup in your <Button onClick={() => { navigate('../share-profile')}} variant="text" size="small">Sharing settings</Button>.</Typography>
+                                </Stack>
+                            }
+                            
+                        </Fragment>
+                        
+                    }
+                    onClose={() => {setShowWordCodeInfo(false);}}
+                />
+            }
+
             { nextAction !== '' &&
                 <Dialog open={nextAction!==''}>
                     <DialogTitle>Save changes to your profile?</DialogTitle>
@@ -245,7 +300,7 @@ function EditProfileDialog() {
                                                 return <span key={'prop-'+entry[0]}>{entry[0]}: <b>{entry[1]}</b><br /></span>;
                                             })
                                         }
-                                        <span>code: <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner.getLastHash() as Hash).join(' ')}</span></span>
+                                        <span>code: <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner.getLastHash() as Hash).join(' ')}</span> <IconButton onClick={() => {console.log('yes'); setShowWordCodeInfo(true);}} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon color="info" /> </IconButton></span>
                                     </Fragment>
                                 }
                             </Typography>

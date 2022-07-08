@@ -180,11 +180,13 @@ function CreateHomeDialog() {
     open={showInfoDialog}
     onClose={closeInfoDialog}
   >
+
     <DialogTitle>
-    <Stack direction="row" spacing={2}><InfoIcon color="info" /> <Typography>About your information</Typography></Stack>
+        <Stack direction="row" spacing={2}><InfoIcon color="info" /> <Typography>About your information</Typography></Stack>
     </DialogTitle>
+
+
     <DialogContent>
-      <DialogContent>
         
         <Typography>The <b>information</b> you enter will be <b>stored on your own device</b>. 
         It will be used to identify yourself when you connect and share 
@@ -196,7 +198,6 @@ function CreateHomeDialog() {
         <Typography sx={{pt:2}}>The device name cannot be seen by others, and is used to 
         help you link / unlink devices.</Typography>
         
-      </DialogContent>
     </DialogContent>
     <DialogActions>
       <Button onClick={closeInfoDialog}  style={{margin: 'auto'}} autoFocus>

@@ -33,7 +33,6 @@ function ShareProfileDialog() {
     const { owner, home, resources } = useOutletContext<HomeContext>();
 
     const [contacts, setContacts] = useState<Contacts>();
-    const contactsState = useObjectState(contacts);
 
     const [profileIsPublic, setProfileIsPublic] = useState<boolean>();
 
