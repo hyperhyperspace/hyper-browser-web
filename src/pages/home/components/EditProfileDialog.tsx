@@ -300,7 +300,7 @@ function EditProfileDialog() {
                                                 return <span key={'prop-'+entry[0]}>{entry[0]}: <b>{entry[1]}</b><br /></span>;
                                             })
                                         }
-                                        <span>code: <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner.getLastHash() as Hash).join(' ')}</span> <IconButton onClick={() => {console.log('yes'); setShowWordCodeInfo(true);}} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon color="info" /> </IconButton></span>
+                                        <span>code: <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner.getLastHash() as Hash).join(' ')}</span> <IconButton onClick={() => {setShowWordCodeInfo(true);}} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon color="info" /> </IconButton></span>
                                     </Fragment>
                                 }
                             </Typography>
