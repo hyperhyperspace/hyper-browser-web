@@ -26,7 +26,7 @@ import ContactsDialog from './pages/home/components/ContactsDialog';
 import ShareProfileDialog from './pages/home/components/ShareProfileDialog';
 import ViewProfileDialog from './pages/home/components/ViewProfileDialog';
 import AddContactDialog from './pages/home/components/AddContactDialog';
-import NoHomeDialog from './pages/home/components/NoHomeDialog';
+import NoHomeDialog from './pages/start/components/NoHomeDialog';
 import ViewProfileAnonDialog from './pages/start/components/ViewProfileAnonDialog';
 import ViewAuthorDialog from './pages/space/ViewAuthorDialog';
 
