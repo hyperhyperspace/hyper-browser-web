@@ -1,4 +1,4 @@
-import { Hash, MutationEvent } from '@hyper-hyper-space/core';
+import { Hash } from '@hyper-hyper-space/core';
 import { Folder, FolderItem, SpaceLink } from '@hyper-hyper-space/home';
 import { useObjectState } from '@hyper-hyper-space/react';
 import { AppBar, Dialog, DialogActions, DialogContent, IconButton, Stack, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';

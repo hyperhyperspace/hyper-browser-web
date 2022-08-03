@@ -90,7 +90,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
 
                 const store = await HyperBrowserConfig.initSavedSpaceStore(home, link.spaceEntryPoint as HashedObject);
                 await store.save(entryPoint, false);
-                await store.save(home.getAuthor()?._keyPair as RSAKeyPair);
+                await store.save(home.getAuthor()?.getKeyPair() as RSAKeyPair);
 
                 window.open('./#/space/' + encodeURIComponent(entryPoint.getLastHash()), '_blank');
 

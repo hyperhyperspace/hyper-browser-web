@@ -12,7 +12,7 @@ import { Box } from '@mui/system';
 import { Profile } from '@hyper-hyper-space/home';
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 
-function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home, resources?: Resources, resourcesForDiscovery?: Resources, anonMode?: boolean}) {
+function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home, resources?: Resources, resourcesForDiscovery?: Resources, anonMode?: boolean, startChat?: (id: Identity) => void}) {
 
     const navigate = useNavigate();
 
@@ -80,7 +80,7 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
     useEffect(() => {
         const attemptToLoad = async () => {
             if (props.identityHash !== undefined && props.resources !== undefined) {
-                const id = await props.resources.store.load(props.identityHash);
+                const id = await props.resources.store.load(props.identityHash, false);
                 if (id !== undefined && id instanceof Identity) {
                     setLocallyFoundIdentity(id);
                 }
@@ -100,19 +100,21 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                 let p = new Profile(identity);
                 const profileHash = p.hash();
 
-                const loaded = await props.resources?.store.load(profileHash) as Profile|undefined;
+                const loaded = await props.resources?.store.load(profileHash, false) as Profile|undefined;
     
                 if (loaded !== undefined) {
                     console.log(loaded);
                     p = loaded;
                     p.startSync();
                     setProfile(p);
+
+                    return () => {
+                        p.stopSync();
+                    }
                 } else {
                     console.log('will try to fetch profile ' + profileHash)
                     setHashForDiscovery(profileHash);
                 }
-
-                
             }
         };
 
@@ -167,9 +169,9 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                                 </Fragment>
                             }
                         </Stack>
-                        {!props.anonMode && !you &&
+                        {!props.anonMode && !you && props.startChat !== undefined &&
                         <Stack direction="row" spacing={1}>
-                            <Button variant="contained" size="small" startIcon={<img  src='icons/streamline-icon-conversation-chat-2@48x48.png' style={{width:'20px', height:'20px'}}/>}>
+                            <Button onClick={() => { if (props.startChat !== undefined) props.startChat(identity); }} variant="contained" size="small" startIcon={<img  src='icons/streamline-icon-conversation-chat-2@48x48.png' style={{width:'20px', height:'20px'}}/>}>
                                 Chat
                             </Button>
                         </Stack>

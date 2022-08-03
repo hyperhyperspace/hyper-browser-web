@@ -1,49 +1,20 @@
 
-import { useState, useEffect, useRef, Fragment } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router';
 
 import { Stack, Dialog, DialogContent, DialogTitle, useTheme, useMediaQuery, Tabs, Tab, Card, CardContent, Button, DialogActions, TextField, InputAdornment, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar, Divider, Chip } from '@mui/material';
 import { Box } from '@mui/system';
 import { HomeContext } from '../HomeSpace';
 import { useObjectState } from '@hyper-hyper-space/react';
-import { Profile } from '@hyper-hyper-space/home';
-import { Hash, Identity, Space } from '@hyper-hyper-space/core';
-import { Ordinals } from '@hyper-hyper-space/core/dist/util/ordinals';
-
-
-type Contact = { 
-    hash: Hash,
-    code: string,
-    name: string,
-    initials: string,
-    order: string,
-    isFirstForLetter?: string,
-    picture?: string
-};
+import { Hash } from '@hyper-hyper-space/core';
+import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
 
 type LetterIndexEntry = {
     letter: string,
     hash?: Hash
 }
 
-const normalizeString = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-const filterContact = (c: Contact, keywords: Array<string>) => {
-
-    for (const keyword of keywords) {
-        let match = false;
-        for (const part of [c.name, c.code]) {
-            if (part !== undefined && normalizeString(part).indexOf(keyword) >= 0) {
-                match = true;
-            }
-        }
-        if (!match) {
-            return false;
-        }
-    }
-
-    return true;
-}
 
 function ContactsDialog() {
 
@@ -96,7 +67,7 @@ function ContactsDialog() {
         const load = async () => {
             if (contactsState?.value !== undefined) {
 
-                const keywords = normalizeString(searchValue).split(/[ -]+/);
+                const keywords = ProfileUtils.normalizeStringForKeywordSearch(searchValue).split(/[ -]+/);
 
                 const contactProfiles = Array.from(contactsState.value._elements?.values());
                 
@@ -106,14 +77,7 @@ function ContactsDialog() {
                     contactProfiles.push(p);
                 }
 
-                const cs = contactProfiles.map((p: Profile) => ({
-                    hash: p.owner?.getLastHash(),
-                    name: (p.owner?.info?.name as string || '').trim(),
-                    initials: initials(p.owner?.info?.name as string),
-                    order: (p.owner?.info?.name as string || '').toLowerCase().trim(),
-                    code: Space.getWordCodingForHash((p.owner as Identity).getLastHash()).join(' '),
-                    picture: p.getPictureDataUrl()
-                } as Contact)).filter((c: Contact) => filterContact(c, keywords));
+                const cs = contactProfiles.map(ProfileUtils.createContact).filter((c: Contact) => ProfileUtils.filterContactForKeywordSearch(c, keywords));
 
                 //for (let i=0; i<20; i++) {
                 //    cs.push({hash: '0_' + i, code: 'pepa pig plush', name: 'just testing', initials: 'JT', order: 'just testing'});
@@ -137,7 +101,7 @@ function ContactsDialog() {
                 let firstLetter = 'A';
 
                 for (const c of cs) {
-                    const normalizedName = normalizeString(c.name);
+                    const normalizedName = ProfileUtils.normalizeStringForKeywordSearch(c.name);
                     if (normalizedName.length > 0) {
                         const newLetter = normalizedName[0].toUpperCase();
                         if (letter !== newLetter) {
@@ -264,7 +228,19 @@ function ContactsDialog() {
                                     </ListItem>
                                     <Divider />
                                     {contacts.map((c: Contact) => (
-                                    <ListItem disablePadding key={'contact-' + c.hash}  ref={(instance: HTMLLIElement | null) => { contactElements.current[c.hash] = instance;}}>
+                                    <ListItem 
+                                        disablePadding 
+                                        key={'contact-' + c.hash}  
+                                        ref={(instance: HTMLLIElement | null) => { contactElements.current[c.hash] = instance;}}
+                                        secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? <Button 
+                                                            onClick={() => { navigate('../chats/'+encodeURIComponent(c.hash)); }} 
+                                                            variant="contained" 
+                                                            size="small" 
+                                                            startIcon={<img  src='icons/streamline-icon-conversation-chat-2@48x48.png' style={{width:'20px', height:'20px'}}/>}
+                                                        >
+                                                            Chat
+                                                        </Button> : undefined}
+                                    >
                                         <ListItemButton component="a" onClick={() => { navigate(c.hash === home?.getAuthor()?.getLastHash() ? '../edit-profile' : '../view-profile/' + encodeURIComponent(c.hash)) }}>
                                             <ListItemIcon>
                                                 {c.picture !== undefined && 

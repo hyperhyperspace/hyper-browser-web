@@ -42,7 +42,7 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
 
             setShowLinkingDialog(true);
 
-            HyperBrowserConfig.createHome(params.id.info, deviceName, env.homes.value as MutableSet<Hash>, params.id._keyPair)
+            HyperBrowserConfig.createHome(params.id.info, deviceName, env.homes.value as MutableSet<Hash>, params.id.getKeyPairIfExists())
                 .then(async (home: Home) => {
                     
                     console.log('created home')

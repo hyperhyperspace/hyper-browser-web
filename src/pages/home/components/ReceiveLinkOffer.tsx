@@ -195,7 +195,7 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                 const localDevice = await home.findLocalDevice() as Device;
 
                 for (const offer of offers) {
-                    offer.createReply(home.getAuthor() as Identity, home.getAuthor()?._keyPair as RSAKeyPair, localDevice);
+                    offer.createReply(home.getAuthor() as Identity, home.getAuthor()?.getKeyPair() as RSAKeyPair, localDevice);
                     await store.save(offer);
                 }
 
@@ -248,7 +248,7 @@ function ReceiveLinkOffer(props: {close: () => void}) {
                 //await home.devices?.add((offer.newDevice?.getValue() as Device).clone());
                 //await home.devices?.saveQueuedOps();
                 
-                const newDevice = await home.getStore().load((rightOffer.newDevice?.getValue() as Device).hash()) as Device;
+                const newDevice = await home.getStore().load((rightOffer.newDevice?.getValue() as Device).hash(), false) as Device;
 
                 console.log('re-loaded new device locally')
                 console.log(newDevice);
@@ -283,6 +283,7 @@ function ReceiveLinkOffer(props: {close: () => void}) {
     const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
 
     const discoveryTimeoutCallback = () => {
+        console.log('discovery timeout callback!!!')
         setShowTimeoutMessage(true);
         setDiscoveryTimeout(undefined);
     }

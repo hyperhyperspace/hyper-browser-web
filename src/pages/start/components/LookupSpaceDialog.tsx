@@ -10,7 +10,6 @@ import { Hash, Identity, ObjectDiscoveryReply } from '@hyper-hyper-space/core';
 import { Fragment, useState, useEffect } from 'react';
 import { SpaceDisplayInfo, supportedSpaces } from '../../../model/SupportedSpaces';
 import { useNavigate, useParams } from 'react-router';
-import { encode } from 'punycode';
 
 function LookupSpaceDialog() {
 

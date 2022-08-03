@@ -6,10 +6,10 @@ import { Outlet, useNavigate, useParams } from 'react-router';
 
 import HomeItem from './components/HomeItem';
 import HomeCommand from './components/HomeCommand';
-import { Hash, HashedObject, Identity, LinkupAddress, MutableSet, MutableSetEvents, MutationEvent, MutationObserver, ObjectBroadcastAgent, ObjectDiscoveryReply, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Identity, LinkupAddress, MutableSet, MutableSetEvents, MutationEvent, MutationObserver, ObjectBroadcastAgent, ObjectDiscoveryReply, PeerInfo, PeerSource, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 import { PeerComponent, useObjectDiscoveryWithResources, useObjectState } from '@hyper-hyper-space/react';
-import { Home, Folder, Device, FolderItem, SpaceLink, FolderTreeEvents, Profile } from '@hyper-hyper-space/home';
+import { Home, Folder, Device, FolderItem, SpaceLink, FolderTreeEvents, Profile, ChatSpace, Conversation } from '@hyper-hyper-space/home';
 import CreateFolderDialog from './components/CreateFolderDialog';
 import RenameFolderItemDialog from './components/RenameFolderDialog';
 import { Link } from 'react-router-dom';
@@ -17,12 +17,14 @@ import CreateSpaceDialog from './components/CreateSpaceDialog';
 import { SpaceDisplayInfo, supportedSpaces } from '../../model/SupportedSpaces';
 import { FolderTreeSearch } from '../../model/FolderTreeSearch';
 import AskForPersistentStorageDialog from './components/AskForPersistentStorageDialog';
+
 type HomeContext = {
     resources: Resources | undefined,
     resourcesForDiscovery: Resources | undefined,
     home: Home | undefined,
     owner: Identity | undefined,
     localDevice: Device | undefined,
+    chats: ChatSpace | undefined,
     openFolder: (folder: Folder, path?: string) => void,
     openCreateFolder: () => void,
     openRenameFolder: (folder: Folder) => void,
@@ -62,11 +64,15 @@ function HomeSpace() {
         setShowAskForPersistentStorageDialog(true);
     }
     
-    const [home, setHome]               = useState<Home|undefined>(undefined);
+    const [home, setHome]                   = useState<Home|undefined>(undefined);
     const homeState = useObjectState(home);
-    const [localDevice, setLocalDevice] = useState<Device|undefined>(undefined);
-    const [owner, setOwner]             = useState<Identity|undefined>(undefined);
+    const [localDevice, setLocalDevice]     = useState<Device|undefined>(undefined);
+    const [owner, setOwner]                 = useState<Identity|undefined>(undefined);
     const [desktopFolder, setDesktopFolder] = useState<Folder|undefined>(undefined);
+
+    const [chats, setChats]                 = useState<ChatSpace|undefined>(undefined);
+    const chatsState                        = useObjectState(chats);
+    const [unreadChatsCount, setUnreadChatsCount] = useState(0);
 
     const desktopFolderState = useObjectState<Folder>(desktopFolder, desktopFolder?.ownEventsFilter());
     
@@ -142,7 +148,7 @@ function HomeSpace() {
         if (folder !== undefined) {
             setViewingFolder(folder);
         } else {
-            homeResources?.store.load(hash).then((obj?: HashedObject) => {
+            homeResources?.store.load(hash, false).then((obj?: HashedObject) => {
                 if (obj instanceof Folder) {
                     obj.loadItemNamesAndWatchForChanges().then(() => {
                         setViewingFolder(obj);
@@ -170,6 +176,7 @@ function HomeSpace() {
         home: home,
         localDevice: localDevice,
         owner: owner,
+        chats: chats,
         openFolder: openFolder,
         openCreateFolder: openCreateFolder,
         openRenameFolder: openRenameFolderItem,
@@ -237,7 +244,6 @@ function HomeSpace() {
             };
 
             newHome.desktop?.addMutationObserver(spacesObserver);
-            
 
             await newHome.findLocalDevice();
 
@@ -301,6 +307,21 @@ function HomeSpace() {
             setHome(newHome);
             setLocalDevice(newHome._localDevice);
 
+            const newChats = new ChatSpace(newOwner);
+
+            let chats = await homeResources?.store.load(newChats.hash(), false) as ChatSpace;
+
+            if (chats === undefined) {
+                await homeResources?.store.save(newChats);
+                chats = newChats;
+            }
+
+            console.log('STARTING CHAT SPACE SYNC');
+            await chats.startSync({localPeer: newHome._devicePeers?.localPeer as PeerInfo, peerSource: newHome._devicePeers?.peerSource as PeerSource});
+            console.log('DONE STARTING CHAT SPACE SYNC');
+
+            setChats(chats);
+
         }
 
         if (homeResources !== undefined && homeHash !== undefined) {
@@ -352,7 +373,19 @@ function HomeSpace() {
             console.log('persistent storage is not supported by this browser')
         }
 
-    }, [home])
+    }, [home]);
+
+    useEffect(() => {
+        if (chatsState?.value !== undefined) {
+            let unread = 0;
+
+            for (const conv of chatsState?.value.conversations?.values()!) {
+                unread = unread + conv._unreadMessages.size;
+            }
+
+            setUnreadChatsCount(unread);
+        }
+    }, [chatsState]);
 
     const [searchValue, setSearchValue] = useState('');
     const searching = searchValue !== '';
@@ -784,7 +817,7 @@ function HomeSpace() {
                         <ButtonGroup style={{flexWrap: 'wrap'}} variant="contained" color="inherit">
                             <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile" action={() => {navigate('./edit-profile')}}></HomeCommand>
                             <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts" action={() => {navigate('./contacts')}}></HomeCommand>
-                            <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={4} action={() => {alert('Chat will be available soon.')}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={unreadChatsCount} action={() => {navigate('./chats')}/*() => {alert('Chat will be available soon')}*/}></HomeCommand>
                             <HomeCommand icon="streamline-icon-satellite-1@48x48.png" title="Spaces" action={() => {alert('Space updates will be available soon.')}}></HomeCommand>
                             {/*<HomeCommand icon="streamline-icon-cog-1@48x48.png" title="Config"></HomeCommand>
                             <HomeCommand icon="🙂" title="Profile"></HomeCommand>
