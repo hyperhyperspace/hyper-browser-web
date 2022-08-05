@@ -1,6 +1,6 @@
-import { Hash, MutableObject, MutationEvent, Resources } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, MutableObject, MutationEvent, Resources } from '@hyper-hyper-space/core';
 import { ChatSpace, Conversation, Message, Profile } from '@hyper-hyper-space/home';
-import { useObjectState } from '@hyper-hyper-space/react';
+import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
 import { Avatar, Button, Chip, IconButton, Stack, TextField, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Box } from '@mui/system';
@@ -9,46 +9,77 @@ import { DateUtils } from '../../model/DateUtils';
 import { ProfileUtils } from '../../model/ProfileUtils';
 import { AllChatsNav } from './AllChats';
 
-function Chat(props: {onClose: () => void, chatWidth: string, noSummary: boolean, identityHash?: Hash, conv?: Conversation, chats: ChatSpace, resources: Resources, nav: AllChatsNav}) {
+function Chat(props: {onClose: () => void, chatWidth: string, noSummary: boolean, identityHash?: Hash, conv?: Conversation, chats: ChatSpace, resources: Resources, resourcesForDiscovery: Resources, nav: AllChatsNav}) {
 
+    const remoteId = props.conv?.getRemoteIdentity();
+    const profileHash = new Profile(remoteId).hash();
+
+
+    const [loadedProfile, setLoadedProfile] = useState<Profile>();
+    const discoveredProfile     = useObjectDiscoveryIfNecessary<Profile>(props.resourcesForDiscovery, profileHash, loadedProfile);
     const [profile, setProfile] = useState<Profile>();
     const profileState          = useObjectState<Profile>(profile);
+
+
+    
 
     const convState = useObjectState<Conversation>(props.conv, (ev: MutationEvent) => MutableObject.isContentChangeEvent(ev));
 
     useEffect(() => {
 
-        let sync = false;
-        let profile: Profile;
 
         const loadRemoteProfile = async () => {
 
             if (props.conv === undefined) {
-                setProfile(undefined);
+                setLoadedProfile(undefined);
             } else {
-                const remoteId = props.conv?.getRemoteIdentity();
-                profile = await props.resources.store.load(new Profile(remoteId).hash(), true, true) as Profile;
-
-                profile.startSync();
-                setProfile(profile);
-
-                sync = true;
+                //const remoteId = props.conv?.getRemoteIdentity();
+                //profile = await props.resources.store.load(new Profile(remoteId).hash(), true, true) as Profile;
+                const profile = await props.resources.store.load(profileHash, true, true) as Profile;
+                setLoadedProfile(profile);
             }
         };
 
         loadRemoteProfile();
 
-        return () => {
-            if (sync && profile !== undefined) {
-                profile.stopSync();
+    }, [profileHash]);
+
+    useEffect(() => {
+
+        let profile = discoveredProfile;
+        
+
+        if (profile !== undefined) {
+            const profileHash = profile.hash();
+            if (!profile.isWatchingForChanges()) {
+                props.resources.store.save(profile).then(() => {
+                    props.resources.store.load(profileHash, true, true).then((loadedProfile?: HashedObject) => {
+                        profile = loadedProfile as Profile;
+                        profile.startSync();
+                        setProfile(profile)
+                    });
+                });
+                
+            } else {
+                profile.startSync();
+                setProfile(profile);
+            }
+            
+            
+
+            return () => {
+                profile?.stopSync();
             }
         }
 
-    }, [props.conv]);
+
+    }, [discoveredProfile]);
+
+
 
     const contact = profileState?.getValue() === undefined ? undefined : ProfileUtils.createContact(profileState?.getValue() as Profile);
 
-    const name = profile?.owner?.info?.name === undefined? '' : (profile?.owner?.info?.name as string).trim().split(' ')[0];
+    const name = profileState?.getValue()?.owner?.info?.name === undefined? '' : (profileState?.getValue()?.owner?.info?.name as string).trim().split(' ')[0];
 
     const messages = convState?.getValue()?.getSortedMessages() || [];
 

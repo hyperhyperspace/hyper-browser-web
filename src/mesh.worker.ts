@@ -1,26 +1,9 @@
 // mesh.worker.ts
 /// <reference lib="webworker" />
 
-import { NetworkAgent, PeerGroupAgent, StateGossipAgent, HeaderBasedSyncAgent, WebRTCConnection, WebWorkerMeshHost, LogLevel, Mesh, ObjectDiscoveryAgent } from '@hyper-hyper-space/core';
+import { WebWorkerMeshHost } from '@hyper-hyper-space/core';
 import { } from '@hyper-hyper-space/home';
 import { } from './model/text/TextSpace';
-
-// log control:
-
-Mesh.syncCommandsLog.level = LogLevel.INFO;
-
-StateGossipAgent.controlLog.level = LogLevel.INFO;
-StateGossipAgent.peerMessageLog.level = LogLevel.INFO;
-
-PeerGroupAgent.controlLog.level = LogLevel.INFO;
-
-HeaderBasedSyncAgent.controlLog.level = LogLevel.INFO;
-
-ObjectDiscoveryAgent.log.level = LogLevel.DEBUG;
-
-WebRTCConnection.logger.level = 5;
-NetworkAgent.connLogger.level = 5;
-NetworkAgent.messageLogger.level = 5;
 
 // crate the mesh host, it will listen for messages on a broadcast channel,
 // thus being effectivly controlled from the UI thread.

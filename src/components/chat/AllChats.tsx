@@ -70,7 +70,7 @@ function AllChats(props: {
                 }
                 {(!noSummary || props.remoteIdHash !== undefined) && 
                     <Box style={{width: chatWidth, height: '100%'}}>
-                        <Chat chats={props.chats} identityHash={props.remoteIdHash} conv={conv} onClose={props.onClose} chatWidth={chatWidth} noSummary={noSummary} resources={props.resources} nav={props.nav}/>
+                        <Chat chats={props.chats} identityHash={props.remoteIdHash} conv={conv} onClose={props.onClose} chatWidth={chatWidth} noSummary={noSummary} resources={props.resources} resourcesForDiscovery={props.resourcesForDiscovery} nav={props.nav}/>
                     </Box>
                 }
                 

@@ -20,7 +20,7 @@ HistorySynchronizer.controlLog.level = LogLevel.INFO;
 
 
 const main = async () => {
-  const configBackend = new WorkerSafeIdbBackend('hyper-browser-config-0.1');
+  const configBackend = new WorkerSafeIdbBackend('hyper-browser-config-0.2');
   let configBackendError: (string|undefined) = undefined;
   
   
