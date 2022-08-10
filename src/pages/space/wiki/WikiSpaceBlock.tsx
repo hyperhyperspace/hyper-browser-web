@@ -25,12 +25,15 @@ function WikiSpaceBlock(props: { block: Block }) {
             Text,
             Placeholder.configure({placeholder: 'write something...'})
         ],
+        parseOptions: {
+            preserveWhitespace: 'full'
+        },    
         // content: ``,
         onUpdate: ({ editor }) => {
             const content = props.block.contents;
 
             if (content !== undefined) {
-                content.setValue(editor.getText()).then(() => {
+                content.setValue(editor.getHTML()).then(() => {
                     content.saveQueuedOps();
                     console.log('SAVED')
                 });
@@ -47,8 +50,8 @@ function WikiSpaceBlock(props: { block: Block }) {
 
         console.log('got new value for the text: ' + newText)
 
-        if (newText !== undefined) {
-            editor?.commands.setContent(newText)
+        if (newText !== undefined && newText !== editor?.getHTML()) {
+            editor?.commands.setContent(newText, false, { preserveWhitespace: 'full' })
         }
     }, [textState, editor])
 
