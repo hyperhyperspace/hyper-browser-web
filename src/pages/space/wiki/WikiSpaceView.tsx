@@ -18,12 +18,17 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
         });
     }, [props.entryPoint]);
         
+    const onEnter = (e: React.KeyboardEvent<HTMLInputElement> ) => {
+        if (e.key === 'Enter') {
+            setCurrentPageName((e.target as HTMLInputElement).value);
+        }
+    }
 
     return <Paper style={{ paddingTop: '40px', height: '100%' }}>
         {!initialized &&
             <Typography>Loading...</Typography>
         }
-        <TextField defaultValue={currentPageName} placeholder='/'></TextField>
+        <TextField defaultValue={currentPageName} placeholder='/' onKeyPress={onEnter}></TextField>
         {initialized &&
             <WikiSpacePage page={wikiSpace?.value?.navigateTo(currentPageName)!}></WikiSpacePage>
         }
