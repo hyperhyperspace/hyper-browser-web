@@ -8,9 +8,10 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
+import { Resources } from '@hyper-hyper-space/core';
 
 
-function WikiSpaceBlock(props: { block: Block }) {
+function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
     const author = props.block.getAuthor();
     const editable = author === undefined || author.hasKeyPair();
 
@@ -28,15 +29,14 @@ function WikiSpaceBlock(props: { block: Block }) {
         parseOptions: {
             preserveWhitespace: 'full'
         },    
-        // content: ``,
-        onUpdate: ({ editor }) => {
+        onUpdate: async ({ editor }) => {
             const content = props.block.contents;
 
             if (content !== undefined) {
-                content.setValue(editor.getHTML()).then(() => {
-                    content.saveQueuedOps();
-                    console.log('SAVED')
-                });
+                await content.setValue(editor.getHTML())
+                content.setResources(props.resources!);                    
+                content.saveQueuedOps();
+                console.log('SAVED BLOCK')
 
             }
         },
@@ -47,8 +47,6 @@ function WikiSpaceBlock(props: { block: Block }) {
 
     useEffect(() => {
         const newText = textState?.value?._value;
-
-        console.log('got new value for the text: ' + newText)
 
         if (newText !== undefined && newText !== editor?.getHTML()) {
             editor?.commands.setContent(newText, false, { preserveWhitespace: 'full' })
