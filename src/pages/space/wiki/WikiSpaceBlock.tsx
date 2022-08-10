@@ -1,0 +1,58 @@
+
+import { useObjectState } from '@hyper-hyper-space/react';
+import { useEffect } from 'react';
+import { Block } from '@hyper-hyper-space/wiki-collab';
+
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+import { EditorContent, useEditor } from '@tiptap/react'
+
+
+function WikiSpaceBlock(props: { block: Block }) {
+    const author = props.block.getAuthor();
+    const editable = author === undefined || author.hasKeyPair();
+
+    // for now just use one tiptap `Editor` per block...
+    // later on it might be desirable to use a custom tiptap `Block` type instead
+    // and share a single tiptap `Editor`.
+    
+    const editor = useEditor({
+        extensions: [
+            Document,
+            Paragraph,
+            Text,
+        ],
+        content: ``,
+        onUpdate: ({ editor }) => {
+            const content = props.block.contents;
+
+            if (content !== undefined) {
+                content.setValue(editor.getText()).then(() => {
+                    content.saveQueuedOps();
+                    console.log('SAVED')
+                });
+
+            }
+        },
+        editable
+    })
+
+    const textState = useObjectState(props.block.contents);
+
+    useEffect(() => {
+        const newText = textState?.value?._value;
+
+        console.log('got new value for the text: ' + newText)
+
+        if (newText !== undefined) {
+            editor?.commands.setContent(newText)
+        }
+    }, [textState, editor?.commands])
+
+    return (
+        <EditorContent editor={editor} />
+    )
+}
+
+export default WikiSpaceBlock;

@@ -1,6 +1,7 @@
 import { Hash, HashedObject, Identity, MutableSet, Resources } from '@hyper-hyper-space/core';
 import { Home, SpaceLink } from '@hyper-hyper-space/home';
 import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
+import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { useEffect, useState, Fragment } from 'react';
 import { Outlet, useParams } from 'react-router';
 
@@ -11,6 +12,7 @@ import { TextSpace } from '../../model/text/TextSpace';
 
 import SpaceFrameToolbar from './SpaceFrameToolbar';
 import TextSpacePage from './text/TextSpacePage';
+import WikiSpaceView from './wiki/WikiSpaceView';
 
 type InitParams = {hash?: Hash, resourcesForDiscovery?: Resources, knownEntryPoint?: HashedObject};
 
@@ -160,6 +162,11 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
         { spaceEntryPoint instanceof TextSpace &&
             
             <TextSpacePage entryPoint={spaceEntryPoint} />
+        }
+        
+        { spaceEntryPoint instanceof WikiSpace &&
+            
+            <WikiSpaceView entryPoint={spaceEntryPoint} currentPageName='/' />
         }
         
         <Outlet context={spaceContext} />
