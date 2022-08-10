@@ -39,10 +39,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
         }
     }
 
-    return <Paper style={{ paddingTop: '40px', height: '100%' }}>
-        {!initialized &&
-            <Typography>Loading...</Typography>
-        }
+    return <Paper style={{ padding: '60px 1rem', height: '100%' }}>
         <TextField
             defaultValue={currentPageName}
             placeholder='/'
@@ -50,6 +47,9 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
             inputRef={navigationRef}
         ></TextField>
         <IconButton onClick={navigate}><ExploreIcon></ExploreIcon></IconButton>
+        {!initialized &&
+            <Typography>Loading...</Typography>
+        }
         {initialized &&
             <WikiSpacePage page={currentPage!} resources={resources!}></WikiSpacePage>
         }

@@ -1,7 +1,12 @@
 /* Basic editor styles */
 .ProseMirror {
-  > * + * {
-    margin-top: 0.75em;
+  // > * + * {
+  //   padding: 0.75rem;
+  //   margin: 0;
+  // }
+  * {
+    padding: 0.75rem;
+    margin: 0;
   }
 }
 

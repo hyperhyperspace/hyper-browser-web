@@ -1,6 +1,6 @@
-import './WikiSpaceBlock.css'
+import './WikiSpaceBlock.scss'
 import { useObjectState } from '@hyper-hyper-space/react';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Block } from '@hyper-hyper-space/wiki-collab';
 
 import Document from '@tiptap/extension-document'
@@ -8,8 +8,8 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
-import { Resources } from '@hyper-hyper-space/core';
-
+import { MutableReference, Resources } from '@hyper-hyper-space/core';
+import { debounce } from 'lodash-es';
 
 function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
     const author = props.block.getAuthor();
@@ -18,6 +18,13 @@ function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
     // for now just use one tiptap `Editor` per block...
     // later on it might be desirable to use a custom tiptap `Block` type instead
     // and share a single tiptap `Editor`.
+
+    const updateBlockWithHtml = useRef(debounce(async (blockContents: MutableReference<string>, html: string) => {
+        await blockContents.setValue(html)
+        blockContents.setResources(props.resources!);                    
+        blockContents.saveQueuedOps();
+        console.log('SAVED BLOCK')
+    }, 500))
 
     const editor = useEditor({
         extensions: [
@@ -30,14 +37,8 @@ function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
             preserveWhitespace: 'full'
         },    
         onUpdate: async ({ editor }) => {
-            const content = props.block.contents;
-
-            if (content !== undefined) {
-                await content.setValue(editor.getHTML())
-                content.setResources(props.resources!);                    
-                content.saveQueuedOps();
-                console.log('SAVED BLOCK')
-
+            if (props.block.contents) {
+                updateBlockWithHtml.current(props.block.contents, editor.getHTML())
             }
         },
         editable
@@ -54,7 +55,7 @@ function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
     }, [textState, editor])
 
     return (
-        <EditorContent editor={editor} />
+        <EditorContent editor={editor}/>
     )
 }
 

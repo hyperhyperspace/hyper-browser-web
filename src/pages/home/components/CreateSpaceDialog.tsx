@@ -9,6 +9,7 @@ import { supportedSpaces } from '../../../model/SupportedSpaces';
 import { HomeContext } from '../HomeSpace';
 
 import { ClassRegistry, HashedObject, Identity, RSAKeyPair } from '@hyper-hyper-space/core';
+import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
 function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose: () => void}) {
 
@@ -72,7 +73,17 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 console.log(spaceType);
                 console.log(clazz);
 
-                const entryPoint = new clazz();
+                // Currently `WikiSpace` objects need to know about
+                // their author in their constructor, so this is a workaround...
+                // 
+                // Maybe there's a way to fix `WikiSpace` so it doesn't need this?
+                let entryPoint;
+                if (spaceType === WikiSpace.className) {
+                    entryPoint = new WikiSpace(home.getAuthor());
+                } else {
+                    entryPoint = new clazz();
+                }
+
                 entryPoint.setAuthor((home.getAuthor()) as Identity);
     
 
