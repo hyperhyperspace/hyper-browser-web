@@ -12,15 +12,18 @@ function WikiSpacePage(props: { page: Page, resources: Resources }) {
     // todo: implement drag+drop using react-beautiful-dnd
 
     const blockElements = blocksState?.getValue()?.contents().map(block => 
-        <WikiSpaceBlock block={block} resources={props.resources}></WikiSpaceBlock>
+        <WikiSpaceBlock key={block.hash()} block={block} resources={props.resources}></WikiSpaceBlock>
     )
 
     return (
         <Box>
-            <IconButton onClick={props.page?.addBlock.bind(props.page)}>
+            <div>{ blockElements }</div>
+            <IconButton
+                aria-label="append a new block to the page"
+                onClick={props.page?.addBlock.bind(props.page)}
+            >
                 <PostAddIcon></PostAddIcon>
             </IconButton>
-            <div>{ blockElements }</div>
         </Box>
     )
 }

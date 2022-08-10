@@ -11,7 +11,7 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import { MutableReference, Resources } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
 
-function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
+function WikiSpaceBlock(props: { block: Block, resources: Resources, key: any }) {
     const author = props.block.getAuthor();
     const editable = author === undefined || author.hasKeyPair();
 

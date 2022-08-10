@@ -1,9 +1,11 @@
 import { useObjectState } from '@hyper-hyper-space/react';
-import { IconButton, Paper, TextField, Typography } from '@mui/material';
+import { IconButton, Paper, TextField, Typography, InputAdornment } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import { Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
 import ExploreIcon from '@mui/icons-material/Explore';
+import { isEmpty } from 'lodash-es';
+
 
 function WikiSpaceView(props: { entryPoint: WikiSpace}) {
 
@@ -27,13 +29,17 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
     const navigationRef = useRef<HTMLInputElement>()
     
     const navigate = () => {
-        const nextPageName = navigationRef.current?.value
+        let nextPageName = navigationRef.current?.value
+        if (isEmpty(nextPageName)) {
+            nextPageName = '/'
+        }
+
         if (nextPageName) {
             setCurrentPageName(nextPageName);
         }
     }
 
-    const onEnter = (e: React.KeyboardEvent<HTMLInputElement> ) => {
+    const onNavigationUpdate = (e: React.KeyboardEvent<HTMLInputElement> ) => {
         if (e.key === 'Enter') {
             navigate()
         }
@@ -43,10 +49,18 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
         <TextField
             defaultValue={currentPageName}
             placeholder='/'
-            onKeyPress={onEnter}
+            onKeyPress={onNavigationUpdate}
             inputRef={navigationRef}
+            InputProps={{
+                endAdornment:
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={navigate}
+                    aria-label="navigate to wiki page"
+                    ><ExploreIcon></ExploreIcon></IconButton>
+                </InputAdornment>
+            }}
         ></TextField>
-        <IconButton onClick={navigate}><ExploreIcon></ExploreIcon></IconButton>
         {!initialized &&
             <Typography>Loading...</Typography>
         }
