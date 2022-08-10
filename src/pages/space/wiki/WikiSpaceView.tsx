@@ -1,8 +1,9 @@
 import { useObjectState } from '@hyper-hyper-space/react';
-import { Paper, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { IconButton, Paper, TextField, Typography } from '@mui/material';
+import { useEffect, useState, useRef } from 'react';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
+import ExploreIcon from '@mui/icons-material/Explore';
 
 function WikiSpaceView(props: { entryPoint: WikiSpace}) {
 
@@ -10,17 +11,24 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
     const [currentPageName, setCurrentPageName] = useState('/');
     const wikiSpace = useObjectState(props.entryPoint);
     
-    // surely there's a more efficient way
-
     useEffect(() => {
         props.entryPoint.startSync().then(() => {
             setInitialized(true);
         });
     }, [props.entryPoint]);
         
+    const navigationRef = useRef<HTMLInputElement>()
+    
+    const navigate = () => {
+        const nextPageName = navigationRef.current?.value
+        if (nextPageName) {
+            setCurrentPageName(nextPageName);
+        }
+    }
+
     const onEnter = (e: React.KeyboardEvent<HTMLInputElement> ) => {
         if (e.key === 'Enter') {
-            setCurrentPageName((e.target as HTMLInputElement).value);
+            navigate()
         }
     }
 
@@ -28,7 +36,8 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
         {!initialized &&
             <Typography>Loading...</Typography>
         }
-        <TextField defaultValue={currentPageName} placeholder='/' onKeyPress={onEnter}></TextField>
+        <TextField defaultValue={currentPageName} placeholder='/' onKeyPress={onEnter} inputRef={navigationRef}></TextField>
+        <IconButton onClick={navigate}><ExploreIcon></ExploreIcon></IconButton>
         {initialized &&
             <WikiSpacePage page={wikiSpace?.value?.navigateTo(currentPageName)!}></WikiSpacePage>
         }

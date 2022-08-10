@@ -1,8 +1,7 @@
 import { useObjectState } from '@hyper-hyper-space/react';
-import { Fragment } from 'react';
 import { Page } from '@hyper-hyper-space/wiki-collab';
 import WikiSpaceBlock from './WikiSpaceBlock';
-import { Button, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 
 function WikiSpacePage(props: { page: Page }) {
@@ -14,10 +13,10 @@ function WikiSpacePage(props: { page: Page }) {
     const blockElements = blocksState?.getValue()?.contents().map(block => <WikiSpaceBlock block={block}></WikiSpaceBlock>)
 
     return (
-        <Fragment>
+        <Box>
             <IconButton onClick={props.page?.addBlock.bind(props.page)}><PostAddIcon></PostAddIcon></IconButton>
             <div>{ blockElements }</div>
-        </Fragment>
+        </Box>
     )
 }
 
