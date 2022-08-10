@@ -1,4 +1,4 @@
-
+import './WikiSpaceBlock.css'
 import { useObjectState } from '@hyper-hyper-space/react';
 import { useEffect } from 'react';
 import { Block } from '@hyper-hyper-space/wiki-collab';
@@ -6,6 +6,7 @@ import { Block } from '@hyper-hyper-space/wiki-collab';
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
+import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 
 
@@ -16,14 +17,15 @@ function WikiSpaceBlock(props: { block: Block }) {
     // for now just use one tiptap `Editor` per block...
     // later on it might be desirable to use a custom tiptap `Block` type instead
     // and share a single tiptap `Editor`.
-    
+
     const editor = useEditor({
         extensions: [
             Document,
             Paragraph,
             Text,
+            Placeholder.configure({placeholder: 'write something...'})
         ],
-        content: ``,
+        // content: ``,
         onUpdate: ({ editor }) => {
             const content = props.block.contents;
 
@@ -48,7 +50,7 @@ function WikiSpaceBlock(props: { block: Block }) {
         if (newText !== undefined) {
             editor?.commands.setContent(newText)
         }
-    }, [textState, editor?.commands])
+    }, [textState, editor])
 
     return (
         <EditorContent editor={editor} />

@@ -166,7 +166,7 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
         
         { spaceEntryPoint instanceof WikiSpace &&
             
-            <WikiSpaceView entryPoint={spaceEntryPoint} currentPageName='/' />
+            <WikiSpaceView entryPoint={spaceEntryPoint}/>
         }
         
         <Outlet context={spaceContext} />
