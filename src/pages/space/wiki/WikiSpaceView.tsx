@@ -10,10 +10,8 @@ import { useNavigate, useOutletContext, useParams } from 'react-router';
 function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
     const [initialized, setInitialized] = useState(false);
-    // const [currentPageName, setCurrentPageName] = useState('/');
     const { path } = useParams();
     const [currentPage, setCurrentPage] = useState<Page>();
-    const wikiSpace = useObjectState(props.entryPoint);
     const spaceFrameContext = useOutletContext();
     console.log(spaceFrameContext)
 
@@ -26,12 +24,16 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     useEffect(() => {
         const nextPath = path || ''
         setInitialized(false)
-        wikiSpace?.value?.navigateTo(nextPath).then(setCurrentPage).then(() => setInitialized(true))
+        props.entryPoint.navigateTo(nextPath)
+            .then(page => {
+                page.loadAndWatchForChanges()
+                setCurrentPage(page)
+            }).then(() => setInitialized(true))
         if (navigationRef.current) {
             console.log('setting path to', nextPath)
             navigationRef.current.value = nextPath
         };
-    }, [path, wikiSpace])
+    }, [path, props.entryPoint])
 
     const navigationRef = useRef<HTMLInputElement>()
 
