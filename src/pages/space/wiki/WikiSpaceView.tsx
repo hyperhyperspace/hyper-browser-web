@@ -4,42 +4,43 @@ import { useEffect, useState, useRef } from 'react';
 import { Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
 import ExploreIcon from '@mui/icons-material/Explore';
-import { isEmpty } from 'lodash-es';
+import { useNavigate, useOutletContext, useParams } from 'react-router';
 
 
-function WikiSpaceView(props: { entryPoint: WikiSpace}) {
+function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
     const [initialized, setInitialized] = useState(false);
-    const [currentPageName, setCurrentPageName] = useState('/');
+    // const [currentPageName, setCurrentPageName] = useState('/');
+    const { path } = useParams();
     const [currentPage, setCurrentPage] = useState<Page>();
     const wikiSpace = useObjectState(props.entryPoint);
-
-    const resources = props.entryPoint.getResources()!;
+    const spaceFrameContext = useOutletContext();
+    console.log(spaceFrameContext)
 
     useEffect(() => {
         props.entryPoint.startSync().then(() => {
             setInitialized(true);
         });
     }, [props.entryPoint]);
-        
+
     useEffect(() => {
-        wikiSpace?.value?.navigateTo(currentPageName).then(setCurrentPage);
-    }, [currentPageName, wikiSpace])
+        const nextPath = path || ''
+        setInitialized(false)
+        wikiSpace?.value?.navigateTo(nextPath).then(setCurrentPage).then(() => setInitialized(true))
+        if (navigationRef.current) {
+            console.log('setting path to', nextPath)
+            navigationRef.current.value = nextPath
+        };
+    }, [path, wikiSpace])
 
     const navigationRef = useRef<HTMLInputElement>()
-    
-    const navigate = () => {
-        let nextPageName = navigationRef.current?.value
-        if (isEmpty(nextPageName)) {
-            nextPageName = '/'
-        }
 
-        if (nextPageName) {
-            setCurrentPageName(nextPageName);
-        }
+    const navigator = useNavigate()
+    const navigate = () => {
+        navigator('../' + (navigationRef.current?.value || ''))
     }
 
-    const onNavigationUpdate = (e: React.KeyboardEvent<HTMLInputElement> ) => {
+    const onNavigationUpdate = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             navigate()
         }
@@ -47,25 +48,26 @@ function WikiSpaceView(props: { entryPoint: WikiSpace}) {
 
     return <Paper style={{ padding: '60px 1rem', height: '100%' }}>
         <TextField
-            defaultValue={currentPageName}
-            placeholder='/'
+            defaultValue={path}
+            placeholder={path}
+            // value={pate}
             onKeyPress={onNavigationUpdate}
             inputRef={navigationRef}
             InputProps={{
                 endAdornment:
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={navigate}
-                    aria-label="navigate to wiki page"
-                    ><ExploreIcon></ExploreIcon></IconButton>
-                </InputAdornment>
+                    <InputAdornment position="end">
+                        <IconButton
+                            onClick={navigate}
+                            aria-label="navigate to wiki page"
+                        ><ExploreIcon></ExploreIcon></IconButton>
+                    </InputAdornment>
             }}
         ></TextField>
         {!initialized &&
             <Typography>Loading...</Typography>
         }
         {initialized &&
-            <WikiSpacePage page={currentPage!} resources={resources!}></WikiSpacePage>
+            <WikiSpacePage page={currentPage!}></WikiSpacePage>
         }
 
     </Paper>;

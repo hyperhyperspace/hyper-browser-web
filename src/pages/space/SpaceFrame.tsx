@@ -1,9 +1,9 @@
-import { Hash, HashedObject, Identity, MutableSet, Resources } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Identity, MutableSet, Resources, SpaceEntryPoint } from '@hyper-hyper-space/core';
 import { Home, SpaceLink } from '@hyper-hyper-space/home';
 import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { useEffect, useState, Fragment } from 'react';
-import { Outlet, useParams } from 'react-router';
+import { Outlet, useOutletContext, useParams } from 'react-router';
 
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 
@@ -158,22 +158,23 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
             <SpaceFrameToolbar home={home} spaceEntryPointHash={spaceEntryPointHash} spaceEntryPoint={spaceEntryPoint}/>
             
         }
-
-        { spaceEntryPoint instanceof TextSpace &&
-            
-            <TextSpacePage entryPoint={spaceEntryPoint} />
-        }
-        
-        { spaceEntryPoint instanceof WikiSpace &&
-            
-            <WikiSpaceView entryPoint={spaceEntryPoint}/>
-        }
         
         <Outlet context={spaceContext} />
 
     </Fragment>;
 
 }
+
+export const SpaceComponent = () => {
+        const {entryPoint} = useOutletContext() as SpaceContext;
+        if (entryPoint instanceof TextSpace) {
+            return <TextSpacePage entryPoint={entryPoint} />
+        } else if ( entryPoint instanceof WikiSpace ){
+            return <WikiSpaceView entryPoint={entryPoint}/>
+        } else {
+            return <Fragment/>
+        }
+    }
 
 export type { SpaceContext };
 

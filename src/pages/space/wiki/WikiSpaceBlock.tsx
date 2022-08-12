@@ -12,8 +12,11 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import { MutableReference, Resources } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
 import { Card, Icon } from '@mui/material';
+import { SpaceContext } from '../SpaceFrame';
+import { useOutletContext } from 'react-router';
 
-function WikiSpaceBlock(props: { block: Block, resources: Resources, startedEditing?: any, stoppedEditing?: any }) {
+function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any }) {
+    const { resources } = useOutletContext() as SpaceContext
     const blockState = useObjectState(props.block);
     const textState = useObjectState(blockState?.getValue()?.contents);
     textState?.getValue()?.loadAndWatchForChanges()
@@ -27,7 +30,7 @@ function WikiSpaceBlock(props: { block: Block, resources: Resources, startedEdit
 
     const updateBlockWithHtml = useRef(debounce(async (blockContents: MutableReference<string>, html: string) => {
         await blockContents.setValue(html)
-        blockContents.setResources(props.resources!);
+        blockContents.setResources(resources!);
         blockContents.saveQueuedOps();
         console.log('SAVED BLOCK')
     }, 500))
