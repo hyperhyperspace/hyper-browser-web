@@ -16,9 +16,14 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     console.log(spaceFrameContext)
 
     useEffect(() => {
-        props.entryPoint.startSync().then(() => {
+        props.entryPoint.startSync();/*.then(() => {
+            
             setInitialized(true);
-        });
+        });*/
+
+        return () => {
+            props.entryPoint.stopSync();
+        };
     }, [props.entryPoint]);
 
     useEffect(() => {

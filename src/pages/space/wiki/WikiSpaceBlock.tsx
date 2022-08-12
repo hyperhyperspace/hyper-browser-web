@@ -18,12 +18,15 @@ import { useOutletContext } from 'react-router';
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any }) {
     const { resources } = useOutletContext() as SpaceContext
     const blockState = useObjectState(props.block);
-    const textState = useObjectState(blockState?.getValue()?.contents);
+    const textState = useObjectState(props.block?.contents);
     
-    useEffect(() => {
+
+    // since this obejct is being sync'd, the following should happen automatically:
+    
+    /*useEffect(() => {
         blockState?.getValue()?.loadAndWatchForChanges();
         textState?.getValue()?.loadAndWatchForChanges();
-    }, [blockState, textState])
+    }, [blockState, textState])*/
 
     const author = blockState?.getValue()?.getAuthor();
     const editable = author === undefined || author.hasKeyPair();
@@ -63,8 +66,8 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     useEffect(() => {
         const newText = textState?.getValue()?.getValue();
 
-        if(!newText) {
-           console.log('newText is empty!') 
+        if (!newText) {
+           console.log('newText is empty!')
            return
         }
 
