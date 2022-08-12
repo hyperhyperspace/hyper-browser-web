@@ -26,7 +26,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
         setInitialized(false)
         props.entryPoint.navigateTo(nextPath)
             .then(page => {
-                page.loadAndWatchForChanges()
+                //page.loadAndWatchForChanges() // I think that's unnecessary, it's alredy being done by the sync logic
                 setCurrentPage(page)
             }).then(() => setInitialized(true))
         if (navigationRef.current) {
