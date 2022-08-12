@@ -19,7 +19,9 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const { resources } = useOutletContext() as SpaceContext
     const blockState = useObjectState(props.block);
     const textState = useObjectState(blockState?.getValue()?.contents);
-    textState?.getValue()?.loadAndWatchForChanges()
+    
+    blockState?.getValue()?.loadAndWatchForChanges();
+    textState?.getValue()?.loadAndWatchForChanges();
 
     const author = blockState?.getValue()?.getAuthor();
     const editable = author === undefined || author.hasKeyPair();
