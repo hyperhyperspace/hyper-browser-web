@@ -9,7 +9,7 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
-import { MutableReference, Resources } from '@hyper-hyper-space/core';
+import { MutableReference } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
 import { Card, Icon } from '@mui/material';
 import { SpaceContext } from '../SpaceFrame';
@@ -20,8 +20,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const blockState = useObjectState(props.block);
     const textState = useObjectState(blockState?.getValue()?.contents);
     
-    blockState?.getValue()?.loadAndWatchForChanges();
-    textState?.getValue()?.loadAndWatchForChanges();
+    useEffect(() => {
+        blockState?.getValue()?.loadAndWatchForChanges();
+        textState?.getValue()?.loadAndWatchForChanges();
+    }, [blockState, textState])
 
     const author = blockState?.getValue()?.getAuthor();
     const editable = author === undefined || author.hasKeyPair();

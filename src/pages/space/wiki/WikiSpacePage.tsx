@@ -16,13 +16,7 @@ function WikiSpacePage(props: { page: Page }) {
         let to = result.destination?.index;
         if (to === undefined) { return }
 
-        console.log('moving block from', from, 'to', to)
-        const block = blocksListState?.getValue()?.valueAt(from);
-        if (block) {
-            await blocksListState?.getValue()?.deleteAt(from);
-            await blocksListState?.getValue()?.insertAt(block, to);
-            await blocksListState?.getValue()?.save()
-        }
+        props.page.moveBlock(from, to)
     }
 
 
