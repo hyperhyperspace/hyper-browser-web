@@ -13,7 +13,7 @@ import { MutableReference, Resources } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
 import { Card, Icon } from '@mui/material';
 
-function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
+function WikiSpaceBlock(props: { block: Block, resources: Resources, startedEditing?: any, stoppedEditing?: any }) {
     const blockState = useObjectState(props.block);
     const textState = useObjectState(blockState?.getValue()?.contents);
     textState?.getValue()?.loadAndWatchForChanges()
@@ -47,7 +47,9 @@ function WikiSpaceBlock(props: { block: Block, resources: Resources }) {
                 updateBlockWithHtml.current(textState.getValue()!, editor.getHTML())
             }
         },
-        editable
+        editable,
+        onFocus: props.startedEditing,
+        onBlur: props.stoppedEditing
     })
 
 

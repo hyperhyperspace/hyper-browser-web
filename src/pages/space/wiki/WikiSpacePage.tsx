@@ -8,7 +8,7 @@ import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautif
 
 function WikiSpacePage(props: { page: Page, resources: Resources }) {
     const blocksListState = useObjectState(props.page?.blocks);
-
+    
     // todo: buttons adding/removing/editing blocks
     // todo: implement drag+drop using react-beautiful-dnd
 
@@ -26,7 +26,17 @@ function WikiSpacePage(props: { page: Page, resources: Resources }) {
         }
     }
 
-    
+
+    const startedEditing = () => {
+       console.log('editing... pause watching for blocks updates')
+       blocksListState?.getValue()?.dontWatchForChanges() 
+    }
+
+    const stoppedEditing = () => {
+       console.log('continue watching for blocks updates')
+       blocksListState?.getValue()?.loadAndWatchForChanges()
+    }
+
     const blockElements = blocksListState?.getValue()?.contents().map((block, index) => 
         (
             <Draggable draggableId={block.hash()} index={index} key={block.hash()}>
@@ -36,7 +46,7 @@ function WikiSpacePage(props: { page: Page, resources: Resources }) {
                         {...provided.dragHandleProps}
                         ref={provided.innerRef}
                     >
-                            <WikiSpaceBlock block={block} resources={props.resources}></WikiSpaceBlock>
+                            <WikiSpaceBlock block={block} resources={props.resources} {...{startedEditing, stoppedEditing}} ></WikiSpaceBlock>
                     </div>
                 }
             </Draggable>
