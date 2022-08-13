@@ -1,5 +1,5 @@
 import { useObjectState } from '@hyper-hyper-space/react';
-import { IconButton, Paper, TextField, Typography, InputAdornment } from '@mui/material';
+import { IconButton, Paper, TextField, Typography, InputAdornment, MenuItem } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import { Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
@@ -16,11 +16,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     console.log(spaceFrameContext)
 
     useEffect(() => {
-        props.entryPoint.startSync();/*.then(() => {
-            
-            setInitialized(true);
-        });*/
-
+        props.entryPoint.startSync();
         return () => {
             props.entryPoint.stopSync();
         };
@@ -31,7 +27,6 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
         setInitialized(false)
         props.entryPoint.navigateTo(nextPath)
             .then(page => {
-                //page.loadAndWatchForChanges() // I think that's unnecessary, it's alredy being done by the sync logic
                 setCurrentPage(page)
             }).then(() => setInitialized(true))
         if (navigationRef.current) {
@@ -57,10 +52,10 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
         <TextField
             defaultValue={path}
             placeholder={path}
-            // value={pate}
             onKeyPress={onNavigationUpdate}
             inputRef={navigationRef}
             InputProps={{
+                style:{fontSize: 25, fontWeight: 'bold'},
                 endAdornment:
                     <InputAdornment position="end">
                         <IconButton
@@ -69,7 +64,8 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                         ><ExploreIcon></ExploreIcon></IconButton>
                     </InputAdornment>
             }}
-        ></TextField>
+        >
+        </TextField>
         {!initialized &&
             <Typography>Loading...</Typography>
         }
