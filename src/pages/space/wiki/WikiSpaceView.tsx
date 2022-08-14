@@ -5,46 +5,80 @@ import { Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
 import ExploreIcon from '@mui/icons-material/Explore';
 import { useNavigate, useOutletContext, useParams } from 'react-router';
+import { MutableObject } from '@hyper-hyper-space/core';
 
 
 function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
-    const [initialized, setInitialized] = useState(false);
+    //const [initialized, setInitialized] = useState(false);
     const { path } = useParams();
-    const [currentPage, setCurrentPage] = useState<Page>();
+    const [pageName, setPageName]                     = useState<string>();
+    const [currentPage, setCurrentPage]               = useState<Page>();
+    const [currentPageIsSaved, setCurrentPageIsSaved] = useState<boolean>();
     const spaceFrameContext = useOutletContext();
-    console.log(spaceFrameContext)
+
+    const [targetPageName, setTargetPageName]         = useState<string>();
+
+   // console.log(spaceFrameContext);
+
+    const wiki = props.entryPoint;
+    const wikiState = useObjectState(wiki);
 
     useEffect(() => {
-        props.entryPoint.startSync();/*.then(() => {
-            
-            setInitialized(true);
-        });*/
+        wiki.startSync();
 
         return () => {
-            props.entryPoint.stopSync();
+            wiki.stopSync();
         };
-    }, [props.entryPoint]);
+    }, [wiki]);
 
     useEffect(() => {
-        const nextPath = path || ''
-        setInitialized(false)
-        props.entryPoint.navigateTo(nextPath)
-            .then(page => {
-                //page.loadAndWatchForChanges() // I think that's unnecessary, it's alredy being done by the sync logic
-                setCurrentPage(page)
-            }).then(() => setInitialized(true))
-        if (navigationRef.current) {
-            console.log('setting path to', nextPath)
-            navigationRef.current.value = nextPath
-        };
-    }, [path, props.entryPoint])
+        setPageName(path || '');
+        setTargetPageName(path);
+        console.log('NAVIGATED TO "' + (path || '') + '"')
+    }, [path]);
 
-    const navigationRef = useRef<HTMLInputElement>()
+    useEffect(() => {
+
+        if (pageName !== undefined && wikiState?.getValue() !== undefined) {
+            const updateCurrentPage = async () => {
+
+                console.log('PAGE IS "' + pageName + '"')
+
+                if (currentPage?.name === pageName) {
+                    if (!currentPageIsSaved && wikiState?.getValue()?.hasPage(pageName)) {
+                        await currentPage?.save();
+                        const page = wikiState?.getValue()?.getPage(pageName);
+                        if (page !== undefined) {
+                            setCurrentPage(page);
+                            setCurrentPageIsSaved(true);
+                            console.log('FOUND PAGE "' + page + '", USING SAVED VERSION INSTEAD')
+                        }
+                    }
+                } else {
+                    const existingPage = wikiState?.getValue()?.getPage(pageName);
+
+                    if (existingPage !== undefined) {
+                        setCurrentPage(existingPage);
+                        setCurrentPageIsSaved(true);
+                        console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
+                    } else {
+                        setCurrentPage(wikiState?.getValue()?.createPage(pageName));
+                        setCurrentPageIsSaved(false);
+                        console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
+                    }
+                }
+            }
+
+            updateCurrentPage();
+        }
+    }, [pageName, wikiState])
+
+    //const navigationRef = useRef<HTMLInputElement>()
 
     const navigator = useNavigate()
     const navigate = () => {
-        navigator('../' + (navigationRef.current?.value || ''))
+        navigator('../' + targetPageName)
     }
 
     const onNavigationUpdate = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -53,13 +87,19 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
         }
     }
 
+    const onTargetPageNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.currentTarget.value;
+        setTargetPageName(newValue);
+    }
+        
+
     return <Paper style={{ padding: '60px 1rem', height: '100%' }}>
         <TextField
-            defaultValue={path}
-            placeholder={path}
+            value={targetPageName}
             // value={pate}
             onKeyPress={onNavigationUpdate}
-            inputRef={navigationRef}
+            //inputRef={navigationRef}
+            onChange={onTargetPageNameChange}
             InputProps={{
                 endAdornment:
                     <InputAdornment position="end">
@@ -70,11 +110,11 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                     </InputAdornment>
             }}
         ></TextField>
-        {!initialized &&
+        {currentPage === undefined &&
             <Typography>Loading...</Typography>
         }
-        {initialized &&
-            <WikiSpacePage page={currentPage!}></WikiSpacePage>
+        {currentPage !== undefined &&
+            <WikiSpacePage page={currentPage}></WikiSpacePage>
         }
 
     </Paper>;
