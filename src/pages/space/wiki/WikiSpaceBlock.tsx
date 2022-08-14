@@ -23,10 +23,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
 
     // since this obejct is being sync'd, the following should happen automatically:
     
-    /*useEffect(() => {
+    useEffect(() => {
         blockState?.getValue()?.loadAndWatchForChanges();
         textState?.getValue()?.loadAndWatchForChanges();
-    }, [blockState, textState])*/
+    }, [blockState, textState])
 
     const author = blockState?.getValue()?.getAuthor();
     const editable = author === undefined || author.hasKeyPair();
