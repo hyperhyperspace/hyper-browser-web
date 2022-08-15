@@ -17,7 +17,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     const [currentPageIsSaved, setCurrentPageIsSaved] = useState<boolean>();
     const spaceFrameContext = useOutletContext();
 
-    const [targetPageName, setTargetPageName]         = useState<string>();
+    const [targetPageName, setTargetPageName]         = useState<string>('');
 
    // console.log(spaceFrameContext);
 
@@ -34,7 +34,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
     useEffect(() => {
         setPageName(path || '');
-        setTargetPageName(path);
+        setTargetPageName(path || '');
         console.log('NAVIGATED TO "' + (path || '') + '"')
     }, [path]);
 
