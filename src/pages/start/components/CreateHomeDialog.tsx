@@ -9,6 +9,7 @@ import { DeviceInfo } from '../../../model/DeviceInfo';
 import { useHyperBrowserEnv } from '../../../context/HyperBrowserContext';
 import { Home, SpaceLink } from '@hyper-hyper-space/home';
 import { TextSpace } from '../../../model/text/TextSpace';
+// import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
 
 

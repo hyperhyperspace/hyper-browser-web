@@ -1,6 +1,6 @@
 import './App.css';
 import { Fragment } from 'react';
-import { Navigate, Route, Routes, useParams } from 'react-router';
+import { Navigate, Outlet, Route, Routes, useParams } from 'react-router';
 
 import { CssBaseline, ThemeProvider, Typography } from '@mui/material';
 import { lightTheme } from './themes';
@@ -17,7 +17,7 @@ import HomeSpace           from './pages/home/HomeSpace';
 import ManageDevicesDialog from './pages/home/components/ManageDevicesDialog';
 import ViewFolderDialog    from './pages/home/components/ViewFolderDialog';
 
-import SpaceFrame from './pages/space/SpaceFrame';
+import SpaceFrame, { SpaceComponent } from './pages/space/SpaceFrame';
 
 import HyperBrowserEnv from './context/HyperBrowserContext';
 import StorageDialog from './pages/home/components/StorageDialog';
@@ -106,7 +106,9 @@ function App(props: {homes: MutableSet<Hash>, config: Store}) {
               <Route path="chats/:identityHash" element={<AllChatsDialog />} />
             </Route>
             <Route path="space/:hash" element={<SpaceFrame homes={props.homes}/>}>
+              <Route path="" element={<SpaceComponent />}/>
               <Route path="view-author" element={<ViewAuthorDialog />} />
+              <Route path=":path" element={<SpaceComponent />}/>
             </Route>
           </Routes>
         </HyperBrowserEnv>
