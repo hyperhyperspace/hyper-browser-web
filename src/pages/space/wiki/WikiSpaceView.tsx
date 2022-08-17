@@ -1,5 +1,5 @@
 import { useObjectState } from '@hyper-hyper-space/react';
-import { IconButton, Paper, TextField, Typography, InputAdornment, MenuItem, useTheme, useMediaQuery, Stack } from '@mui/material';
+import { IconButton, Paper, TextField, Typography, InputAdornment, MenuItem, useTheme, useMediaQuery, Stack, List, ListItem, Button } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import { Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
@@ -101,31 +101,44 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     const chatWidth    = noSummary? '100%' : (fullScreen? '75%' : '80%');
 
     return <div style={{ padding: '60px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
-                <Stack direction="row" style={{height: '100%'}} spacing='1rem' sx={{maxWidth: 'md'}}>
+                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'md'}}>
         {(!noSummary || path === undefined) &&
                     <Box style={{width: summaryWidth, height: '100%'}}>
-                        <Typography variant="h4">{wiki.title?.getValue() || 'No title yet'}</Typography>
+                        <Typography style={{paddingBottom: '2rem'}}variant="h4">
+                            {wiki.title?.getValue() || 'Wiki name here'}
+                        </Typography>
+
+                        <TextField
+                        placeholder='Page name'
+                        value={targetPageName}
+                        // value={pate}
+                        onKeyPress={onNavigationUpdate}
+                        //inputRef={navigationRef}
+                        onChange={onTargetPageNameChange}
+                        size='small'
+                        InputProps={{}/*{
+                            style:{},
+                            endAdornment:
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={navigate}
+                                        aria-label="navigate to wiki page"
+                                    ><ExploreIcon></ExploreIcon></IconButton>
+                                </InputAdornment>
+                        }*/}
+                    ></TextField>
+                    <List style={{width: '100%'}}>
+                        {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).map((p: Page) => {
+                            return <ListItem><Typography>{p.name}</Typography></ListItem>
+                        })}
+                        <ListItem style={{justifyContent: 'center'}}><Button>Add a page</Button></ListItem>
+                    </List>
                     </Box>
         }
         {(!noSummary || path !== undefined) && 
             <Box style={{width: chatWidth, height: '100%'}}>
-                <TextField
-            value={targetPageName}
-            // value={pate}
-            onKeyPress={onNavigationUpdate}
-            //inputRef={navigationRef}
-            onChange={onTargetPageNameChange}
-            InputProps={{
-                style:{fontSize: 25, fontWeight: 'bold'},
-                endAdornment:
-                    <InputAdornment position="end">
-                        <IconButton
-                            onClick={navigate}
-                            aria-label="navigate to wiki page"
-                        ><ExploreIcon></ExploreIcon></IconButton>
-                    </InputAdornment>
-            }}
-        ></TextField>
+                
+                
         {currentPage === undefined &&
             <Typography>Loading...</Typography>
         }
