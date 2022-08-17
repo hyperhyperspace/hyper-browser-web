@@ -67,7 +67,7 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
                     remoteDevice.setResources(resources);
                     remoteDevice.setAuthor(home.getAuthor() as Identity);
                     remoteDevice.name?.setAuthor(home.getAuthor() as Identity);
-                    remoteDevice.name?.setWriter(home.getAuthor() as Identity);
+                    remoteDevice.name?.addWriter(home.getAuthor() as Identity);
                     
                     console.log(home.getAuthor() as Identity);
 
@@ -84,7 +84,7 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
                     localDevice.forgetResources();
                     localDevice.setAuthor(home.getAuthor() as Identity);
                     localDevice.name?.setAuthor(home.getAuthor() as Identity);
-                    localDevice.name?.setWriter(home.getAuthor() as Identity);
+                    localDevice.name?.addWriter(home.getAuthor() as Identity);
 
                     await params.offer.newDevice?.setValue(localDevice);
                     await params.offer.newDevice?.saveQueuedOps();
