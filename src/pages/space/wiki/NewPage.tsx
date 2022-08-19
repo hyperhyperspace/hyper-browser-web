@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField} from '@mui/material';
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography} from '@mui/material';
 
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
-import { useNavigate } from 'react-router';
+import { useNavigate, useOutletContext } from 'react-router';
+import { WikiContext } from './WikiSpaceView';
 
-function NewPageDialog(props: {wiki: WikiSpace, onClose: () => void, open: boolean, goToPage: (pageName: string) => void}) {
+function NewPage() {
+
+    const {wiki, nav} = useOutletContext<WikiContext>();
 
     const [name, setName] = useState('');
     const [nameError, setNameError] = useState(false);
@@ -22,8 +25,6 @@ function NewPageDialog(props: {wiki: WikiSpace, onClose: () => void, open: boole
         }
     };
 
-    const navigate = useNavigate();
-
 
     const goToPage = () => {
         let err = false;
@@ -34,16 +35,13 @@ function NewPageDialog(props: {wiki: WikiSpace, onClose: () => void, open: boole
         }
         
         if (!err) {
-            props.goToPage(name);
-            props.onClose();
+            nav.goToPage(name);
         } 
     };
 
     return (
-        <Dialog open={props.open} scroll='paper' onClose={props.onClose}>
-            <DialogTitle>Add a New Page</DialogTitle>
-
-            <DialogContent>
+        <Stack direction="column">
+            <Typography variant="h3">Add a New Page</Typography>
 
                 <Stack direction='column' spacing={2} padding={1}>
                     <TextField
@@ -55,14 +53,10 @@ function NewPageDialog(props: {wiki: WikiSpace, onClose: () => void, open: boole
                     />
                 </Stack>
 
-            </DialogContent>
+            <Button variant="outlined" onClick={goToPage}>Add</Button>
 
-            <DialogActions>
-                <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button variant="outlined" onClick={goToPage}>Add</Button><Button onClick={props.onClose}>Cancel</Button></Stack>
-            </DialogActions>
-
-        </Dialog>
+        </Stack>
     );
 }
 
-export default NewPageDialog;
+export default NewPage;

@@ -14,9 +14,11 @@ import { debounce } from 'lodash-es';
 import { Card, Icon } from '@mui/material';
 import { SpaceContext } from '../SpaceFrame';
 import { useOutletContext } from 'react-router';
+import { WikiContext } from './WikiSpaceView';
 
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any }) {
-    const { resources } = useOutletContext() as SpaceContext
+    const { spaceContext } = useOutletContext<WikiContext>();
+    const resources = spaceContext.resources;
     const blockState = useObjectState(props.block);
     const textState = useObjectState(props.block?.contents);
     

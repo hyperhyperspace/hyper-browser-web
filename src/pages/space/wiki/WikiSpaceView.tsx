@@ -7,8 +7,9 @@ import ExploreIcon from '@mui/icons-material/Explore';
 import { Outlet, Route, Routes, useNavigate, useOutletContext, useParams } from 'react-router';
 import { MutableObject } from '@hyper-hyper-space/core';
 import { Box } from '@mui/system';
-import NewPageDialog from './NewPage';
+import NewPage from './NewPage';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
+import { SpaceContext } from '../SpaceFrame';
 
 type WikiNav = {
     goToPage: (pageName: string) => void,
@@ -17,19 +18,14 @@ type WikiNav = {
 
 type WikiContext = {
     wiki : WikiSpace,
-    nav  : WikiNav
+    nav  : WikiNav,
+    spaceContext : SpaceContext
 }
 
 function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
-    //const [initialized, setInitialized] = useState(false);
-    const { path } = useParams();
-    const [pageName, setPageName]                     = useState<string>();
-    const [currentPage, setCurrentPage]               = useState<Page>();
-    const [currentPageIsSaved, setCurrentPageIsSaved] = useState<boolean>();
-    const spaceFrameContext = useOutletContext();
 
-   // console.log(spaceFrameContext);
+    const spaceContext = useOutletContext<SpaceContext>();
 
     const wiki = props.entryPoint;
     const wikiState = useObjectState(wiki);
@@ -49,7 +45,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     }
 
     const goToAddPage = () => {
-        navigate('/space/' + encodeURIComponent(wiki.getLastHash()) + '/add')
+        navigate('/space/' + encodeURIComponent(wiki.getLastHash()) + '/add-page')
     }
 
     const context: WikiContext = {
@@ -57,7 +53,8 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
         nav: {
             goToPage: goToPage,
             goToAddPage: goToAddPage
-        }
+        },
+        spaceContext: spaceContext
     }
 
     return  <Routes>
@@ -75,7 +72,13 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                                 </Stack>
                             </div>} />
                 <Route path="contents/:pageName" element={<WikiSpacePage />} />
-
+                <Route path="add-page" element={
+                            <div style={{ padding: '60px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
+                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'md'}}>
+                                    <WikiSpaceNavigation width="40%" />  
+                                    <NewPage />
+                                </Stack>
+                            </div>} />
             </Route>
     </Routes>
     

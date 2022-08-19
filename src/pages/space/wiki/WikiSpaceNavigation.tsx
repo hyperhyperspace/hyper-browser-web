@@ -26,8 +26,8 @@ function WikiSpaceNavigation(props: {width: string}) {
                         
 
                         
-                    <List style={{width: '100%'}} dense>
-                    <ListItem style={{paddingBottom: '1.5rem'}}>
+                    <List style={{width: '100%', paddingTop: '0px'}} dense>
+                    <ListItem style={{paddingBottom: '1.5rem', paddingTop: '0px'}}>
                         <Typography variant="h4">
                             {wiki.title?.getValue() || 'Wiki name here'}
                         </Typography>
@@ -54,9 +54,9 @@ function WikiSpaceNavigation(props: {width: string}) {
                     ></TextField>
                     </ListItem>
                         {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
-                            return <ListItem style={{paddingTop: '1px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none'}} variant="text" onClick={() => nav.goToPage(p.name as string)}><Typography>{p.name}</Typography></Button></ListItem>
+                            return <ListItem style={{paddingTop: '0px', paddingBottom: '0px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={() => nav.goToPage(p.name as string)}><Typography>{p.name}</Typography></Button></ListItem>
                         })}
-                        <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>
+                        <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>
                         {/*<ListItem style={{justifyContent: 'center'}}><Button onClick={nav.goToAddPage}>Add page</Button></ListItem>*/}
                     </List>
                     </Box>

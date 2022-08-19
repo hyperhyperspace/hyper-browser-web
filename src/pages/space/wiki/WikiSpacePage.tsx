@@ -26,14 +26,15 @@ function WikiSpacePage() {
     const [page, setPage] = useState<Page>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
 
-    const blocksListState = useObjectState<MutableArray<Block>>(page?.blocks);
+    const pageState       = useObjectState<Page>(page);
+    const blocksListState = useObjectState<MutableArray<Block>>(pageState?.value?.blocks);
 
     const theme = useTheme();
     const fullScreen   = useMediaQuery(theme.breakpoints.down('md'));
     const noSummary    = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const summaryWidth = noSummary? '100%' : (fullScreen? '25%' : '20%');
-    const chatWidth    = noSummary? '100%' : (fullScreen? '75%' : '80%');
+    const summaryWidth = noSummary? '100%' : (fullScreen? '35%' : '30%');
+    const chatWidth    = noSummary? '100%' : (fullScreen? '65%' : '60%');
 
     useEffect(() => {
 
@@ -42,13 +43,13 @@ function WikiSpacePage() {
 
                 console.log('PAGE IS "' + pageName + '"')
 
-                if (page === undefined) {
+                if (page?.name !== pageName || !pageIsSaved) {
                     const existingPage = wikiState?.getValue()?.getPage(pageName);
                     if (existingPage !== undefined) {
                         setPage(existingPage);
                         setPageIsSaved(true);
                         console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
-                    } else {
+                    } else if (page === undefined){
                         setPage(wikiState?.getValue()?.createPage(pageName));
                         setPageIsSaved(false);
                         console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
