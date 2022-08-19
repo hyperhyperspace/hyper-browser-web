@@ -1,13 +1,24 @@
 import { useObjectState } from '@hyper-hyper-space/react';
 import { IconButton, Paper, TextField, Typography, InputAdornment, MenuItem, useTheme, useMediaQuery, Stack, List, ListItem, Button } from '@mui/material';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Fragment } from 'react';
 import { Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
 import ExploreIcon from '@mui/icons-material/Explore';
-import { useNavigate, useOutletContext, useParams } from 'react-router';
+import { Outlet, Route, Routes, useNavigate, useOutletContext, useParams } from 'react-router';
 import { MutableObject } from '@hyper-hyper-space/core';
 import { Box } from '@mui/system';
+import NewPageDialog from './NewPage';
+import WikiSpaceNavigation from './WikiSpaceNavigation';
 
+type WikiNav = {
+    goToPage: (pageName: string) => void,
+    goToAddPage: () => void
+}
+
+type WikiContext = {
+    wiki : WikiSpace,
+    nav  : WikiNav
+}
 
 function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
@@ -17,8 +28,6 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     const [currentPage, setCurrentPage]               = useState<Page>();
     const [currentPageIsSaved, setCurrentPageIsSaved] = useState<boolean>();
     const spaceFrameContext = useOutletContext();
-
-    const [targetPageName, setTargetPageName]         = useState<string>('');
 
    // console.log(spaceFrameContext);
 
@@ -33,122 +42,42 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
         };
     }, [wiki]);
 
-    useEffect(() => {
-        setPageName(path || '');
-        setTargetPageName(path || '');
-        console.log('NAVIGATED TO "' + (path || '') + '"')
-    }, [path]);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-
-        if (pageName !== undefined && wikiState?.getValue() !== undefined) {
-            const updateCurrentPage = async () => {
-
-                console.log('PAGE IS "' + pageName + '"')
-
-                if (currentPage?.name === pageName) {
-                    if (!currentPageIsSaved && wikiState?.getValue()?.hasPage(pageName)) {
-                        await currentPage?.save();
-                        const page = wikiState?.getValue()?.getPage(pageName);
-                        if (page !== undefined) {
-                            setCurrentPage(page);
-                            setCurrentPageIsSaved(true);
-                            console.log('FOUND PAGE "' + page + '", USING SAVED VERSION INSTEAD')
-                        }
-                    }
-                } else {
-                    const existingPage = wikiState?.getValue()?.getPage(pageName);
-
-                    if (existingPage !== undefined) {
-                        setCurrentPage(existingPage);
-                        setCurrentPageIsSaved(true);
-                        console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
-                    } else {
-                        setCurrentPage(wikiState?.getValue()?.createPage(pageName));
-                        setCurrentPageIsSaved(false);
-                        console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
-                    }
-                }
-            }
-
-            updateCurrentPage();
-        }
-    }, [pageName, wikiState])
-
-    //const navigationRef = useRef<HTMLInputElement>()
-
-    const navigator = useNavigate()
-    const navigate = () => {
-        navigator('../' + targetPageName)
+    const goToPage = (pageName: string) => {
+        navigate('/space/' + encodeURIComponent(wiki.getLastHash()) + '/contents/' + encodeURIComponent(pageName));
     }
 
-    const onNavigationUpdate = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            navigate()
+    const goToAddPage = () => {
+        navigate('/space/' + encodeURIComponent(wiki.getLastHash()) + '/add')
+    }
+
+    const context: WikiContext = {
+        wiki: wiki,
+        nav: {
+            goToPage: goToPage,
+            goToAddPage: goToAddPage
         }
     }
 
-    const onTargetPageNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.currentTarget.value;
-        setTargetPageName(newValue);
-    }
-    
-    const theme = useTheme();
-    const fullScreen   = useMediaQuery(theme.breakpoints.down('md'));
-    const noSummary    = useMediaQuery(theme.breakpoints.down('sm'));
-
-    const summaryWidth = noSummary? '100%' : (fullScreen? '25%' : '20%');
-    const chatWidth    = noSummary? '100%' : (fullScreen? '75%' : '80%');
-
-    return <div style={{ padding: '60px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
-                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'md'}}>
-        {(!noSummary || path === undefined) &&
-                    <Box style={{width: summaryWidth, height: '100%'}}>
-                        <Typography style={{paddingBottom: '2rem'}}variant="h4">
-                            {wiki.title?.getValue() || 'Wiki name here'}
-                        </Typography>
-
-                        <TextField
-                        placeholder='Page name'
-                        value={targetPageName}
-                        // value={pate}
-                        onKeyPress={onNavigationUpdate}
-                        //inputRef={navigationRef}
-                        onChange={onTargetPageNameChange}
-                        size='small'
-                        InputProps={{}/*{
-                            style:{},
-                            endAdornment:
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        onClick={navigate}
-                                        aria-label="navigate to wiki page"
-                                    ><ExploreIcon></ExploreIcon></IconButton>
-                                </InputAdornment>
-                        }*/}
-                    ></TextField>
-                    <List style={{width: '100%'}}>
-                        {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).map((p: Page) => {
-                            return <ListItem><Typography>{p.name}</Typography></ListItem>
-                        })}
-                        <ListItem style={{justifyContent: 'center'}}><Button>Add a page</Button></ListItem>
-                    </List>
-                    </Box>
-        }
-        {(!noSummary || path !== undefined) && 
-            <Box style={{width: chatWidth, height: '100%'}}>
+    return  <Routes>
+            <Route path="" element={
+                <Fragment>
+                    
+                <Outlet context={context}/>
+                {/*showNewPageDialog && <NewPageDialog wiki={wiki} open={showNewPageDialog} onClose={closeNewPageDialog} goToPage={goToPage}/>*/}
+            </Fragment>}>
                 
-                
-        {currentPage === undefined &&
-            <Typography>Loading...</Typography>
-        }
-        {currentPage !== undefined &&
-            <WikiSpacePage page={currentPage}></WikiSpacePage>
-        }
-            </Box>
-        }
+                <Route path="" element={
+                            <div style={{ padding: '60px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
+                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'md'}}>
+                                    <WikiSpaceNavigation width="100%"/>
+                                </Stack>
+                            </div>} />
+                <Route path="contents/:pageName" element={<WikiSpacePage />} />
 
-    </Stack></div>
+            </Route>
+    </Routes>
     
     
     {/* <Paper style={{ padding: '60px 1rem', height: '100%' }}>
@@ -178,5 +107,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
     </Paper>*/};
 }
+
+export type { WikiContext };
 
 export default WikiSpaceView;

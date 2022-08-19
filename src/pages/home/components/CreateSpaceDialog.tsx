@@ -79,7 +79,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 // Maybe there's a way to fix `WikiSpace` so it doesn't need this?
                 let entryPoint;
                 if (spaceType === WikiSpace.className) {
-                    entryPoint = new WikiSpace(home.getAuthor());
+                    entryPoint = new WikiSpace(home.getAuthor(), name.trim());
                 } else {
                     entryPoint = new clazz();
                 }
@@ -87,7 +87,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 entryPoint.setAuthor((home.getAuthor()) as Identity);
     
 
-                const link = new SpaceLink(home.getAuthor() as Identity, entryPoint);
+                const link = new SpaceLink(home.getAuthor() as Identity, entryPoint.clone());
                 await link.name?.setValue(name.trim());
                 await props.folder.getStore().save(link);
                 console.log('saved link: ' + link.getLastHash());
@@ -100,8 +100,12 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 console.log('saved folder items')
 
                 const store = await HyperBrowserConfig.initSavedSpaceStore(home, link.spaceEntryPoint as HashedObject);
-                await store.save(entryPoint, false);
+                await store.save(entryPoint, true);
                 await store.save(home.getAuthor()?.getKeyPair() as RSAKeyPair);
+
+                if (spaceType === WikiSpace.className) {
+                    (entryPoint as WikiSpace).createWelcomePage(name);
+                }
 
                 window.open('./#/space/' + encodeURIComponent(entryPoint.getLastHash()), '_blank');
 

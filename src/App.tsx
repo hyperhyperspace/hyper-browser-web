@@ -108,7 +108,7 @@ function App(props: {homes: MutableSet<Hash>, config: Store}) {
             <Route path="space/:hash" element={<SpaceFrame homes={props.homes}/>}>
               <Route path="" element={<SpaceComponent />}/>
               <Route path="view-author" element={<ViewAuthorDialog />} />
-              <Route path=":path" element={<SpaceComponent />}/>
+              <Route path="*" element={<SpaceComponent />}/>
             </Route>
           </Routes>
         </HyperBrowserEnv>
