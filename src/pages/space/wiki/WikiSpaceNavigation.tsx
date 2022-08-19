@@ -23,13 +23,16 @@ function WikiSpaceNavigation(props: {width: string}) {
     const filterPage = (p: Page, filterText: string) => (filterText.trim() === '' || (p.name?.toLowerCase()?.indexOf(filterText.trim().toLocaleLowerCase()) as number) >= 0);
 
     return <Box style={{width: props.width, height: '100%'}}>
-                        <Typography style={{paddingBottom: '2rem'}}variant="h4">
-                            {wiki.title?.getValue() || 'Wiki name here'}
-                        </Typography>
+                        
 
                         
                     <List style={{width: '100%'}} dense>
-                    <ListItem style={{paddingTop: '1px', paddingBottom: '3px'}}>
+                    <ListItem style={{paddingBottom: '1.5rem'}}>
+                        <Typography variant="h4">
+                            {wiki.title?.getValue() || 'Wiki name here'}
+                        </Typography>
+                    </ListItem>
+                    <ListItem style={{paddingTop: '1px', paddingBottom: '5px'}}>
                     <TextField
                         placeholder='Filter pages'
                         value={filterText}
