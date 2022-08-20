@@ -217,14 +217,12 @@ function SpaceFrameToolbar(props: {home?: Home, spaceEntryPointHash: Hash, space
                         <Box paddingBottom='0.5rem'><Typography>In <b>{homeState?.value?.getAuthor()?.info?.name}</b>'s Home Space:</Typography></Box>
 
                         {links.map((link: SpaceLink) => (
-                            <Fragment>
-                            {Array.from(homeState?.value?.desktop?.getPathsForItemHash(link.getLastHash())?.values() || []).map((path: Array<FolderItem>) =>  (
+                            Array.from(homeState?.value?.desktop?.getPathsForItemHash(link.getLastHash())?.values() || []).map((path: Array<FolderItem>) =>  (
                         
-                                <Box paddingBottom='0.5rem'>
+                                <Box paddingBottom='0.5rem' key={path.map((item: FolderItem) => item.getLastHash()).join('-')}>
                                     <Typography><b>name</b>: {(path.at(-1) as FolderItem).name?.getValue()}</Typography>
                                     <Typography style={{marginTop:'-0.25rem'}}><b style={{verticalAlign:'middle', lineHeight: '20px'}}>location</b><span style={{verticalAlign:'middle', lineHeight: '20px'}}>: {path.slice(0, -1).map((value: FolderItem) => value.name?.getValue() || 'unnamed').join('/')}</span><IconButton onClick={() => openContainingFolder(path)}><img src="icons/streamline-icon-folder-empty@48x48.png" style={{width:'20px', height:'20px', padding: '1px'}}></img></IconButton></Typography>
-                                </Box>))}
-                            </Fragment>)
+                                </Box>)))
                         )}
                         
                     </div>

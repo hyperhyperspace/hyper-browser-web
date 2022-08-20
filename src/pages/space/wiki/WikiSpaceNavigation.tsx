@@ -56,7 +56,7 @@ function WikiSpaceNavigation(props: {width: string}) {
                     ></TextField>
                     </ListItem>
                         {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
-                            return <ListItem style={{paddingTop: '0px', paddingBottom: '0px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={() => nav.goToPage(p.name as string)}><Typography>{p.name}</Typography></Button></ListItem>
+                            return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={() => nav.goToPage(p.name as string)}><Typography>{p.name}</Typography></Button></ListItem>
                         })}
                         <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>
                         {/*<ListItem style={{justifyContent: 'center'}}><Button onClick={nav.goToAddPage}>Add page</Button></ListItem>*/}
