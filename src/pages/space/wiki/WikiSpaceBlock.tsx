@@ -17,7 +17,7 @@ import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { Box } from '@mui/system';
 
-function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number, addTextBlock: (idx: number) => void}) {
+function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number, showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void}) {
     const { spaceContext } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block);
@@ -79,13 +79,9 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         }
     }, [textState, editor])//, editor, blockState])
 
-    const [anchorEl, setAnchorEl]         = useState<HTMLElement|null>(null);
-    const [showAddBlock, setShowAddBlock] = useState(false);
     const handleAddBlock = (event: React.MouseEvent<HTMLButtonElement>) => {
-        console.log(event)
-        setAnchorEl(event.currentTarget);
-        setShowAddBlock(true);
-      };
+        props.showAddBlockMenu(event.currentTarget, props.idx + 1);
+    };
 
     const blockContentView =
                     <Fragment>                    
@@ -103,34 +99,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                             
                             <EditorContent editor={editor} />
                         </Box>
-                        <Menu
-                            id={'add-block-after-' + props.block?.getLastHash()}
-                            anchorEl={anchorEl}
-                            open={showAddBlock}
-                            onClose={() => {setShowAddBlock(false); setAnchorEl(null);}}
-                            MenuListProps={{
-                            'aria-labelledby': 'add a block after this one',
-                            }}
-                        >
-                            <MenuItem onClick={() => {setShowAddBlock(false); setAnchorEl(null); alert('Coming soon!');}}>
-                                <ListItemIcon>
-                                    <img src="icons/streamlinehq-megaphone-1-interface-essential-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
-                                </ListItemIcon>
-                                <ListItemText><Typography variant='body2' >Add <b>title</b> below</Typography></ListItemText>    
-                            </MenuItem>
-                            <MenuItem onClick={() => {props.addTextBlock(props.idx+1); setShowAddBlock(false); setAnchorEl(null);}}>
-                                <ListItemIcon>
-                                    <img src="icons/streamlinehq-common-file-horizontal-text-files-folders-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
-                                </ListItemIcon>
-                                <ListItemText><Typography variant='body2' >Add <b>text</b> below</Typography></ListItemText>    
-                            </MenuItem>
-                            <MenuItem onClick={() => {setShowAddBlock(false); setAnchorEl(null); alert('Coming soon!');}}>
-                                <ListItemIcon>
-                                    <img src="icons/streamlinehq-picture-sun-images-photography-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
-                                </ListItemIcon>
-                                <ListItemText><Typography variant='body2' >Add <b>image</b> below</Typography></ListItemText>    
-                            </MenuItem>
-                        </Menu>
+                        
                     </Fragment>
 
     return blockContentView 

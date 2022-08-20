@@ -1,7 +1,7 @@
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Block, Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpaceBlock from './WikiSpaceBlock';
-import { Box, Button, IconButton, Link, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { MutableArray, MutableSet } from '@hyper-hyper-space/core';
@@ -83,7 +83,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
        blocksListState?.getValue()?.loadAndWatchForChanges()
     }
     
-    const addTextBlock = (idx: number) => {
+    const addTextBlock = (idx?: number) => {
         page?.addBlock(idx);
     }
 
@@ -95,13 +95,27 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                                     {...provided.dragHandleProps}
                                     ref={provided.innerRef}
                                 >
-                                    <WikiSpaceBlock block={block} {...{startedEditing, stoppedEditing}} idx={index} addTextBlock={addTextBlock}></WikiSpaceBlock>
+                                    <WikiSpaceBlock block={block} {...{startedEditing, stoppedEditing}} idx={index} showAddBlockMenu={showAddBlockMenu}></WikiSpaceBlock>
                                 </div>
                     
                 }
             </Draggable>
         )
     )
+
+    const [anchorEl, setAnchorEl]         = useState<HTMLElement|null>(null);
+    const [newBlockIdx, setNewBlockIdx]   = useState<number|undefined>();
+    const [showAddBlock, setShowAddBlock] = useState(false);
+
+    const showAddBlockMenu = (newAnchorEl: HTMLElement, newBlockIdx?: number) => {
+        setAnchorEl(newAnchorEl);
+        setNewBlockIdx(newBlockIdx);
+        setShowAddBlock(true);
+    };
+
+    const handleAddBlock = (event: React.MouseEvent<HTMLButtonElement>) => {
+        showAddBlockMenu(event.currentTarget);
+    };
 
     return (
 
@@ -141,18 +155,49 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                             }
                         </Droppable>
                     </DragDropContext>
-                    <IconButton
-                        aria-label="append a new block to the page"
-                        onClick={() => {page.addBlock();}}
-                    >
-                        <PostAddIcon></PostAddIcon>
-                    </IconButton>
+                    {!blocksListState?.getValue()?.contents().length &&
+                        <IconButton
+                            aria-label="append a new block to the page"
+                            onClick={handleAddBlock}
+                        >
+                            <PostAddIcon></PostAddIcon>
+                        </IconButton>
+                    }
                 </Box>
                 }
                     </Box>
                 }
 
-            </Stack></div>
+            </Stack>
+            <Menu
+                id={'add-block-menu'}
+                anchorEl={anchorEl}
+                open={showAddBlock}
+                onClose={() => {setShowAddBlock(false); setAnchorEl(null);}}
+                MenuListProps={{
+                'aria-labelledby': 'add a block after this one',
+                }}
+            >
+                <MenuItem onClick={() => {setShowAddBlock(false); setAnchorEl(null); alert('Coming soon!');}}>
+                    <ListItemIcon>
+                        <img src="icons/streamlinehq-megaphone-1-interface-essential-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
+                    </ListItemIcon>
+                    <ListItemText><Typography variant='body2' >Add <b>title</b> below</Typography></ListItemText>    
+                </MenuItem>
+                <MenuItem onClick={() => {addTextBlock(newBlockIdx); setShowAddBlock(false); setAnchorEl(null);}}>
+                    <ListItemIcon>
+                        <img src="icons/streamlinehq-common-file-horizontal-text-files-folders-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
+                    </ListItemIcon>
+                    <ListItemText><Typography variant='body2' >Add <b>text</b> below</Typography></ListItemText>    
+                </MenuItem>
+                <MenuItem onClick={() => {setShowAddBlock(false); setAnchorEl(null); alert('Coming soon!');}}>
+                    <ListItemIcon>
+                        <img src="icons/streamlinehq-picture-sun-images-photography-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
+                    </ListItemIcon>
+                    <ListItemText><Typography variant='body2' >Add <b>image</b> below</Typography></ListItemText>    
+                </MenuItem>
+            </Menu>
+            </div>
 
         
     )
