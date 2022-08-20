@@ -7,7 +7,7 @@ import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautif
 import { MutableArray, MutableSet } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 
 function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, contentWidth: string}) {
@@ -83,17 +83,21 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
        blocksListState?.getValue()?.loadAndWatchForChanges()
     }
     
+    const addTextBlock = (idx: number) => {
+        page?.addBlock(idx);
+    }
+
     const blockElements = blocksListState?.getValue()?.contents().map((block, index) => 
         (
             <Draggable draggableId={block.hash()} index={index} key={block.hash()}>
-                {(provided) => 
-                    <div
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        ref={provided.innerRef}
-                    >
-                            <WikiSpaceBlock block={block} {...{startedEditing, stoppedEditing}} ></WikiSpaceBlock>
-                    </div>
+                {(provided) =>  <div
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    ref={provided.innerRef}
+                                >
+                                    <WikiSpaceBlock block={block} {...{startedEditing, stoppedEditing}} idx={index} addTextBlock={addTextBlock}></WikiSpaceBlock>
+                                </div>
+                    
                 }
             </Draggable>
         )

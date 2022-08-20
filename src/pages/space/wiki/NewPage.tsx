@@ -57,6 +57,9 @@ function NewPage(props: {noNavigation: boolean, contentWidth: string}) {
                 error={nameError} 
                 helperText={nameError? 'Please enter a name' : 'Page name'}
                 fullWidth
+                InputProps={{
+                    autoComplete: 'off'
+                }}
             />
 
             <Stack direction="row" spacing={1}><Button variant="contained" size="medium" onClick={goToPage}>Add</Button>{props.noNavigation && <Button variant="outlined" size="medium" onClick={() => {navigate(-1)}}>Cancel</Button>}</Stack>
