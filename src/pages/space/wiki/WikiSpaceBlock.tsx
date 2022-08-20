@@ -11,7 +11,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { MutableReference } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
-import { Card, Icon, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
+import { Card, Icon, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import { SpaceContext } from '../SpaceFrame';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
@@ -92,18 +92,16 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                         <Box className='wiki-block'>
                             
                             <Tooltip title="Click to add a block below">
-                                <Icon onClick={handleAddBlock} style={{cursor: 'default'}}>
+                                <Icon onClick={handleAddBlock} style={{cursor: 'default', height: 'default', width: 'default', overflow: 'visible'}}>
                                     <Add></Add>
                                 </Icon>
                             </Tooltip>
                             
-                            <Icon>
+                            <Icon style={{height: 'default', width: 'default', marginRight: '0.25rem', overflow: 'visible'}}>
                                 <DragIndicator></DragIndicator>
                             </Icon>
                             
-                            {/*<div style={{borderTop: '1px solid #acacac', paddingTop: '0.75rem'}}>*/}
-                                <EditorContent editor={editor} />
-                            {/*</div>*/}
+                            <EditorContent editor={editor} />
                         </Box>
                         <Menu
                             id={'add-block-after-' + props.block?.getLastHash()}

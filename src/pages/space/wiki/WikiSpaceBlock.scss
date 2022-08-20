@@ -18,7 +18,6 @@
   float: left;
   height: 0;
   pointer-events: none;
-  
 }
 
 .wiki-block {
@@ -46,8 +45,19 @@
   border-radius: 4px;
 }
 
+.wiki-block svg {
+  border-radius: 3px;
+  background-color: transparent;
+  line-height: default;
+}
+
+.wiki-block svg:hover {
+  background-color: #ddd
+}
+
 .wiki-block .material-icons {
   opacity: 0;
+  line-height: default;
 }
 
 .wiki-block:hover .material-icons {
