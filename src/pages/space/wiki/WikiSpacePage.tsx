@@ -1,7 +1,7 @@
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Block, Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpaceBlock from './WikiSpaceBlock';
-import { Box, IconButton, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, IconButton, Link, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { MutableArray, MutableSet } from '@hyper-hyper-space/core';
@@ -10,7 +10,7 @@ import { WikiContext } from './WikiSpaceView';
 import { useEffect, useState } from 'react';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 
-function WikiSpacePage() {
+function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, contentWidth: string}) {
     
     //const pageSetState    = useObjectState<MutableSet<Page>>(props.page.wiki?.pages);
     
@@ -19,7 +19,7 @@ function WikiSpacePage() {
     // todo: implement drag+drop using react-beautiful-dnd
 
     const { pageName } = useParams();
-    const { wiki }     = useOutletContext<WikiContext>();
+    const { wiki, nav }     = useOutletContext<WikiContext>();
     
     const wikiState = useObjectState<WikiSpace>(wiki);
 
@@ -28,13 +28,6 @@ function WikiSpacePage() {
 
     const pageState       = useObjectState<Page>(page);
     const blocksListState = useObjectState<MutableArray<Block>>(pageState?.value?.blocks);
-
-    const theme = useTheme();
-    const fullScreen   = useMediaQuery(theme.breakpoints.down('md'));
-    const noSummary    = useMediaQuery(theme.breakpoints.down('sm'));
-
-    const summaryWidth = noSummary? '100%' : (fullScreen? '35%' : '30%');
-    const chatWidth    = noSummary? '100%' : (fullScreen? '65%' : '60%');
 
     useEffect(() => {
 
@@ -108,13 +101,13 @@ function WikiSpacePage() {
 
     return (
 
-<div style={{ padding: '60px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
-                        <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'md'}}>
-                {(!noSummary || pageName === undefined) &&
-                    <WikiSpaceNavigation width={summaryWidth} />  
+<div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'lg'}}>
+                {(!props.noNavigation || pageName === undefined) &&
+                    <WikiSpaceNavigation width={props.navigationWidth} />  
                 }
-                {(!noSummary || pageName !== undefined) && 
-                    <Box style={{width: chatWidth, height: '100%'}}>
+                {(!props.noNavigation || pageName !== undefined) && 
+                    <Box style={{width: props.contentWidth, height: '100%'}}>
                         
                         
                 {page === undefined &&
@@ -125,6 +118,12 @@ function WikiSpacePage() {
 
                 {page !== undefined &&
                     <Box>
+                    {props.noNavigation && 
+                        <Stack direction="row" spacing="3px" style={{paddingBottom:'.75rem'}}>
+                            <img src="icons/streamlinehq-arrow-thick-left-arrows-diagrams-48x48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
+                            <Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToIndex}><Typography>All pages ({wiki.pages?.size() || 0})</Typography></Button>
+                        </Stack>
+                    }
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId={page.getId()!}>
                             { provided =>

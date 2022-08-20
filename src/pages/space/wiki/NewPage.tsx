@@ -5,7 +5,7 @@ import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { useNavigate, useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 
-function NewPage() {
+function NewPage(props: {noNavigation: boolean, contentWidth: string}) {
 
     const {wiki, nav} = useOutletContext<WikiContext>();
 
@@ -35,25 +35,32 @@ function NewPage() {
         }
         
         if (!err) {
+
+            if (wiki.getPage(name) === undefined) {
+                const p = wiki.createPage(name);
+                wiki.addPage(p);
+            }
+
             nav.goToPage(name);
         } 
     };
 
+    const navigate = useNavigate();
+
     return (
-        <Stack direction="column">
-            <Typography variant="h3">Add a New Page</Typography>
+        <Stack style={{width: props.contentWidth}} direction="column">
+            <Typography variant="h4">Add a New Page</Typography>
 
-                <Stack direction='column' spacing={2} padding={1}>
-                    <TextField
-                        value={name} onChange={handleNameChange} 
-                        onKeyPress={handleNameKeyPress} 
-                        error={nameError} 
-                        helperText={nameError? 'Please enter a name' : 'Page name'}
-                        fullWidth
-                    />
-                </Stack>
+            <TextField
+                value={name} onChange={handleNameChange} 
+                onKeyPress={handleNameKeyPress} 
+                error={nameError} 
+                helperText={nameError? 'Please enter a name' : 'Page name'}
+                fullWidth
+            />
 
-            <Button variant="outlined" onClick={goToPage}>Add</Button>
+            <Stack direction="row" spacing={1}><Button variant="contained" size="medium" onClick={goToPage}>Add</Button>{props.noNavigation && <Button variant="outlined" size="medium" onClick={() => {navigate(-1)}}>Cancel</Button>}</Stack>
+            
 
         </Stack>
     );

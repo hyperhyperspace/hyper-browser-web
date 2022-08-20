@@ -1,6 +1,6 @@
 import { useObjectState } from "@hyper-hyper-space/react"
 import { Page } from "@hyper-hyper-space/wiki-collab"
-import { Button, Link, List, ListItem, TextField, Typography } from "@mui/material"
+import { Button, InputAdornment, Link, List, ListItem, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
 import { useOutletContext } from "react-router"
@@ -41,16 +41,18 @@ function WikiSpaceNavigation(props: {width: string}) {
                         //inputRef={navigationRef}
                         onChange={onFilterTextChange}
                         size='small'
-                        InputProps={{}/*{
+                        InputProps={{
+                            autoComplete: 'off',
                             style:{},
                             endAdornment:
                                 <InputAdornment position="end">
-                                    <IconButton
+                                    <img src="icons/streamline-icon-search@48x48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
+                                    {/*<IconButton
                                         onClick={navigate}
                                         aria-label="navigate to wiki page"
-                                    ><ExploreIcon></ExploreIcon></IconButton>
+                                    ><ExploreIcon></ExploreIcon></IconButton>*/}
                                 </InputAdornment>
-                        }*/}
+                        }}
                     ></TextField>
                     </ListItem>
                         {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
