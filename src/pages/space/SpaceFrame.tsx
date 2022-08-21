@@ -4,6 +4,7 @@ import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-spac
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { useEffect, useState, Fragment } from 'react';
 import { Outlet, useOutletContext, useParams } from 'react-router';
+import { start } from 'repl';
 
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 
@@ -27,7 +28,7 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
 
     const params = useParams();
 
-    const localHomesState = useObjectState(props.homes);
+    //const localHomesState = useObjectState(props.homes);
     
     const [home, setHome] = useState<Home|undefined>(undefined);
 
@@ -45,70 +46,96 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
 
     useEffect(() => {
 
+        let isSaved = false;
+
+        let homeResources: Resources|undefined;
+        let home: Home|undefined;
+
+        let savedSpaceResources: Resources|undefined;
+
+        let transientSpaceResources: Resources|undefined;
+        let starterResources: Resources|undefined;
+
         const init = async () => {
 
-                let isSaved = false;
+            if (props.homes.size() > 0) {
 
-                if (localHomesState !== undefined && localHomesState.value !== undefined) {
+                const homeHash = props.homes.values().next().value;
+                console.log('ok got home hash:' + homeHash);
+                
+                homeResources = await HyperBrowserConfig.initHomeResources(homeHash, (e) => { console.log('ERROR'); console.log(e);}, 'worker');
+                setHomeResources(homeResources);
+                console.log('ok got home resources');
+                
+                home = await homeResources.store.loadAndWatchForChanges(homeHash) as Home;     
+                setHome(home);
+                console.log('ok got home:')
+                console.log(home);
+                
+                if (home !== undefined) {
 
-                    if (localHomesState.value.size() > 0) {
+                    console.log('desktop:');
+                    console.log(home.desktop);
 
-                        const homeHash = localHomesState.getValue()?.values().next().value;
-                        console.log('ok got home hash:' + homeHash);
+                    console.log('desktop spaces:');
+                    console.log(Array.from(home.desktop?._currentSpaces.values() || []));
+
+                    console.log('entry point: ' + spaceEntryPointHash);
+
+                    console.log('has current item:');
+                    console.log(home?.desktop?.hasCurrentItemByHash(spaceEntryPointHash));
+
+                    isSaved = home.desktop !== undefined && 
+                                home.desktop?.hasCurrentSpaceByHash(spaceEntryPointHash);
                         
-                        const homeResources = await HyperBrowserConfig.initHomeResources(homeHash, (e) => { console.log('ERROR'); console.log(e);}, 'worker');
-                        setHomeResources(homeResources);
-                        console.log('ok got home resources');
-                        
-                        const home = await homeResources.store.loadAndWatchForChanges(homeHash) as Home;     
-                        setHome(home);
-                        console.log('ok got home:')
-                        console.log(home);
-                        
-                        if (home !== undefined) {
-
-                            console.log('desktop:');
-                            console.log(home.desktop);
-
-                            console.log('desktop spaces:');
-                            console.log(Array.from(home.desktop?._currentSpaces.values() || []));
-
-                            console.log('entry point: ' + spaceEntryPointHash);
-
-                            console.log('has current item:');
-                            console.log(home?.desktop?.hasCurrentItemByHash(spaceEntryPointHash));
-
-                            isSaved = home.desktop !== undefined && 
-                                      home.desktop?.hasCurrentSpaceByHash(spaceEntryPointHash);
-                                
-                            if (isSaved) {
-                                console.log(home.desktop?.currentLinksForSpace(spaceEntryPointHash));
-                                const spaceLink = home.desktop?.currentLinksForSpace(spaceEntryPointHash)[0] as SpaceLink;
-                                const savedSpaceResources = await HyperBrowserConfig.initSavedSpaceResources(home, spaceLink.spaceEntryPoint as HashedObject);
-                                const knownEntryPoint = await savedSpaceResources.store.load(spaceEntryPointHash, false);
-                                if (knownEntryPoint !== undefined) {
-                                    setSpaceResources(savedSpaceResources);
-                                    setInitParams({knownEntryPoint: knownEntryPoint});
-                                } else {
-                                    isSaved = false; // oooops;
-                                    console.log('Space was saved, but it is missing in the corresponding store!')
-                                }
-                            }
+                    if (isSaved) {
+                        console.log(home.desktop?.currentLinksForSpace(spaceEntryPointHash));
+                        const spaceLink = home.desktop?.currentLinksForSpace(spaceEntryPointHash)[0] as SpaceLink;
+                        savedSpaceResources = await HyperBrowserConfig.initSavedSpaceResources(home, spaceLink.spaceEntryPoint as HashedObject);
+                        const knownEntryPoint = await savedSpaceResources.store.load(spaceEntryPointHash, false);
+                        if (knownEntryPoint !== undefined) {
+                            setSpaceResources(savedSpaceResources);
+                            setInitParams({knownEntryPoint: knownEntryPoint});
+                        } else {
+                            isSaved = false; // oooops;
+                            console.log('Space was saved, but it is missing in the corresponding store!')
                         }
                     }
                 }
-                            
-                console.log('is saved: ' + isSaved);
+            }
+        
+                        
+            console.log('is saved: ' + isSaved);
 
-                if (!isSaved) {
-                    setSpaceResources(await HyperBrowserConfig.initTransientSpaceResources(spaceEntryPointHash));
-                    setInitParams({hash: spaceEntryPointHash, resourcesForDiscovery: await HyperBrowserConfig.initStarterResources()});
-                }
+            if (!isSaved) {
 
+                transientSpaceResources = await HyperBrowserConfig.initTransientSpaceResources(spaceEntryPointHash)
+                setSpaceResources(transientSpaceResources);
+
+                starterResources = await HyperBrowserConfig.initStarterResources();
+                setInitParams({hash: spaceEntryPointHash, resourcesForDiscovery: starterResources});
             }
 
+        }
+
         init();
-    }, [localHomesState]);
+
+        return () => {
+            homeResources?.mesh.shutdown();
+            homeResources?.store.close();
+
+            home?.dontWatchForChanges();
+
+            savedSpaceResources?.mesh.shutdown();
+            savedSpaceResources?.store.close();
+
+            transientSpaceResources?.mesh.shutdown();
+            transientSpaceResources?.store.close();
+
+            starterResources?.mesh.shutdown();
+            starterResources?.store.close();
+        }
+    }, []);
 
     useEffect(() => {
 

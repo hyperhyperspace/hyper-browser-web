@@ -4,7 +4,7 @@ import WikiSpaceBlock from './WikiSpaceBlock';
 import { Box, Button, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
-import { MutableArray, MutableSet } from '@hyper-hyper-space/core';
+import { MutableArray, MutableSet, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import React, { useEffect, useState } from 'react';
@@ -22,6 +22,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     const { wiki, nav }     = useOutletContext<WikiContext>();
     
     const wikiState = useObjectState<WikiSpace>(wiki);
+    const pageSetState = useObjectState<WikiSpace>(wiki, (ev: MutationEvent) => ev.emitter === wikiState?.getValue()?.pages);
 
     const [page, setPage] = useState<Page>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
@@ -31,26 +32,26 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     useEffect(() => {
 
-        if (pageName !== undefined && wikiState?.getValue() !== undefined) {
+        if (pageName !== undefined && pageSetState?.getValue() !== undefined) {
             const updateCurrentPage = async () => {
 
                 console.log('PAGE IS "' + pageName + '"')
 
                 if (page?.name !== pageName || !pageIsSaved) {
-                    const existingPage = wikiState?.getValue()?.getPage(pageName);
+                    const existingPage = pageSetState?.getValue()?.getPage(pageName);
                     if (existingPage !== undefined) {
                         setPage(existingPage);
                         setPageIsSaved(true);
                         console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
                     } else if (page === undefined){
-                        setPage(wikiState?.getValue()?.createPage(pageName));
+                        setPage(pageSetState?.getValue()?.createPage(pageName));
                         setPageIsSaved(false);
                         console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
                     }
                 } else {
-                    if (!pageIsSaved && wikiState?.getValue()?.hasPage(pageName)) {
+                    if (!pageIsSaved && pageSetState?.getValue()?.hasPage(pageName)) {
                         await page?.save();
-                        const foundPage = wikiState?.getValue()?.getPage(pageName);
+                        const foundPage = pageSetState?.getValue()?.getPage(pageName);
                         if (page !== undefined) {
                             setPage(page);
                             setPageIsSaved(true);
@@ -62,7 +63,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
             updateCurrentPage();
         }
-    }, [pageName, page, wikiState]);
+    }, [pageName, page, pageSetState]);
 
     const onDragEnd = async (result: DropResult) => {
         const from = result.source.index;

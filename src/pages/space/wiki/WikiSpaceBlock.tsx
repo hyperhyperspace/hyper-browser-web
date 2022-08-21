@@ -70,7 +70,6 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         const newText = textState?.getValue()?.getValue();
 
         if (!newText) {
-           console.log('newText is empty!')
            return
         }
 
