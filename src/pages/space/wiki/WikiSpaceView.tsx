@@ -67,8 +67,8 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     const tablet   = useMediaQuery(theme.breakpoints.down('md'));
     const noNavigation    = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const navigationWidth = noNavigation? '100%' : (tablet? '35%' : '30%');
-    const contentWidth    = noNavigation? '100%' : (tablet? '65%' : '60%');
+    const navigationWidth = noNavigation? '100%' : (tablet? '30%' : '22%');
+    const contentWidth    = noNavigation? '100%' : (tablet? '70%' : '78%');
 
     return  <Routes>
             <Route path="" element={
@@ -80,14 +80,14 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                 
                 <Route path="" element={
                             <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
-                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'lg'}}>
+                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
                                     <WikiSpaceNavigation width="100%"/>
                                 </Stack>
                             </div>} />
                 <Route path="contents/:pageName" element={<WikiSpacePage noNavigation={noNavigation} navigationWidth={navigationWidth} contentWidth={contentWidth}/>} />
                 <Route path="add-page" element={
                             <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
-                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'lg'}}>
+                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
                                     {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
                                     
                                     <NewPage noNavigation={noNavigation} contentWidth={contentWidth}/>

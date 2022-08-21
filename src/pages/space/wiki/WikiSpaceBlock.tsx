@@ -2,7 +2,7 @@ import './WikiSpaceBlock.scss'
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Add, DragIndicator, PlusOne } from '@mui/icons-material';
-import { Block } from '@hyper-hyper-space/wiki-collab';
+import { Block, BlockType } from '@hyper-hyper-space/wiki-collab';
 
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
@@ -50,7 +50,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Document,
             Paragraph,
             Text,
-            Placeholder.configure({ placeholder: 'write something...' })
+            Placeholder.configure({ placeholder: 'Write something...' })
         ],
         parseOptions: {
             preserveWhitespace: 'full'
@@ -96,7 +96,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                                 <DragIndicator></DragIndicator>
                             </Icon>
                             
-                            <EditorContent editor={editor} />
+                            {props.block?.type === BlockType.Title && <EditorContent style={{fontSize: '2rem'}} editor={editor} />}
+                            {props.block?.type === BlockType.Text  && <EditorContent editor={editor} />}
+                            {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.contents?.getValue()} />}
+                            
                         </Box>
                         
                     </Fragment>

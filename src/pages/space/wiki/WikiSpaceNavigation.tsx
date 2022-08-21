@@ -3,13 +3,15 @@ import { Page } from "@hyper-hyper-space/wiki-collab"
 import { Button, InputAdornment, Link, List, ListItem, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
-import { useOutletContext } from "react-router"
+import { useOutletContext, useParams } from "react-router"
 import { WikiContext } from "./WikiSpaceView"
 
 
 function WikiSpaceNavigation(props: {width: string}) {
 
     const {nav, wiki} = useOutletContext<WikiContext>();
+
+    const { pageName } = useParams();
 
     const wikiState = useObjectState(wiki);
 
@@ -28,7 +30,7 @@ function WikiSpaceNavigation(props: {width: string}) {
                         
                     <List style={{width: '100%', paddingTop: '0px'}} dense>
                     <ListItem style={{paddingBottom: '1.5rem', paddingTop: '0px'}}>
-                        <Typography variant="h4">
+                        <Typography variant="h5">
                             {wiki.title?.getValue() || 'Wiki name here'}
                         </Typography>
                     </ListItem>
@@ -56,7 +58,12 @@ function WikiSpaceNavigation(props: {width: string}) {
                     ></TextField>
                     </ListItem>
                         {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
-                            return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={() => nav.goToPage(p.name as string)}><Typography>{p.name}</Typography></Button></ListItem>
+                            return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}>
+                                        {pageName !== p.name && <Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={() => nav.goToPage(p.name as string)}>
+                                            <Typography>{p.name}</Typography>
+                                        </Button>}
+                                        {pageName === p.name && <Typography style={{padding: '4px 5px'}}><b>{p.name}</b></Typography>}
+                                   </ListItem>
                         })}
                         <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>
                         {/*<ListItem style={{justifyContent: 'center'}}><Button onClick={nav.goToAddPage}>Add page</Button></ListItem>*/}

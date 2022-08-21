@@ -1,5 +1,5 @@
 import { useObjectState } from '@hyper-hyper-space/react';
-import { Block, Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
+import { Block, BlockType, Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpaceBlock from './WikiSpaceBlock';
 import { Box, Button, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import PostAddIcon from '@mui/icons-material/PostAdd';
@@ -7,7 +7,7 @@ import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautif
 import { MutableArray, MutableSet, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 
 function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, contentWidth: string}) {
@@ -84,8 +84,21 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
        blocksListState?.getValue()?.loadAndWatchForChanges()
     }
     
+    const addTitleBlock = (idx?: number) => {
+        page?.addBlock(idx, BlockType.Title);
+    }
+
     const addTextBlock = (idx?: number) => {
         page?.addBlock(idx);
+    }
+
+    const addImageBlock = (dataUrl: string, idx?: number) => {
+        console.log('CALLED ADD IMAGE BLOCK')
+        page?.addBlock(idx, BlockType.Image).then(async (b: Block) => {
+            console.log('SET IMAGE VALUE TO ', dataUrl)
+            await b.contents?.setValue(dataUrl);
+            await b.contents?.save();
+        });
     }
 
     const blockElements = blocksListState?.getValue()?.contents().map((block, index) => 
@@ -118,10 +131,33 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
         showAddBlockMenu(event.currentTarget);
     };
 
+    // image upload
+    const newImageInputRef = useRef<HTMLInputElement>(null);
+
+    const onNewPicture: React.ChangeEventHandler<HTMLInputElement> = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files !== null) {
+            console.log('got a file:')
+            console.log(e.target.files[0]);
+
+            const fileReader = new FileReader();
+
+            fileReader.onload = () => {
+
+                const dataUrl = fileReader.result?.toString();
+
+                if (dataUrl !== undefined) {
+                    addImageBlock(dataUrl, newBlockIdx);
+                }
+            };
+
+            fileReader.readAsDataURL(e.target.files[0]);
+        }
+    }
+
     return (
 
 <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
-                        <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='1rem' sx={{maxWidth: 'lg'}}>
+                        <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
                 {(!props.noNavigation || pageName === undefined) &&
                     <WikiSpaceNavigation width={props.navigationWidth} />  
                 }
@@ -170,6 +206,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                 }
 
             </Stack>
+            <input type="file" id="pictureInput" style={{display: 'none'}} ref={newImageInputRef} accept="image/*" onChange={onNewPicture}/>
             <Menu
                 id={'add-block-menu'}
                 anchorEl={anchorEl}
@@ -179,11 +216,11 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                 'aria-labelledby': 'add a block after this one',
                 }}
             >
-                <MenuItem onClick={() => {setShowAddBlock(false); setAnchorEl(null); alert('Coming soon!');}}>
+                <MenuItem onClick={() => {addTitleBlock(newBlockIdx); setShowAddBlock(false); setAnchorEl(null);}}>
                     <ListItemIcon>
                         <img src="icons/streamlinehq-megaphone-1-interface-essential-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
                     </ListItemIcon>
-                    <ListItemText><Typography variant='body2' >Add <b>title</b> below</Typography></ListItemText>    
+                    <ListItemText><Typography variant='body2' >Add a <b>title</b> below</Typography></ListItemText>    
                 </MenuItem>
                 <MenuItem onClick={() => {addTextBlock(newBlockIdx); setShowAddBlock(false); setAnchorEl(null);}}>
                     <ListItemIcon>
@@ -191,11 +228,11 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                     </ListItemIcon>
                     <ListItemText><Typography variant='body2' >Add <b>text</b> below</Typography></ListItemText>    
                 </MenuItem>
-                <MenuItem onClick={() => {setShowAddBlock(false); setAnchorEl(null); alert('Coming soon!');}}>
+                <MenuItem onClick={() => {setShowAddBlock(false); setAnchorEl(null); newImageInputRef.current?.click();}}>
                     <ListItemIcon>
                         <img src="icons/streamlinehq-picture-sun-images-photography-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
                     </ListItemIcon>
-                    <ListItemText><Typography variant='body2' >Add <b>image</b> below</Typography></ListItemText>    
+                    <ListItemText><Typography variant='body2' >Add an <b>image</b> below</Typography></ListItemText>    
                 </MenuItem>
             </Menu>
             </div>
