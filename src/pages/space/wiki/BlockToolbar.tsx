@@ -2,6 +2,7 @@ import type { Editor } from '@tiptap/core'
 import { Button, ButtonGroup } from '@mui/material'
 import CodeIcon from '@mui/icons-material/Code';
 import HighlightIcon from '@mui/icons-material/Highlight';
+import LinkIcon from '@mui/icons-material/Link';
 
 
 const BlockStyleBar = ({ editor }: { editor: Editor }) => {
@@ -12,7 +13,21 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
     return (
         <ButtonGroup
         aria-label="text formatting"
-      >
+        >
+        <Button
+            onClick={() => {
+                const baseLocation = window.location.hash.substring(1)?.split('/').slice(0,4).join('/')
+                const pageName = editor.state.doc.textBetween(editor.view.state.selection.from, editor.view.state.selection.to)
+                console.log('linking', baseLocation, pageName)
+                editor.chain().focus().toggleLink({
+                    href: `#${baseLocation}/${pageName}`,
+                    target: '_self'
+                }).run()}
+            }
+            variant={editor.isActive('link') ? 'contained' : 'outlined'}
+            aria-label="bold">
+          <LinkIcon/>
+        </Button>
         <Button
             onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
             variant={editor.isActive('heading', { level: 1 }) ? 'contained' : 'outlined'}

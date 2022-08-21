@@ -49,20 +49,19 @@ function NewPage(props: {noNavigation: boolean, contentWidth: string}) {
 
     return (
         <Stack style={{width: props.contentWidth}} direction="column">
-            <Typography variant="h4">Add a New Page</Typography>
-
             <TextField
                 value={name} onChange={handleNameChange} 
                 onKeyPress={handleNameKeyPress} 
                 error={nameError} 
-                helperText={nameError? 'Please enter a name' : 'Page name'}
+                helperText={nameError? 'Please enter a name' : ''}
                 fullWidth
+                placeholder='Untitled page'
                 InputProps={{
                     autoComplete: 'off'
                 }}
             />
 
-            <Stack direction="row" spacing={1}><Button variant="contained" size="medium" onClick={goToPage}>Add</Button>{props.noNavigation && <Button variant="outlined" size="medium" onClick={() => {navigate(-1)}}>Cancel</Button>}</Stack>
+            <Stack direction="row" spacing={1}><Button variant="contained" size="medium" onClick={goToPage}>Add new page</Button>{props.noNavigation && <Button variant="outlined" size="medium" onClick={() => {navigate(-1)}}>Cancel</Button>}</Stack>
             
 
         </Stack>

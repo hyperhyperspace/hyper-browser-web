@@ -20,6 +20,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
+import Link from '@tiptap/extension-link'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { lowlight } from 'lowlight/lib/all.js'
 
@@ -61,6 +62,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Highlight,
             TextAlign,
             Underline,
+            Link,
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
         ],
