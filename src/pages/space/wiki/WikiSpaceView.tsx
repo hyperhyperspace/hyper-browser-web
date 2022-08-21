@@ -1,12 +1,8 @@
-import { useObjectState } from '@hyper-hyper-space/react';
-import { IconButton, Paper, TextField, Typography, InputAdornment, MenuItem, useTheme, useMediaQuery, Stack, List, ListItem, Button } from '@mui/material';
-import { useEffect, useState, useRef, Fragment } from 'react';
-import { Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
+import { useTheme, useMediaQuery, Stack } from '@mui/material';
+import { useEffect, Fragment } from 'react';
+import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
-import ExploreIcon from '@mui/icons-material/Explore';
-import { Outlet, Route, Routes, useNavigate, useOutletContext, useParams } from 'react-router';
-import { MutableObject } from '@hyper-hyper-space/core';
-import { Box } from '@mui/system';
+import { Outlet, Route, Routes, useNavigate, useOutletContext } from 'react-router';
 import NewPage from './NewPage';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 import { SpaceContext } from '../SpaceFrame';
@@ -29,7 +25,6 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     const spaceContext = useOutletContext<SpaceContext>();
 
     const wiki = props.entryPoint;
-    const wikiState = useObjectState(wiki);
 
     useEffect(() => {
         wiki.startSync();

@@ -11,21 +11,28 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { MutableReference } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
-import { Card, Icon, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
-import { SpaceContext } from '../SpaceFrame';
+import { Icon, Tooltip } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { Box } from '@mui/system';
+import BlockStyleBar from './BlockToolbar';
+import StarterKit from '@tiptap/starter-kit';
+import Highlight from '@tiptap/extension-highlight'
+import TextAlign from '@tiptap/extension-text-align'
+import Underline from '@tiptap/extension-underline'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { lowlight } from 'lowlight/lib/all.js'
 
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number, showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void}) {
     const { spaceContext } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block);
     const textState = useObjectState(props.block?.contents);
-    
+
+
+    // console.log('instantiating block editor component') // this is happening *a lot* sometimes when focusing the editor ...
 
     // since this obejct is being sync'd, the following should happen automatically:
-    
     useEffect(() => {
         blockState?.getValue()?.loadAndWatchForChanges();
         textState?.getValue()?.loadAndWatchForChanges();
@@ -50,6 +57,11 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Document,
             Paragraph,
             Text,
+            StarterKit,
+            Highlight,
+            TextAlign,
+            Underline,
+            CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
         ],
         parseOptions: {
@@ -61,10 +73,13 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             }
         },
         editable,
-        onFocus: props.startedEditing,
         onBlur: props.stoppedEditing
     })
 
+    editor?.on('focus', () => {
+        console.log('focusing editor')
+        props.startedEditing!(editor)
+    })
 
     useEffect(() => {
         const newText = textState?.getValue()?.getValue();
@@ -85,7 +100,6 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const blockContentView =
                     <Fragment>                    
                         <Box className='wiki-block'>
-                            
                             <Tooltip title="Click to add a block below">
                                 <Icon onClick={handleAddBlock} style={{cursor: 'default', height: 'default', width: 'default', overflow: 'visible'}}>
                                     <Add></Add>
@@ -96,9 +110,12 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                                 <DragIndicator></DragIndicator>
                             </Icon>
                             
-                            {props.block?.type === BlockType.Title && <EditorContent style={{fontSize: '2rem'}} editor={editor} />}
-                            {props.block?.type === BlockType.Text  && <EditorContent editor={editor} />}
-                            {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.contents?.getValue()} />}
+                            <div>
+                                {editor?.isEditable && <BlockStyleBar editor={editor}></BlockStyleBar>}
+                                {props.block?.type === BlockType.Title && <EditorContent style={{fontSize: '2rem'}} editor={editor} />}
+                                {props.block?.type === BlockType.Text  && <EditorContent editor={editor} />}
+                                {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.contents?.getValue()} />}
+                            </div>                            
                             
                         </Box>
                         
