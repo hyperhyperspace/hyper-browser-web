@@ -32,7 +32,7 @@ function ViewFolderDialog() {
           folder.items !== undefined && 
           folder.items.indexOfByHash(ev.emitter.getLastHash()) >= 0));*/
 
-    const folderState = useObjectState<Folder>(viewingFolder, viewingFolder?.ownEventsFilter());
+    const folderState = useObjectState<Folder>(viewingFolder, {filterMutations: viewingFolder?.ownEventsFilter()});
 
     useEffect(() => {
         setViewingFolderByHash(path[path.length-1])

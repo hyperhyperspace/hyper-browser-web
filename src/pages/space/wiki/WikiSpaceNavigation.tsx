@@ -1,3 +1,4 @@
+import { MutationEvent } from "@hyper-hyper-space/core"
 import { useObjectState } from "@hyper-hyper-space/react"
 import { Page } from "@hyper-hyper-space/wiki-collab"
 import { Button, InputAdornment, Link, List, ListItem, TextField, Typography } from "@mui/material"
@@ -7,13 +8,15 @@ import { useOutletContext, useParams } from "react-router"
 import { WikiContext } from "./WikiSpaceView"
 
 
-function WikiSpaceNavigation(props: {width: string}) {
+function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
 
     const {nav, wiki} = useOutletContext<WikiContext>();
 
     const { pageName } = useParams();
 
     const wikiState = useObjectState(wiki);
+    const pageSetState = useObjectState(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
+
 
     const [filterText, setFilterText] = useState<string>('');
 
@@ -24,14 +27,22 @@ function WikiSpaceNavigation(props: {width: string}) {
 
     const filterPage = (p: Page, filterText: string) => (filterText.trim() === '' || (p.name?.toLowerCase()?.indexOf(filterText.trim().toLocaleLowerCase()) as number) >= 0);
 
+    useEffect(() => {
+        if (props.redirect) {
+            if (pageSetState?.getValue()?.pages?.size() || 0 > 0) {
+                nav.goToPage(pageSetState?.getValue()?.pages?.values().next().value.name);
+            }
+        }
+    }, [pageSetState]);
+
     return <Box style={{width: props.width, height: '100%'}}>
                         
 
                         
                     <List style={{width: '100%', paddingTop: '0px'}} dense>
                     <ListItem style={{paddingBottom: '1.5rem', paddingTop: '0px'}}>
-                        <Typography variant="h5">
-                            {wiki.title?.getValue() || 'Wiki name here'}
+                        <Typography variant="h5" style={{color: (wikiState?.getValue()?.title?.getValue() === undefined? 'gray' : 'unset')}}>
+                            {wikiState?.getValue()?.title?.getValue() || 'Fetching title...'}
                         </Typography>
                     </ListItem>
                     <ListItem style={{paddingTop: '1px', paddingBottom: '5px'}}>
@@ -59,7 +70,7 @@ function WikiSpaceNavigation(props: {width: string}) {
                     </ListItem>
                         {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
                             return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}>
-                                        {pageName !== p.name && <Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={() => nav.goToPage(p.name as string)}>
+                                        {pageName !== p.name && <Button size="small" style={{textTransform:'none', textAlign: 'left', minWidth: 'unset'}} variant="text" onClick={() => nav.goToPage(p.name as string)}>
                                             <Typography>{p.name}</Typography>
                                         </Button>}
                                         {pageName === p.name && <Typography style={{padding: '4px 5px'}}><b>{p.name}</b></Typography>}

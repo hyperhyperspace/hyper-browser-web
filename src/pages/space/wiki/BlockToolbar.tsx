@@ -12,7 +12,7 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
 
     return (
         <ButtonGroup
-        aria-label="text formatting"
+            aria-label="text formatting"
         >
         <Button
             onClick={() => {
@@ -80,7 +80,7 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
             onClick={() => editor.chain().focus().toggleHighlight().run()} 
             variant={editor.isActive('highlight') ? 'contained' : 'outlined'}
             aria-label="highlight selection">
-            <HighlightIcon/>
+            {!editor.isActive('highlight') && <span style={{backgroundColor: 'yellow', padding: '0px 2px'}}>h</span>}{editor.isActive('highlight') && <span style={{padding: '0px 2px'}}>h</span>}{/*<HighlightIcon/>*/}
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleCodeBlock().run()} 

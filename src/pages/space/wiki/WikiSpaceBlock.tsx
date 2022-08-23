@@ -27,17 +27,63 @@ import { lowlight } from 'lowlight/lib/all.js'
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number, showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void}) {
     const { spaceContext } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
-    const blockState = useObjectState(props.block);
-    const textState = useObjectState(props.block?.contents);
+    const blockState = useObjectState(props.block, {debounceFreq: 250});
+    const blockContentsState = useObjectState(props.block?.contents, {debounceFreq: 250});
 
+    const [isEditing, setIsEditing] = useState(false);
+    const lostFocusTimeout          = useRef<number|undefined>();
+
+    const startedEditing = (editor?: any, event?: any/*FocusEvent*/) => {
+
+        console.log('STARTED EDITING', editor, event)
+
+        if (lostFocusTimeout.current !== undefined) {
+            window.clearTimeout(lostFocusTimeout.current);
+        }
+
+        lostFocusTimeout.current = window.setTimeout(() => {
+            setIsEditing((old: boolean) => {
+
+                if (!old && props.block.type === BlockType.Text) {
+                    props.startedEditing(editor);
+                    blockState?.setDebounceFreq(undefined);
+                    blockContentsState?.setDebounceFreq(undefined);
+                }
+    
+                return true;
+            });    
+        }, 10);
+
+    }
+
+    const stoppedEditing = () => {
+
+        if (lostFocusTimeout.current !== undefined) {
+            window.clearTimeout(lostFocusTimeout.current);
+        }
+
+        lostFocusTimeout.current = window.setTimeout(
+            () => {
+                setIsEditing((old: boolean) => {
+
+                    if (old && props.block.type === BlockType.Text) {
+                        props.stoppedEditing();
+                    }
+        
+                    return false;
+                });
+            }, 500
+        );
+
+    }
 
     // console.log('instantiating block editor component') // this is happening *a lot* sometimes when focusing the editor ...
 
     // since this obejct is being sync'd, the following should happen automatically:
-    useEffect(() => {
+    /*useEffect(() => {
         blockState?.getValue()?.loadAndWatchForChanges();
-        textState?.getValue()?.loadAndWatchForChanges();
-    }, [blockState, textState])
+        blockContentsState?.getValue()?.loadAndWatchForChanges();
+    }, [blockState, blockContentsState])*/
 
     const author = blockState?.getValue()?.getAuthor();
     const editable = author === undefined || author.hasKeyPair();
@@ -51,7 +97,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         blockContents.setResources(resources!);
         blockContents.saveQueuedOps();
         console.log('SAVED BLOCK')
-    }, 500))
+    }, 1500))
 
     const editor = useEditor({
         extensions: [
@@ -70,30 +116,33 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             preserveWhitespace: 'full'
         },
         onUpdate: async ({ editor }) => {
-            if (textState) {
-                updateBlockWithHtml.current(textState.getValue()!, editor.getHTML())
+            console.log('UPDATE')
+            console.log(blockContentsState)
+            if (blockContentsState && !editor.isDestroyed) {
+                updateBlockWithHtml.current(blockContentsState.getValue()!, editor.getHTML())
             }
         },
         editable,
-        onBlur: props.stoppedEditing
-    })
+        onBlur: stoppedEditing,
+        onFocus: startedEditing
+    });
 
-    editor?.on('focus', () => {
+    /*editor?.on('focus', () => {
         console.log('focusing editor')
-        props.startedEditing!(editor)
-    })
+        startedEditing!(editor)
+    });*/
 
     useEffect(() => {
-        const newText = textState?.getValue()?.getValue();
+        const newText = blockContentsState?.getValue()?.getValue();
 
         if (!newText) {
            return
         }
 
-        if (newText !== editor?.getHTML()) {
+        if (!editor?.isDestroyed && newText !== editor?.getHTML()) {
             editor?.commands.setContent(newText, false, { preserveWhitespace: 'full' })
         }
-    }, [textState, editor])//, editor, blockState])
+    }, [blockContentsState, editor])//, editor, blockState])
 
     const handleAddBlock = (event: React.MouseEvent<HTMLButtonElement>) => {
         props.showAddBlockMenu(event.currentTarget, props.idx + 1);
@@ -103,7 +152,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                     <Fragment>                    
                         <Box className='wiki-block'>
                             <Tooltip title="Click to add a block below">
-                                <Icon onClick={handleAddBlock} style={{cursor: 'default', height: 'default', width: 'default', overflow: 'visible'}}>
+                                <Icon onClick={handleAddBlock} style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
                                     <Add></Add>
                                 </Icon>
                             </Tooltip>
@@ -113,9 +162,12 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                             </Icon>
                             
                             <div>
-                                {editor?.isEditable && <BlockStyleBar editor={editor}></BlockStyleBar>}
-                                {props.block?.type === BlockType.Title && <EditorContent style={{fontSize: '2rem'}} editor={editor} />}
-                                {props.block?.type === BlockType.Text  && <EditorContent editor={editor} />}
+                                {props.block?.type === BlockType.Text  && 
+                                    <Fragment>
+                                        {editor?.isEditable && isEditing && <BlockStyleBar editor={editor}></BlockStyleBar>}
+                                        <EditorContent editor={editor} />
+                                    </Fragment>
+                                }
                                 {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.contents?.getValue()} />}
                             </div>                            
                             

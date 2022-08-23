@@ -74,7 +74,7 @@ function HomeSpace() {
     const chatsState                        = useObjectState(chats);
     const [unreadChatsCount, setUnreadChatsCount] = useState(0);
 
-    const desktopFolderState = useObjectState<Folder>(desktopFolder, desktopFolder?.ownEventsFilter());
+    const desktopFolderState = useObjectState<Folder>(desktopFolder, {filterMutations: desktopFolder?.ownEventsFilter()});
     
 
     const [viewingFolder, setViewingFolder] = useState<Folder|undefined>()

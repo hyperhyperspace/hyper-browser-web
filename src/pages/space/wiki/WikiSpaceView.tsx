@@ -1,4 +1,4 @@
-import { useTheme, useMediaQuery, Stack } from '@mui/material';
+import { useTheme, useMediaQuery, Stack, Paper, Typography } from '@mui/material';
 import { useEffect, Fragment } from 'react';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
@@ -28,9 +28,11 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
     useEffect(() => {
         wiki.startSync();
+        wiki.title?.loadAndWatchForChanges();
 
         return () => {
             wiki.stopSync();
+            wiki.title?.dontWatchForChanges();
         };
     }, [wiki]);
 
@@ -45,7 +47,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     }
 
     const goToIndex = () => {
-        navigate('/space/' + encodeURIComponent(wiki.getLastHash()));
+        navigate('/space/' + encodeURIComponent(wiki.getLastHash()) + '/index');
     }
 
     const context: WikiContext = {
@@ -60,10 +62,10 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
     const theme = useTheme();
     const tablet   = useMediaQuery(theme.breakpoints.down('md'));
-    const noNavigation    = useMediaQuery(theme.breakpoints.down('sm'));
+    const noNavigation    = useMediaQuery(theme.breakpoints.down('md'));
 
-    const navigationWidth = noNavigation? '100%' : (tablet? '30%' : '22%');
-    const contentWidth    = noNavigation? '100%' : (tablet? '70%' : '78%');
+    const navigationWidth = noNavigation? '100%' : (tablet? '20' : '22%');
+    const contentWidth    = noNavigation? '100%' : (tablet? '80%' : '78%');
 
     return  <Routes>
             <Route path="" element={
@@ -74,6 +76,15 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
             </Fragment>}>
                 
                 <Route path="" element={
+                            <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
+                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
+                                    <WikiSpaceNavigation width={navigationWidth} redirect/>
+                                    <Paper style={{width: contentWidth}}>
+                                        <Typography>Fetching wiki contents...</Typography>
+                                    </Paper>
+                                </Stack>
+                            </div>} />
+                <Route path="index" element={
                             <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
                                 <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
                                     <WikiSpaceNavigation width="100%"/>

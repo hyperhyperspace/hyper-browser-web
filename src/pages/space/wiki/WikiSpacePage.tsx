@@ -21,14 +21,14 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     const { pageName } = useParams();
     const { wiki, nav }     = useOutletContext<WikiContext>();
     
-    const wikiState = useObjectState<WikiSpace>(wiki);
-    const pageSetState = useObjectState<WikiSpace>(wiki, (ev: MutationEvent) => ev.emitter === wikiState?.getValue()?.pages);
+    //const wikiState = useObjectState<WikiSpace>(wiki, {debounceFreq: 250});
+    const wikiTitleState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.title, debounceFreq: 250});
+    const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
     const [page, setPage] = useState<Page>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
 
-    const pageState       = useObjectState<Page>(page);
-    const blocksListState = useObjectState<MutableArray<Block>>(pageState?.value?.blocks);
+    const blocksListState = useObjectState<MutableArray<Block>>(page?.blocks, {debounceFreq: 250});
 
     useEffect(() => {
 
@@ -47,6 +47,8 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                         setPage(pageSetState?.getValue()?.createPage(pageName));
                         setPageIsSaved(false);
                         console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
+                    } else {
+                        console.log('NOT NAVIGATING 1')
                     }
                 } else {
                     if (!pageIsSaved && pageSetState?.getValue()?.hasPage(pageName)) {
@@ -56,7 +58,11 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                             setPage(page);
                             setPageIsSaved(true);
                             console.log('FOUND PAGE "' + page + '", USING SAVED VERSION INSTEAD')
+                        } else {
+                            console.log('NOT NAVIGATING 2')
                         }
+                    } else {
+                        console.log('NOT NAVIGATING 3')
                     }
                 }
             }
@@ -75,19 +81,17 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
 
     const startedEditing = () => {
-       console.log('editing... pause watching for blocks updates')
-       blocksListState?.getValue()?.dontWatchForChanges() 
+        console.log('editing... pause watching for blocks updates')
+        blocksListState?.getValue()?.dontWatchForChanges();
+        blocksListState?.setDebounceFreq(undefined);
     }
 
     const stoppedEditing = () => {
-       console.log('continue watching for blocks updates')
-       blocksListState?.getValue()?.loadAndWatchForChanges()
+        console.log('continue watching for blocks updates');
+        blocksListState?.setDebounceFreq(250);
+        blocksListState?.getValue()?.loadAndWatchForChanges();
     }
     
-    const addTitleBlock = (idx?: number) => {
-        page?.addBlock(idx, BlockType.Title);
-    }
-
     const addTextBlock = (idx?: number) => {
         page?.addBlock(idx);
     }
@@ -174,10 +178,14 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                 {page !== undefined &&
                     <Box>
                     {props.noNavigation && 
-                        <Stack direction="row" spacing="3px" style={{paddingBottom:'.75rem'}}>
-                            <img src="icons/streamlinehq-arrow-thick-left-arrows-diagrams-48x48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
-                            <Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToIndex}><Typography>All pages ({wiki.pages?.size() || 0})</Typography></Button>
+                    <Stack direction="row" style={{paddingBottom:'.75rem', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
+                        <Stack direction="row" spacing="3px" style={{alignItems: 'center'}}>
+                            <a onClick={nav.goToIndex} style={{cursor:'pointer', paddingTop: '6px', paddingRight: '3px'}}><img src="icons/streamlinehq-arrow-thick-left-arrows-diagrams-48x48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img></a>
+                            <Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToIndex}><Typography> Index</Typography></Button>
                         </Stack>
+                        <Typography variant='h5'>{pageName || ''}</Typography>
+                        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                    </Stack>
                     }
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId={page.getId()!}>
@@ -192,13 +200,18 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                             }
                         </Droppable>
                     </DragDropContext>
-                    {!blocksListState?.getValue()?.contents().length &&
-                        <IconButton
-                            aria-label="append a new block to the page"
-                            onClick={handleAddBlock}
-                        >
-                            <PostAddIcon></PostAddIcon>
-                        </IconButton>
+                    {!blocksListState?.getValue()?.contents().length && wikiTitleState?.getValue()?.title?.getValue() !== undefined &&
+                        <Stack direction='row' spacing={3} style={{alignItems: 'baseline'}}>
+                            <Typography>This looks empty.</Typography>
+                            <Button aria-label="add something to the page" variant="contained" onClick={handleAddBlock}>
+                                Add something
+                            </Button>
+                        </Stack>
+                    }
+                    {!blocksListState?.getValue()?.contents().length && wikiTitleState?.getValue()?.title?.getValue() === undefined &&
+                        <Stack direction='row' spacing={3} style={{alignItems: 'baseline'}}>
+                            <Typography>Fetching wiki contents...</Typography>
+                        </Stack>
                     }
                 </Box>
                 }
@@ -216,12 +229,6 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                 'aria-labelledby': 'add a block after this one',
                 }}
             >
-                <MenuItem onClick={() => {addTitleBlock(newBlockIdx); setShowAddBlock(false); setAnchorEl(null);}}>
-                    <ListItemIcon>
-                        <img src="icons/streamlinehq-megaphone-1-interface-essential-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>
-                    </ListItemIcon>
-                    <ListItemText><Typography variant='body2' >Add a <b>title</b> below</Typography></ListItemText>    
-                </MenuItem>
                 <MenuItem onClick={() => {addTextBlock(newBlockIdx); setShowAddBlock(false); setAnchorEl(null);}}>
                     <ListItemIcon>
                         <img src="icons/streamlinehq-common-file-horizontal-text-files-folders-48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img>

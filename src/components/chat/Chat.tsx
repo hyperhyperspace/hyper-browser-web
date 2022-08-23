@@ -23,7 +23,7 @@ function Chat(props: {onClose: () => void, chatWidth: string, noSummary: boolean
 
     
 
-    const convState = useObjectState<Conversation>(props.conv, (ev: MutationEvent) => MutableObject.isContentChangeEvent(ev));
+    const convState = useObjectState<Conversation>(props.conv, {filterMutations: (ev: MutationEvent) => MutableObject.isContentChangeEvent(ev)});
 
     useEffect(() => {
 
