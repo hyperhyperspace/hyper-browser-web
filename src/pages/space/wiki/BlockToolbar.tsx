@@ -11,6 +11,7 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
     }
 
     return (
+        <div className='wiki-toolbar'>
         <ButtonGroup
             aria-label="text formatting"
         >
@@ -89,6 +90,7 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
             <CodeIcon/>
         </Button>
       </ButtonGroup>
+      </div>
   
     )
 }

@@ -83,12 +83,12 @@ pre {
   }
 }
 
-.MuiButtonGroup-root {
+.wiki-toolbar .MuiButtonGroup-root {
   display: flex !important;
   flex-wrap: wrap !important;
 }
 
-.MuiButtonGroup-grouped {
+.wiki-toolbar .MuiButtonGroup-grouped {
   border-right-color: unset !important;
 }
 
