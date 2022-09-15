@@ -8,7 +8,7 @@ import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Placeholder from '@tiptap/extension-placeholder'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, useEditor, Editor } from '@tiptap/react'
 import { MutableReference } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
 import { Icon, Tooltip } from '@mui/material';
@@ -164,8 +164,8 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                             <div>
                                 {props.block?.type === BlockType.Text  && 
                                     <Fragment>
-                                        {editor?.isEditable && isEditing && <BlockStyleBar editor={editor}></BlockStyleBar>}
                                         <EditorContent editor={editor} />
+                                        {editor?.isEditable && isEditing && !editor?.state.selection?.empty && <BlockStyleBar editor={editor}></BlockStyleBar>}
                                     </Fragment>
                                 }
                                 {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.contents?.getValue()} />}
