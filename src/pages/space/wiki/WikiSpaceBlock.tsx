@@ -2,7 +2,7 @@ import './WikiSpaceBlock.scss'
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Add, DragIndicator, PlusOne } from '@mui/icons-material';
-import { Block, BlockType } from '@hyper-hyper-space/wiki-collab';
+import { Block, BlockType, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
@@ -16,12 +16,12 @@ import BlockStyleBar from './BlockToolbar';
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
-import Link from '@tiptap/extension-link'
+import WikiLink from './WikiLink';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import History from '@tiptap/extension-history';
 import { lowlight } from 'lowlight/lib/all.js'
 import { EditorContent, useEditor } from '@tiptap/react'
-import { MutableReference } from '@hyper-hyper-space/core';
+import { MutableReference, MutationEvent } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
 import { Icon, Tooltip } from '@mui/material';
 import { useOutletContext } from 'react-router';
@@ -41,6 +41,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
     const blockContentsState = useObjectState(props.block?.contents, {debounceFreq: 250});
+
+    const { wiki }     = useOutletContext<WikiContext>();
+    const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
+
 
     const [isEditing, setIsEditing] = useState(false);
     const lostFocusTimeout          = useRef<number|undefined>();
@@ -124,7 +128,9 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Highlight,
             TextAlign,
             Underline,
-            Link,
+            WikiLink.configure({
+                definedPageNames: [...pageSetState?.getValue()?.pages?.values()!].map(page => page.name!)
+            }),
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
         ],

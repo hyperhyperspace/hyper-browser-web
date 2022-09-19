@@ -100,4 +100,8 @@ pre {
   border-right-color: unset !important;
 }
 
+a:not(.existing-page-link) {
+  color: #00ace4;
+}
+
 @import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/github-dark.min.css')
