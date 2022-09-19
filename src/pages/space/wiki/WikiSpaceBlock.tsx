@@ -7,22 +7,34 @@ import { Block, BlockType } from '@hyper-hyper-space/wiki-collab';
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
+import Bold from '@tiptap/extension-bold';
+import Heading from '@tiptap/extension-heading';
+import Italic from '@tiptap/extension-italic';
+import Strike from '@tiptap/extension-strike';
 import Placeholder from '@tiptap/extension-placeholder'
-import { EditorContent, useEditor, Editor } from '@tiptap/react'
-import { MutableReference } from '@hyper-hyper-space/core';
-import { debounce } from 'lodash-es';
-import { Icon, Tooltip } from '@mui/material';
-import { useOutletContext } from 'react-router';
-import { WikiContext } from './WikiSpaceView';
-import { Box } from '@mui/system';
 import BlockStyleBar from './BlockToolbar';
-import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { lowlight } from 'lowlight/lib/all.js'
+import { EditorContent, useEditor } from '@tiptap/react'
+import { MutableReference } from '@hyper-hyper-space/core';
+import { debounce } from 'lodash-es';
+import { Icon, Tooltip } from '@mui/material';
+import { useOutletContext } from 'react-router';
+import { WikiContext } from './WikiSpaceView';
+import { Box } from '@mui/system';
+// other extensions from the tiptap StarterKit:
+// import BlockQuote from '@tiptap/extension-blockquote';
+// import BulletList from '@tiptap/extension-bullet-list';
+// import DropCursor from '@tiptap/extension-dropcursor';
+// import HardBreak from '@tiptap/extension-hard-break';
+// import History from '@tiptap/extension-history';
+// import HorizontalRule from '@tiptap/extension-horizontal-rule';
+// import List from '@tiptap/extension-list-item';
+// import OrderedList from '@tiptap/extension-ordered-list';
 
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number, showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void}) {
     const { spaceContext } = useOutletContext<WikiContext>();
@@ -104,7 +116,11 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Document,
             Paragraph,
             Text,
-            StarterKit,
+            Bold,
+            Strike,
+            Italic,
+            Heading,
+            // StarterKit,
             Highlight,
             TextAlign,
             Underline,
