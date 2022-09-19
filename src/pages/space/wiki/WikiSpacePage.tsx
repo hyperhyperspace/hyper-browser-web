@@ -43,12 +43,12 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                         setPage(existingPage);
                         setPageIsSaved(true);
                         console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
-                    } else if (page === undefined){
+                    } else if (page === undefined || page?.name !== pageName){
                         setPage(pageSetState?.getValue()?.createPage(pageName));
                         setPageIsSaved(false);
                         console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
                     } else {
-                        console.log('NOT NAVIGATING 1')
+                        console.log('NOT NAVIGATING 1', pageName, page, page?.name, existingPage, blocksListState?.getValue()?.contents(), page?.blocks?.contents())
                     }
                 } else {
                     if (!pageIsSaved && pageSetState?.getValue()?.hasPage(pageName)) {
