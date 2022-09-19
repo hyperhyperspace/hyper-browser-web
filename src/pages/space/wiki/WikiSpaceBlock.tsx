@@ -18,6 +18,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import History from '@tiptap/extension-history';
 import { lowlight } from 'lowlight/lib/all.js'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { MutableReference } from '@hyper-hyper-space/core';
@@ -31,7 +32,6 @@ import { Box } from '@mui/system';
 // import BulletList from '@tiptap/extension-bullet-list';
 // import DropCursor from '@tiptap/extension-dropcursor';
 // import HardBreak from '@tiptap/extension-hard-break';
-// import History from '@tiptap/extension-history';
 // import HorizontalRule from '@tiptap/extension-horizontal-rule';
 // import List from '@tiptap/extension-list-item';
 // import OrderedList from '@tiptap/extension-ordered-list';
@@ -120,7 +120,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Strike,
             Italic,
             Heading,
-            // StarterKit,
+            History,
             Highlight,
             TextAlign,
             Underline,
