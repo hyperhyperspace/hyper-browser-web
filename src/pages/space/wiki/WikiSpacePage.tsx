@@ -48,7 +48,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                         setPageIsSaved(false);
                         console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
                     } else {
-                        console.log('NOT NAVIGATING 1', pageName, page, page?.name, existingPage, blocksListState?.getValue()?.contents(), page?.blocks?.contents())
+                        console.log('NOT NAVIGATING 1')
                     }
                 } else {
                     if (!pageIsSaved && pageSetState?.getValue()?.hasPage(pageName)) {
