@@ -20,7 +20,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import WikiLink from './WikiLink';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import History from '@tiptap/extension-history';
+// import History from '@tiptap/extension-history';
 import { lowlight } from 'lowlight/lib/all.js'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { MutableReference, MutationEvent } from '@hyper-hyper-space/core';
@@ -45,6 +45,8 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
     const blockContentsState = useObjectState(props.block?.contents, {debounceFreq: 250});
+
+    const [editorFieldId, setEditorFieldId] = useState(props.block?.contents?.hash())
 
     const { wiki }     = useOutletContext<WikiContext>();
     const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
@@ -128,14 +130,14 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Strike,
             Italic,
             Heading,
-            History,
+            // History, // conflicts with Collaboration plugin
             Highlight,
             TextAlign,
             Underline,
             WikiLink.configure({
                 definedPageNames: [...pageSetState?.getValue()?.pages?.values()!].map(page => page.name!)
             }),
-            Collaboration.configure({document: ydoc, field: blockState?.getValue()?.getId()}),
+            Collaboration.configure({document: ydoc, field: (editorFieldId || '')}),
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
         ],
@@ -152,7 +154,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         editable,
         onBlur: stoppedEditing,
         onFocus: startedEditing
-    });
+    }, [editorFieldId]);
 
     /*editor?.on('focus', () => {
         console.log('focusing editor')
@@ -160,6 +162,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     });*/
 
     useEffect(() => {
+        setEditorFieldId(blockContentsState?.getValue()?.hash())
         const newText = blockContentsState?.getValue()?.getValue();
 
         if (!newText) {
@@ -169,6 +172,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         if (!editor?.isDestroyed && newText !== editor?.getHTML()) {
             editor?.commands.setContent(newText, false, { preserveWhitespace: 'full' })
         }
+        
     }, [blockContentsState, editor])//, editor, blockState])
 
     const handleAddBlock = (event: React.MouseEvent<HTMLButtonElement>) => {
