@@ -21,7 +21,6 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     const { pageName } = useParams();
     const { wiki, nav }     = useOutletContext<WikiContext>();
     
-    //const wikiState = useObjectState<WikiSpace>(wiki, {debounceFreq: 250});
     const wikiTitleState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.title, debounceFreq: 250});
     const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 

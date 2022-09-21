@@ -20,6 +20,7 @@
     "@tiptap/extension-code-block-lowlight": "^2.0.0-beta.73",
     "@tiptap/extension-document": "^2.0.0-beta.196",
     "@tiptap/extension-heading": "^2.0.0-beta.196",
+    "@tiptap/extension-collaboration": "^2.0.0-beta.196",
     "@tiptap/extension-highlight": "^2.0.0-beta.35",
     "@tiptap/extension-history": "^2.0.0-beta.196",
     "@tiptap/extension-italic": "^2.0.0-beta.196",
@@ -42,7 +43,9 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
     "tippy.js": "^6.3.7",
-    "web-vitals": "^2.1.0"
+    "web-vitals": "^2.1.0",
+    "y-webrtc": "^10.2.3",
+    "yjs": "^13.5.41"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.14.1",

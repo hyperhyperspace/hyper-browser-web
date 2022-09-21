@@ -4,6 +4,8 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { Add, DragIndicator, Delete } from '@mui/icons-material';
 import { Block, BlockType, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
+import Collaboration from '@tiptap/extension-collaboration'
+
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
@@ -39,7 +41,7 @@ import { Box } from '@mui/system';
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number,
         showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void, removeBlock: () => void},
     ) {
-    const { spaceContext } = useOutletContext<WikiContext>();
+    const { spaceContext, ydoc } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
     const blockContentsState = useObjectState(props.block?.contents, {debounceFreq: 250});
@@ -115,7 +117,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         blockContents.setResources(resources!);
         blockContents.saveQueuedOps();
         console.log('SAVED BLOCK')
-    }, 1500))
+    }, 10000))
 
     const editor = useEditor({
         extensions: [
@@ -133,6 +135,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             WikiLink.configure({
                 definedPageNames: [...pageSetState?.getValue()?.pages?.values()!].map(page => page.name!)
             }),
+            Collaboration.configure({document: ydoc, field: blockState?.getValue()?.getId()}),
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
         ],

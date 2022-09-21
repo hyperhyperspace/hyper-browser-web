@@ -6,6 +6,9 @@ import { Outlet, Route, Routes, useNavigate, useOutletContext } from 'react-rout
 import NewPage from './NewPage';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 import { SpaceContext } from '../SpaceFrame';
+import { WebrtcProvider } from 'y-webrtc'
+import { Doc } from 'yjs';
+import { memoize } from 'lodash-es';
 
 type WikiNav = {
     goToPage: (pageName: string) => void,
@@ -16,8 +19,13 @@ type WikiNav = {
 type WikiContext = {
     wiki : WikiSpace,
     nav  : WikiNav,
-    spaceContext : SpaceContext
+    spaceContext : SpaceContext,
+    yjsProvider : WebrtcProvider,
+    ydoc: Doc
 }
+
+const getYdoc = memoize(id => new Doc())
+const getYjsProvider = memoize(id => new WebrtcProvider(id, getYdoc(id)))
 
 function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
@@ -57,7 +65,9 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
             goToAddPage: goToAddPage,
             goToIndex: goToIndex
         },
-        spaceContext: spaceContext
+        spaceContext: spaceContext,
+        yjsProvider: getYjsProvider(wiki.getId()),
+        ydoc: getYdoc(wiki.getId())
     }
 
     const theme = useTheme();
@@ -102,33 +112,6 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
             </Route>
     </Routes>
     
-    
-    {/* <Paper style={{ padding: '60px 1rem', height: '100%' }}>
-        <TextField
-            value={targetPageName}
-            // value={pate}
-            onKeyPress={onNavigationUpdate}
-            //inputRef={navigationRef}
-            onChange={onTargetPageNameChange}
-            InputProps={{
-                style:{fontSize: 25, fontWeight: 'bold'},
-                endAdornment:
-                    <InputAdornment position="end">
-                        <IconButton
-                            onClick={navigate}
-                            aria-label="navigate to wiki page"
-                        ><ExploreIcon></ExploreIcon></IconButton>
-                    </InputAdornment>
-            }}
-        ></TextField>
-        {currentPage === undefined &&
-            <Typography>Loading...</Typography>
-        }
-        {currentPage !== undefined &&
-            <WikiSpacePage page={currentPage}></WikiSpacePage>
-        }
-
-    </Paper>*/};
 }
 
 export type { WikiContext };
