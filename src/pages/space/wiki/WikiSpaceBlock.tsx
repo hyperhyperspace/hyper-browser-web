@@ -119,7 +119,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         blockContents.setResources(resources!);
         blockContents.saveQueuedOps();
         console.log('SAVED BLOCK')
-    }, 10000))
+    }, 1500))
 
     const editor = useEditor({
         extensions: [
@@ -145,6 +145,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             preserveWhitespace: 'full'
         },
         onUpdate: async ({ editor }) => {
+            if (blockState?.value?.type === BlockType.Image) {
+                console.log('NOT UPDATING IMAGE BLOCK')
+                return
+            }
             console.log('UPDATE')
             console.log(blockContentsState)
             if (blockContentsState && !editor.isDestroyed) {
@@ -154,7 +158,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         editable,
         onBlur: stoppedEditing,
         onFocus: startedEditing
-    }, [editorFieldId]);
+    }, [editorFieldId, blockState?.value?.type]);
 
     /*editor?.on('focus', () => {
         console.log('focusing editor')
@@ -173,7 +177,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             editor?.commands.setContent(newText, false, { preserveWhitespace: 'full' })
         }
         
-    }, [blockContentsState, editor])//, editor, blockState])
+    }, [blockContentsState, editor, blockState])//, editor, blockState])
 
     const handleAddBlock = (event: React.MouseEvent<HTMLButtonElement>) => {
         props.showAddBlockMenu(event.currentTarget, props.idx + 1);
