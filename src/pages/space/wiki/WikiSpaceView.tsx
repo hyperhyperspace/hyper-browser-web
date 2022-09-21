@@ -31,6 +31,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
 
     const spaceContext = useOutletContext<SpaceContext>();
+    console.log(spaceContext)
 
     const wiki = props.entryPoint;
 

@@ -21,6 +21,7 @@
     "@tiptap/extension-document": "^2.0.0-beta.196",
     "@tiptap/extension-heading": "^2.0.0-beta.196",
     "@tiptap/extension-collaboration": "^2.0.0-beta.196",
+    "@tiptap/extension-collaboration-cursor": "^2.0.0-beta.196",
     "@tiptap/extension-highlight": "^2.0.0-beta.35",
     "@tiptap/extension-history": "^2.0.0-beta.196",
     "@tiptap/extension-italic": "^2.0.0-beta.196",

@@ -5,6 +5,7 @@ import { Add, DragIndicator, Delete } from '@mui/icons-material';
 import { Block, BlockType, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
 import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
@@ -29,6 +30,9 @@ import { Icon, Tooltip } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { Box } from '@mui/system';
+
+import ColorHash from 'color-hash';
+const colorHash = new ColorHash({lightness: 0.4});
 // other extensions from the tiptap StarterKit:
 // import BlockQuote from '@tiptap/extension-blockquote';
 // import BulletList from '@tiptap/extension-bullet-list';
@@ -41,7 +45,7 @@ import { Box } from '@mui/system';
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number,
         showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void, removeBlock: () => void},
     ) {
-    const { spaceContext, ydoc } = useOutletContext<WikiContext>();
+    const { spaceContext, ydoc, yjsProvider } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
     const blockContentsState = useObjectState(props.block?.contents, {debounceFreq: 250});
@@ -121,6 +125,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         console.log('SAVED BLOCK')
     }, 1500))
 
+    console.log('space context author name', spaceContext.home?.getAuthor()?.info?.name)
     const editor = useEditor({
         extensions: [
             Document,
@@ -138,6 +143,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                 definedPageNames: [...pageSetState?.getValue()?.pages?.values()!].map(page => page.name!)
             }),
             Collaboration.configure({document: ydoc, field: (editorFieldId || '')}),
+            CollaborationCursor.configure({ provider: yjsProvider, user: {
+                name: spaceContext.home?.getAuthor()?.info?.name || "anonymous",
+                color: colorHash.hex(spaceContext.home?.getAuthor()?.info?.name || "anonymous"), 
+            }}),
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
         ],
