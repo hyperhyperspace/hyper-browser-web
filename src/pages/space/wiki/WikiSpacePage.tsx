@@ -116,7 +116,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                                     <WikiSpaceBlock
                                         block={block} {...{startedEditing, stoppedEditing}}
                                         idx={index} showAddBlockMenu={showAddBlockMenu}
-                                        removeBlock={() => blocksListState.getValue()?.deleteElement(block)}
+                                        removeBlock={() => page?.removeBlock(block)}
                                     ></WikiSpaceBlock>
                                 </div>
                     
