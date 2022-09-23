@@ -1,7 +1,7 @@
 import './WikiSpaceBlock.scss'
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Add, DragIndicator, PlusOne } from '@mui/icons-material';
+import { Add, DragIndicator, Delete } from '@mui/icons-material';
 import { Block, BlockType, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
 import Document from '@tiptap/extension-document'
@@ -36,7 +36,9 @@ import { Box } from '@mui/system';
 // import List from '@tiptap/extension-list-item';
 // import OrderedList from '@tiptap/extension-ordered-list';
 
-function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number, showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void}) {
+function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number,
+        showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void, removeBlock: () => void},
+    ) {
     const { spaceContext } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
@@ -170,6 +172,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         props.showAddBlockMenu(event.currentTarget, props.idx + 1);
     };
 
+    const handleRemoveBlock = (event: React.MouseEvent<HTMLButtonElement>) => {
+        props.removeBlock()
+    };
+
     const blockContentView =
                     <Fragment>                    
                         <Box className='wiki-block'>
@@ -193,6 +199,11 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                                 {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.contents?.getValue()} />}
                             </div>                            
                             
+                            <Tooltip title="Click to remove this block">
+                                <Icon onClick={handleRemoveBlock} style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
+                                    <Delete></Delete>
+                                </Icon>
+                            </Tooltip>
                         </Box>
                         
                     </Fragment>

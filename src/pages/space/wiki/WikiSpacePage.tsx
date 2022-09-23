@@ -113,7 +113,11 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                                     {...provided.dragHandleProps}
                                     ref={provided.innerRef}
                                 >
-                                    <WikiSpaceBlock block={block} {...{startedEditing, stoppedEditing}} idx={index} showAddBlockMenu={showAddBlockMenu}></WikiSpaceBlock>
+                                    <WikiSpaceBlock
+                                        block={block} {...{startedEditing, stoppedEditing}}
+                                        idx={index} showAddBlockMenu={showAddBlockMenu}
+                                        removeBlock={() => blocksListState.getValue()?.deleteElement(block)}
+                                    ></WikiSpaceBlock>
                                 </div>
                     
                 }
