@@ -35,6 +35,7 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
         }
     }, [pageSetState]);
 
+    const currentPageStyle = {padding: '4px 5px', fontWeight: 'bold'}
     return <Box style={{width: props.width, height: '100%'}}>
                         
 
@@ -68,14 +69,16 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
                         }}
                     ></TextField>
                     </ListItem>
-                        {Array.from(wikiState?.getValue()?.getAllowedPages()||[]).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
+                        {Array.from(wikiState?.getValue()?.getAllowedPages()!).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
                             return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}>
                                         {pageName !== p.name && <Button size="small" style={{textTransform:'none', textAlign: 'left', minWidth: 'unset'}} variant="text" onClick={() => nav.goToPage(p.name as string)}>
                                             <Typography>{p.name}</Typography>
                                         </Button>}
-                                        {pageName === p.name && <Typography style={{padding: '4px 5px'}}><b>{p.name}</b></Typography>}
+                                        {pageName === p.name && <Typography style={currentPageStyle}><b>{p.name}</b></Typography>}
                                    </ListItem>
                         })}
+                        {!Array.from(wikiState?.getValue()?.getAllowedPages()!).map(p => p.name).includes(pageName)
+                            && <ListItem><Typography style={{textDecoration: "underline dotted", ...currentPageStyle}}>{pageName}</Typography></ListItem>}
                         <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>
                         {/*<ListItem style={{justifyContent: 'center'}}><Button onClick={nav.goToAddPage}>Add page</Button></ListItem>*/}
                     </List>
