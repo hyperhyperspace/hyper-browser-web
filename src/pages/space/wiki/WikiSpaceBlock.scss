@@ -101,7 +101,7 @@ pre {
 }
 
 a:not(.existing-page-link) {
-  color: #00ace4;
+  text-decoration: underline currentcolor dotted;
 }
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/github-dark.min.css')
