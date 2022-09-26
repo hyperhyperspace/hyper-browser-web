@@ -4,6 +4,9 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { Add, DragIndicator, Delete } from '@mui/icons-material';
 import { Block, BlockType, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
+import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
@@ -18,7 +21,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import WikiLink from './WikiLink';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import History from '@tiptap/extension-history';
+// import History from '@tiptap/extension-history';
 import { lowlight } from 'lowlight/lib/all.js'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { MutableReference, MutationEvent } from '@hyper-hyper-space/core';
@@ -27,6 +30,9 @@ import { Icon, Tooltip } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { Box } from '@mui/system';
+
+import ColorHash from 'color-hash';
+const colorHash = new ColorHash({lightness: 0.4});
 // other extensions from the tiptap StarterKit:
 // import BlockQuote from '@tiptap/extension-blockquote';
 // import BulletList from '@tiptap/extension-bullet-list';
@@ -39,10 +45,12 @@ import { Box } from '@mui/system';
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number,
         showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void, removeBlock: () => void},
     ) {
-    const { spaceContext } = useOutletContext<WikiContext>();
+    const { spaceContext, ydoc, yjsProvider } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
     const blockContentsState = useObjectState(props.block?.contents, {debounceFreq: 250});
+
+    const [editorFieldId, setEditorFieldId] = useState(props.block?.contents?.hash())
 
     const { wiki }     = useOutletContext<WikiContext>();
     const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
@@ -117,6 +125,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         console.log('SAVED BLOCK')
     }, 1500))
 
+    console.log('space context author name', spaceContext.home?.getAuthor()?.info?.name)
     const editor = useEditor({
         extensions: [
             Document,
@@ -126,13 +135,18 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Strike,
             Italic,
             Heading,
-            History,
+            // History, // conflicts with Collaboration plugin
             Highlight,
             TextAlign,
             Underline,
             WikiLink.configure({
                 definedPageNames: [...pageSetState?.getValue()?.pages?.values()!].map(page => page.name!)
             }),
+            Collaboration.configure({document: ydoc, field: (editorFieldId || '')}),
+            CollaborationCursor.configure({ provider: yjsProvider, user: {
+                name: spaceContext.home?.getAuthor()?.info?.name || "anonymous",
+                color: colorHash.hex(spaceContext.home?.getAuthor()?.info?.name || "anonymous"), 
+            }}),
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
         ],
@@ -140,6 +154,10 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             preserveWhitespace: 'full'
         },
         onUpdate: async ({ editor }) => {
+            if (blockState?.value?.type === BlockType.Image) {
+                console.log('NOT UPDATING IMAGE BLOCK')
+                return
+            }
             console.log('UPDATE')
             console.log(blockContentsState)
             if (blockContentsState && !editor.isDestroyed) {
@@ -149,7 +167,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         editable,
         onBlur: stoppedEditing,
         onFocus: startedEditing
-    });
+    }, [editorFieldId, blockState?.value?.type]);
 
     /*editor?.on('focus', () => {
         console.log('focusing editor')
@@ -157,6 +175,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     });*/
 
     useEffect(() => {
+        setEditorFieldId(blockContentsState?.getValue()?.hash())
         const newText = blockContentsState?.getValue()?.getValue();
 
         if (!newText) {
@@ -166,7 +185,8 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         if (!editor?.isDestroyed && newText !== editor?.getHTML()) {
             editor?.commands.setContent(newText, false, { preserveWhitespace: 'full' })
         }
-    }, [blockContentsState, editor])//, editor, blockState])
+        
+    }, [blockContentsState, editor, blockState])//, editor, blockState])
 
     const handleAddBlock = (event: React.MouseEvent<HTMLButtonElement>) => {
         props.showAddBlockMenu(event.currentTarget, props.idx + 1);

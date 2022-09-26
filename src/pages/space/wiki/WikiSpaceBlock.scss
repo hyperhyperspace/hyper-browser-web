@@ -104,4 +104,22 @@ a:not(.existing-page-link) {
   text-decoration: underline currentcolor dotted;
 }
 
+.collaboration-cursor__caret {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  // position: absolute;
+}
+
+// .collaboration-cursor__caret::after {
+//   content: "}{";
+//   position: absolute;
+// }
+
+.collaboration-cursor__label {
+  color: white;
+  // position: absolute;
+  // top: -1em;
+}
+
 @import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/github-dark.min.css')

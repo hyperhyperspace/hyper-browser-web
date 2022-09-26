@@ -1,7 +1,6 @@
 import type { Editor } from '@tiptap/core'
 import { Button, ButtonGroup } from '@mui/material'
 import CodeIcon from '@mui/icons-material/Code';
-import HighlightIcon from '@mui/icons-material/Highlight';
 import LinkIcon from '@mui/icons-material/Link';
 
 
