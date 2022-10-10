@@ -4,7 +4,7 @@ import WikiSpaceBlock from './WikiSpaceBlock';
 import { Box, Button, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
-import { MutableArray, MutableSet, MutationEvent } from '@hyper-hyper-space/core';
+import { CausalArray, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import React, { useEffect, useRef, useState } from 'react';
@@ -28,7 +28,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     const [page, setPage] = useState<Page>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
 
-    const blocksListState = useObjectState<MutableArray<Block>>(page?.blocks, {debounceFreq: 250});
+    const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
 
     useEffect(() => {
 
