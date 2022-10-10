@@ -15,9 +15,7 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 
         this.setRandomId();
 
-        const content = new MutableReference<string>();
-        content.typeConstraints = ['string'];
-
+        const content = new MutableReference<string>({acceptedTypes: ['string']});
         this.addDerivedField('content', content);
     }
     
@@ -54,7 +52,7 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
             }
         }
 
-        if (!Types.checkTypeConstraint(this.content.typeConstraints, ['string'])) {
+        if (!this.content.validateAcceptedTypes(['string'])) {
             return false;
         }
 

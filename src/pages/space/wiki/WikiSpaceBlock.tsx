@@ -183,6 +183,8 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         }
 
         if (!editor?.isDestroyed && newText !== editor?.getHTML()) {
+            console.log('setting contents of block ' + props.block.getLastHash() + ' to:');
+            console.log(newText);
             editor?.commands.setContent(newText, false, { preserveWhitespace: 'full' })
         }
         
