@@ -85,7 +85,6 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 }
 
                 entryPoint.setAuthor((home.getAuthor()) as Identity);
-    
 
                 const link = new SpaceLink(home.getAuthor() as Identity, entryPoint.clone());
                 await link.name?.setValue(name.trim());
