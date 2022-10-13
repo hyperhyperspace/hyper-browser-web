@@ -4,7 +4,7 @@ import WikiSpaceBlock from './WikiSpaceBlock';
 import { Box, Button, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
-import { CausalArray, MutationEvent } from '@hyper-hyper-space/core';
+import { CausalArray, Identity, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import React, { useEffect, useRef, useState } from 'react';
@@ -19,7 +19,8 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     // todo: implement drag+drop using react-beautiful-dnd
 
     const { pageName } = useParams();
-    const { wiki, nav }     = useOutletContext<WikiContext>();
+    const { wiki, nav, spaceContext}     = useOutletContext<WikiContext>();
+    const { home } = spaceContext;
     
     //const wikiState = useObjectState<WikiSpace>(wiki, {debounceFreq: 250});
     const wikiTitleState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.title, debounceFreq: 250});
@@ -93,7 +94,8 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     }
     
     const addTextBlock = (idx?: number) => {
-        page?.addBlock(idx);
+        // console.log('adding text block with author:', home?.getAuthor(), '...')
+        page?.addBlock(idx, undefined, (home?.getAuthor() as Identity)!);
     }
 
     const addImageBlock = (dataUrl: string, idx?: number) => {
