@@ -5,6 +5,7 @@ import { Button, InputAdornment, Link, List, ListItem, TextField, Typography } f
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
 import { useOutletContext, useParams } from "react-router"
+import WikiSpacePermissionsDialog from "./WikiSpacePermissionSettings"
 import { WikiContext } from "./WikiSpaceView"
 
 
@@ -37,15 +38,13 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
 
     const currentPageStyle = {padding: '4px 5px', fontWeight: 'bold'}
     return <Box style={{width: props.width, height: '100%'}}>
-                        
-
-                        
                     <List style={{width: '100%', paddingTop: '0px'}} dense>
                     <ListItem style={{paddingBottom: '1.5rem', paddingTop: '0px'}}>
                         <Typography variant="h5" style={{color: (wikiState?.getValue()?.title?.getValue() === undefined? 'gray' : 'unset')}}>
                             {wikiState?.getValue()?.title?.getValue() || 'Fetching title...'}
                         </Typography>
                     </ListItem>
+                    <ListItem><WikiSpacePermissionsDialog/></ListItem>
                     <ListItem style={{paddingTop: '1px', paddingBottom: '5px'}}>
                     <TextField
                         placeholder='Filter pages'

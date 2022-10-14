@@ -21,9 +21,7 @@ type WikiContext = {
 
 function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
-
     const spaceContext = useOutletContext<SpaceContext>();
-
     const wiki = props.entryPoint;
 
     useEffect(() => {
