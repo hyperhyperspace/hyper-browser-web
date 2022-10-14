@@ -80,7 +80,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 let entryPoint;
                 if (spaceType === WikiSpace.className) {
                     entryPoint = new WikiSpace([home.getAuthor() as Identity].values(), name.trim());
-                    entryPoint.editFlags?.add(WikiSpace.OpenlyEditableFlag);
+                    await entryPoint.editFlags?.add(WikiSpace.OpenlyEditableFlag);
                 } else {
                     entryPoint = new clazz();
                 }
@@ -105,8 +105,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
 
                 if (spaceType === WikiSpace.className) {
                     const wiki = entryPoint as WikiSpace;
-                    wiki.createWelcomePage(name);
-                    await wiki.editFlags?.add(WikiSpace.OpenlyEditableFlag);
+                    await wiki.createWelcomePage(name, home.getAuthor() as Identity);
                 }
 
                 window.open('./#/space/' + encodeURIComponent(entryPoint.getLastHash()), '_blank');
