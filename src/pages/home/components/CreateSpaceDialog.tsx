@@ -107,7 +107,6 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                     const wiki = entryPoint as WikiSpace;
                     wiki.createWelcomePage(name);
                     await wiki.editFlags?.add(WikiSpace.OpenlyEditableFlag);
-                    await wiki.editFlags?.save()
                 }
 
                 window.open('./#/space/' + encodeURIComponent(entryPoint.getLastHash()), '_blank');

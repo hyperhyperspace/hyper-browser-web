@@ -94,7 +94,9 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     }
     
     const addTextBlock = (idx?: number) => {
-        // console.log('adding text block with author:', home?.getAuthor(), '...')
+        console.log('adding text block with author:', home?.getAuthor(), '...')
+        console.log('hasKeyPair()=', home?.getAuthor()?.hasKeyPair(), '...')
+
         page?.addBlock(idx, undefined, (home?.getAuthor() as Identity)!);
     }
 
