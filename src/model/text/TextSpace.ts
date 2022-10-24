@@ -84,6 +84,9 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
         this._node?.stopSync(this);
     }
 
+    getName() {
+        return undefined;
+    }
 }
 
 ClassRegistry.register(TextSpace.className, TextSpace);

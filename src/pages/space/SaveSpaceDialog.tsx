@@ -1,20 +1,22 @@
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
 import { Folder, Home, SpaceLink } from '@hyper-hyper-space/home';
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material';
 import FolderTreeComponent from '../../components/FolderTreeComponent';
 import { Box } from '@mui/system';
-import { HashedObject, Identity, Store } from '@hyper-hyper-space/core';
+import { HashedObject, Identity, MutableReference, SpaceEntryPoint, Store } from '@hyper-hyper-space/core';
 
 
-function SaveSpaceDialog(props: {home: Home, spaceEntryPoint: HashedObject, onClose: () => void}) {
+function SaveSpaceDialog(props: {home?: Home, spaceEntryPoint: HashedObject & SpaceEntryPoint, onClose: () => void}) {
 
     const [open, setOpen] = useState(true);
 
     const [saving, setSaving] = useState(false);
 
-    const [name, setName] = useState('');
+    const defaultName = props.spaceEntryPoint.getName();
+
+    const [name, setName] = useState<string>((defaultName instanceof MutableReference? defaultName.getValue() : defaultName) || '');
     const [nameError, setNameError] = useState(false);
 
     const [destination, setDestination] = useState(props.home?.desktop?.root as Folder);
@@ -41,9 +43,9 @@ function SaveSpaceDialog(props: {home: Home, spaceEntryPoint: HashedObject, onCl
 
         setSaving(true);
 
-        const store = props.home.getStore() as Store;
+        const store = (props.home as Home).getStore() as Store;
 
-        const link = new SpaceLink(props.home.getAuthor() as Identity, props.spaceEntryPoint);
+        const link = new SpaceLink((props.home as Home).getAuthor() as Identity, props.spaceEntryPoint);
         link.name?.setValue(name);
 
         await store.save(link);
@@ -87,10 +89,10 @@ function SaveSpaceDialog(props: {home: Home, spaceEntryPoint: HashedObject, onCl
                         label="Save as"
                         disabled={saving}/>
                     
-                    { props.home.desktop === undefined && 
+                    { props.home?.desktop === undefined && 
                         <Typography>Loading...</Typography>
                     }
-                    { props.home.desktop !== undefined &&
+                    { props.home?.desktop !== undefined &&
                         <Box>
                             <Typography>Choose folder:</Typography>
                             <FolderTreeComponent style={{padding: '1rem', border: '1px solid', borderRadius: '4px', borderColor: 'lightgray'}} tree={props.home.desktop} onFolderSelect={folderChosen}/>
@@ -101,11 +103,15 @@ function SaveSpaceDialog(props: {home: Home, spaceEntryPoint: HashedObject, onCl
                 </DialogContent>
                 
                 <DialogActions>
-                    { !saving && 
-                        <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button variant="outlined" onClick={save}>Save</Button><Button onClick={close}>Cancel</Button></Stack>
-                    }
-                    { saving && 
-                        <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><CircularProgress style={{margin: 'auto'}}/></Stack>
+                    {props.home !== undefined &&
+                    <Fragment>
+                        { !saving && 
+                            <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button variant="outlined" onClick={save}>Save</Button><Button onClick={close}>Cancel</Button></Stack>
+                        }
+                        { saving && 
+                            <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><CircularProgress style={{margin: 'auto'}}/></Stack>
+                        }
+                    </Fragment>
                     }
                 </DialogActions>
             </Dialog>);

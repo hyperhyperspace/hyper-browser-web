@@ -1,4 +1,4 @@
-import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, WorkerSafeIdbBackend, Resources, WebWorkerMeshProxy, Mesh, Store, Backend, MemoryBackend } from '@hyper-hyper-space/core';
+import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, WorkerSafeIdbBackend, Resources, WebWorkerMeshProxy, Mesh, Store, Backend, MemoryBackend, IdbBackend } from '@hyper-hyper-space/core';
 import { Device, Home, SpaceLink } from '@hyper-hyper-space/home';
 
 //yadda yadda import / no - webpack - loader - syntax
@@ -151,7 +151,7 @@ class HyperBrowserConfig extends HashedObject {
         return 'transient-space-' + spaceHash;
     }
 
-    static async createSpaceStore(homeHash: Hash, entryPoint: HashedObject): Promise<Store> {
+    /*static async createSpaceStore(homeHash: Hash, entryPoint: HashedObject): Promise<Store> {
         const spaceHash = entryPoint.hash();
 
         const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(homeHash, spaceHash));
@@ -163,11 +163,18 @@ class HyperBrowserConfig extends HashedObject {
         await store.save(entryPoint);
 
         return store;
-    }
+    }*/
 
     //static async initSpaceResources(homeHash: Hash, spaceHash: Hash) {
     //    let backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(homeHash, spaceHash));
     //}
+
+    static async savedSpaceStoreExists(homeHash: Hash, spaceEntryPointHash: Hash) {
+
+        const backendName = HyperBrowserConfig.backendNameForSpace(homeHash, spaceEntryPointHash);
+
+        return IdbBackend.exists(backendName);
+    }
 
     static async initSavedSpaceMesh(homeHash: Hash, spaceHash: Hash): Promise<Mesh> {
         const worker = new Worker(new URL('../mesh.worker', import.meta.url));
@@ -183,20 +190,32 @@ class HyperBrowserConfig extends HashedObject {
         return mesh;
     }
 
-    static async initSavedSpaceStore(home: Home, spaceEntryPoint: HashedObject): Promise<Store> {
+    static async initSavedSpaceStore(home: Home|Hash, spaceEntryPoint: HashedObject|Hash): Promise<Store> {
 
-        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(home.getLastHash(), spaceEntryPoint.getLastHash()));
+        const homeHash            = home instanceof Home? home.getLastHash() : home;
+        const spaceEntryPointHash = spaceEntryPoint instanceof HashedObject? spaceEntryPoint.getLastHash() : spaceEntryPoint
+
+        const backend = new WorkerSafeIdbBackend(HyperBrowserConfig.backendNameForSpace(homeHash, spaceEntryPointHash));
         const store = new Store(backend);
 
-        await store.save(spaceEntryPoint)
-        await store.save((home.getAuthor() as Identity).getKeyPair())
+        if (spaceEntryPoint instanceof HashedObject) {
+            await store.save(spaceEntryPoint)
+        }
+
+        if (home instanceof Home) {
+            await store.save((home.getAuthor() as Identity).getKeyPair())
+        }
 
         return store;
     }
 
-    static async initSavedSpaceResources(home: Home, spaceEntryPoint: HashedObject): Promise<Resources> {
+    static async initSavedSpaceResources(home: Home|Hash, spaceEntryPoint: HashedObject|Hash): Promise<Resources> {
 
-        const mesh  = await HyperBrowserConfig.initSavedSpaceMesh(home.getLastHash(), spaceEntryPoint.getLastHash());
+        const homeHash            = home instanceof Home? home.getLastHash() : home;
+        const spaceEntryPointHash = spaceEntryPoint instanceof HashedObject? spaceEntryPoint.getLastHash() : spaceEntryPoint
+
+
+        const mesh  = await HyperBrowserConfig.initSavedSpaceMesh(homeHash, spaceEntryPointHash);
         const store = await HyperBrowserConfig.initSavedSpaceStore(home, spaceEntryPoint);
     
         const resources = await Resources.create({mesh: mesh, store: store});

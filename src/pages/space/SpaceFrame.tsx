@@ -1,4 +1,4 @@
-import { Hash, HashedObject, Identity, MutableSet, Resources, SpaceEntryPoint } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, IdbBackend, Identity, MutableSet, Resources, SpaceEntryPoint } from '@hyper-hyper-space/core';
 import { Home, SpaceLink } from '@hyper-hyper-space/home';
 import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
@@ -15,7 +15,7 @@ import SpaceFrameToolbar from './SpaceFrameToolbar';
 import TextSpacePage from './text/TextSpacePage';
 import WikiSpaceView from './wiki/WikiSpaceView';
 
-type InitParams = {hash?: Hash, resourcesForDiscovery?: Resources, knownEntryPoint?: HashedObject};
+type InitParams = {hash?: Hash, resourcesForDiscovery?: Resources, knownEntryPoint?: HashedObject & SpaceEntryPoint};
 
 type SpaceContext = {
     entryPoint?: HashedObject;
@@ -30,15 +30,17 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
 
     //const localHomesState = useObjectState(props.homes);
     
+    const [foundLocalCopy, setFoundLocalCopy] = useState<boolean>(false);
+    const [homeHash, setHomeHash] = useState<Hash>();
     const [home, setHome] = useState<Home|undefined>(undefined);
 
     const [initParams, setInitParams] = useState<InitParams|undefined>(undefined);
 
-    const initResult = useObjectDiscoveryIfNecessary(initParams?.resourcesForDiscovery, initParams?.hash, initParams?.knownEntryPoint);
+    const initResult = useObjectDiscoveryIfNecessary<HashedObject & SpaceEntryPoint>(initParams?.resourcesForDiscovery, initParams?.hash, initParams?.knownEntryPoint);
 
     const spaceEntryPointHash = decodeURIComponent(params.hash as Hash) as Hash;
 
-    const [spaceEntryPoint, setSpaceEntryPoint] = useState<HashedObject|undefined>(undefined);
+    const [spaceEntryPoint, setSpaceEntryPoint] = useState<HashedObject & SpaceEntryPoint|undefined>(undefined);
     const [spaceResources, setSpaceResources]   = useState<Resources|undefined>(undefined);
     const [homeResources, setHomeResources]   = useState<Resources|undefined>(undefined);
 
@@ -60,51 +62,27 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
 
             if (props.homes.size() > 0) {
 
-                const homeHash = props.homes.values().next().value;
+                const homeHash = props.homes.values().next().value as string;
+                setHomeHash(homeHash);
                 console.log('ok got home hash:' + homeHash);
                 
-                homeResources = await HyperBrowserConfig.initHomeResources(homeHash, (e) => { console.log('ERROR'); console.log(e);}, 'worker');
-                setHomeResources(homeResources);
-                console.log('ok got home resources');
-                
-                home = await homeResources.store.loadAndWatchForChanges(homeHash) as Home;     
-                setHome(home);
-                console.log('ok got home:')
-                console.log(home);
-                
-                if (home !== undefined) {
+                isSaved = await HyperBrowserConfig.savedSpaceStoreExists(homeHash, spaceEntryPointHash);
 
-                    console.log('desktop:');
-                    console.log(home.desktop);
-
-                    console.log('desktop spaces:');
-                    console.log(Array.from(home.desktop?._currentSpaces.values() || []));
-
-                    console.log('entry point: ' + spaceEntryPointHash);
-
-                    console.log('has current item:');
-                    console.log(home?.desktop?.hasCurrentItemByHash(spaceEntryPointHash));
-
-                    isSaved = home.desktop !== undefined && 
-                                home.desktop?.hasCurrentSpaceByHash(spaceEntryPointHash);
-                        
-                    if (isSaved) {
-                        console.log(home.desktop?.currentLinksForSpace(spaceEntryPointHash));
-                        const spaceLink = home.desktop?.currentLinksForSpace(spaceEntryPointHash)[0] as SpaceLink;
-                        savedSpaceResources = await HyperBrowserConfig.initSavedSpaceResources(home, spaceLink.spaceEntryPoint as HashedObject);
-                        const knownEntryPoint = await savedSpaceResources.store.load(spaceEntryPointHash, false);
-                        if (knownEntryPoint !== undefined) {
-                            setSpaceResources(savedSpaceResources);
-                            setInitParams({knownEntryPoint: knownEntryPoint});
-                        } else {
-                            isSaved = false; // oooops;
-                            console.log('Space was saved, but it is missing in the corresponding store!')
-                        }
+                if (isSaved) {
+                    savedSpaceResources = await HyperBrowserConfig.initSavedSpaceResources(homeHash, spaceEntryPointHash);
+                    const knownEntryPoint = await savedSpaceResources.store.load<HashedObject & SpaceEntryPoint>(spaceEntryPointHash, false);
+                    if (knownEntryPoint !== undefined) {
+                        setSpaceResources(savedSpaceResources);
+                        setInitParams({knownEntryPoint: knownEntryPoint});
+                    } else {
+                        isSaved = false; // oooops;
+                        console.log('Space was saved, but it is missing in the corresponding store!')
                     }
                 }
             }
         
-                        
+                
+            setFoundLocalCopy(isSaved);
             console.log('is saved: ' + isSaved);
 
             if (!isSaved) {
@@ -182,7 +160,7 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
         }
         { initResult !== undefined &&
 
-            <SpaceFrameToolbar home={home} spaceEntryPointHash={spaceEntryPointHash} spaceEntryPoint={spaceEntryPoint}/>
+            <SpaceFrameToolbar home={home || homeHash} spaceEntryPointHash={spaceEntryPointHash} spaceEntryPoint={spaceEntryPoint} foundLocalCopy={foundLocalCopy}/>
             
         }
         
