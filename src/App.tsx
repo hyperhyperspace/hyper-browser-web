@@ -6,7 +6,7 @@ import { CssBaseline, ThemeProvider, Typography } from '@mui/material';
 import { lightTheme } from './themes';
 
 import { Hash, MutableSet, Store }     from '@hyper-hyper-space/core';
-import { StateObject, useObjectState } from '@hyper-hyper-space/react';
+import { ObjectState, useObjectState } from '@hyper-hyper-space/react';
 
 import StartPage         from './pages/start/StartPage';
 import LookupSpaceDialog from './pages/start/components/LookupSpaceDialog';
@@ -32,7 +32,7 @@ import ViewAuthorDialog from './pages/space/ViewAuthorDialog';
 import AllChatsDialog from './pages/home/components/AllChatsDialog';
 
 
-function RedirectContactLink(props: {homes: StateObject<MutableSet<Hash>>}) {
+function RedirectContactLink(props: {homes: ObjectState<MutableSet<Hash>>}) {
   const params = useParams();
   const { profile } = params;
 
@@ -59,7 +59,7 @@ function RedirectContactLink(props: {homes: StateObject<MutableSet<Hash>>}) {
 
 function App(props: {homes: MutableSet<Hash>, config: Store}) {
 
-  const homes = useObjectState(props.homes) as StateObject<MutableSet<Hash>>;
+  const homes = useObjectState(props.homes) as ObjectState<MutableSet<Hash>>;
 
   const confReady = props.config && homes && homes.value;
 

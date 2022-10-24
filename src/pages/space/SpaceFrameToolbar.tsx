@@ -18,9 +18,6 @@ import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 
 function SpaceFrameToolbar(props: {home?: Home|Hash, spaceEntryPointHash: Hash, spaceEntryPoint?: HashedObject & SpaceEntryPoint, foundLocalCopy?: boolean}) {
 
-    console.log('HOME', props.home)
-    console.log('FOUND LOCAL COPY', props.foundLocalCopy)
-
     const navigate = useNavigate();
 
     const spaceState = useObjectState(props.spaceEntryPoint);
@@ -51,8 +48,6 @@ function SpaceFrameToolbar(props: {home?: Home|Hash, spaceEntryPointHash: Hash, 
     const links = homeState?.value?.desktop?.currentLinksForSpace(props.spaceEntryPointHash) || [] as Array<SpaceLink>;
 
     const isSaved = homeState?.value === undefined? (props.foundLocalCopy !== undefined && props.foundLocalCopy) : links.length > 0;
-
-    console.log('IS SAVED', isSaved);
 
     const [showCreateHomeDialog, setShowCreateHomeDialog] = useState(false);
 
@@ -124,8 +119,6 @@ function SpaceFrameToolbar(props: {home?: Home|Hash, spaceEntryPointHash: Hash, 
 
     useEffect(() => {
 
-        console.log('EFFECT')
-
         const init = async () => {
             console.log('LOADING HOME...')
             const homeResources = await HyperBrowserConfig.initHomeResources(homeHash as string, (e) => { console.log('Error while initializing home in SpaceFrameToolbar'); console.log(e);}, 'worker');
@@ -133,7 +126,6 @@ function SpaceFrameToolbar(props: {home?: Home|Hash, spaceEntryPointHash: Hash, 
             setHome(loaded);
         };
 
-        console.log(homeHash, home)
         if ((showDrawer || showSaveSpaceDialog) && homeHash !== undefined && home === undefined && !loadingHome) {
             setLoadingHome(true);
             init();

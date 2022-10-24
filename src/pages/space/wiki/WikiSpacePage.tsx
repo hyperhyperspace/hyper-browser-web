@@ -36,7 +36,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
     useEffect(() => {
         const size = blocksListState?.getValue()?.size();
         if (size !== undefined && size > 0 && blocksListState?.getDebounceFreq() !== undefined) {
-            blocksListState?.setDebounceFreq(undefined);
+            //blocksListState?.setDebounceFreq(undefined); FIXME
         }
     }, [blocksListState]);
 

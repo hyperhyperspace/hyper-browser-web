@@ -51,13 +51,13 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     
     useEffect(() => {
         if (blockState?.getValue()?.contents?.getValue() !== undefined && blockState.getDebounceFreq() !== undefined) {
-            blockState.setDebounceFreq(undefined);
+            //blockState.setDebounceFreq(undefined); FIXME
         }
     }, [blockState]);
 
     useEffect(() => {
         if (blockContentsState?.getValue()?.getValue() !== undefined && blockContentsState.getDebounceFreq() !== undefined) {
-            blockContentsState.setDebounceFreq(undefined);
+            //blockContentsState.setDebounceFreq(undefined); FIXME
         }
     }, [blockContentsState]);
 

@@ -1,5 +1,5 @@
 import { Hash, MutableSet, Resources, Store, WordCode } from '@hyper-hyper-space/core';
-import { PeerComponent, StateObject, useObjectState } from '@hyper-hyper-space/react';
+import { PeerComponent, ObjectState, useObjectState } from '@hyper-hyper-space/react';
 import { AppBar, Button, Container, Link, Stack, TextField, Toolbar, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { Fragment, useRef, useState, useEffect } from 'react';
@@ -131,7 +131,7 @@ function StartPage(props: {homes: MutableSet<Hash>, config: Store}) {
         }
     };
 
-    const homes = useObjectState(props.homes) as StateObject<MutableSet<Hash>>;
+    const homes = useObjectState(props.homes) as ObjectState<MutableSet<Hash>>;
 
     return (
     
