@@ -47,6 +47,20 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const { wiki }     = useOutletContext<WikiContext>();
     const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
+    // disable debouncing once state has arrived:
+    
+    useEffect(() => {
+        if (blockState?.getValue()?.contents?.getValue() !== undefined && blockState.getDebounceFreq() !== undefined) {
+            blockState.setDebounceFreq(undefined);
+        }
+    }, [blockState]);
+
+    useEffect(() => {
+        if (blockContentsState?.getValue()?.getValue() !== undefined && blockContentsState.getDebounceFreq() !== undefined) {
+            blockContentsState.setDebounceFreq(undefined);
+        }
+    }, [blockContentsState]);
+
 
     const [isEditing, setIsEditing] = useState(false);
     const lostFocusTimeout          = useRef<number|undefined>();

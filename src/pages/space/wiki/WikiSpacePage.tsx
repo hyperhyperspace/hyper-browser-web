@@ -31,6 +31,15 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
 
+    // remove debouncing after loading:
+
+    useEffect(() => {
+        const size = blocksListState?.getValue()?.size();
+        if (size !== undefined && size > 0 && blocksListState?.getDebounceFreq() !== undefined) {
+            blocksListState?.setDebounceFreq(undefined);
+        }
+    }, [blocksListState]);
+
     useEffect(() => {
 
         if (pageName !== undefined && pageSetState?.getValue() !== undefined) {
