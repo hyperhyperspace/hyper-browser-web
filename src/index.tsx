@@ -4,8 +4,6 @@ import { HashRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 
-import { EventRelay, HeaderBasedSyncAgent, HistorySynchronizer, LogLevel } from '@hyper-hyper-space/core';
-
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -13,11 +11,6 @@ import '@fontsource/roboto/700.css';
 
 import { Hash, MutableSet, Store, WorkerSafeIdbBackend } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from './model/HyperBrowserConfig';
-
-EventRelay.logger.level = LogLevel.INFO;
-HeaderBasedSyncAgent.controlLog.level = LogLevel.INFO;
-HistorySynchronizer.controlLog.level = LogLevel.INFO;
-
 
 const main = async () => {
   const configBackend = new WorkerSafeIdbBackend('hyper-browser-config-0.4');

@@ -120,7 +120,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     const blockElements = blocksListState?.getValue()?.contents().map((block, index) => 
         (
-            <Draggable draggableId={block.hash()} index={index} key={block.hash()}>
+            <Draggable draggableId={block.getLastHash()} index={index} key={block.getLastHash()}>
                 {(provided) =>  <div
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
