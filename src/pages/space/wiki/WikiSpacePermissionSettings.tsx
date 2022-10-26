@@ -11,9 +11,11 @@ import PeopleIcon from '@mui/icons-material/People';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
+import ContactSelector from '../../home/components/ContactSelector';
 
 function EditFlagsToggle() {
   const {wiki, spaceContext} = useOutletContext<WikiContext>();
+  const {home} = spaceContext;
   const editFlagsState = useObjectState(wiki.editFlags);
   const author = spaceContext?.home?.getAuthor();
 
@@ -34,23 +36,26 @@ function EditFlagsToggle() {
   };
 
   return (
-    <ToggleButtonGroup
-      value={editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag)}
-      exclusive
-      onChange={handleToggle}
-      aria-label="wiki permissions"
-      disabled={!wiki.owners?.has(author!)}
-      // label={editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag) ? 'Openly editable' : 'Restricted editing'}
-    >
-      <ToggleButton value={true} aria-label="openly editable">
-        <PublicIcon/>
-        {/* Open */}
-      </ToggleButton>
-      <ToggleButton value={false} aria-label="editable only by designated editors">
-        <PeopleIcon />
-        {/* Restricted */}
-      </ToggleButton>
-    </ToggleButtonGroup>
+    <React.Fragment>
+      <ToggleButtonGroup
+        value={editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag)}
+        exclusive
+        onChange={handleToggle}
+        aria-label="wiki permissions"
+        disabled={!wiki.owners?.has(author!)}
+        // label={editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag) ? 'Openly editable' : 'Restricted editing'}
+      >
+        <ToggleButton value={true} aria-label="openly editable">
+          <PublicIcon/>
+          {/* Open */}
+        </ToggleButton>
+        <ToggleButton value={false} aria-label="editable only by designated editors">
+          <PeopleIcon />
+          {/* Restricted */}
+        </ToggleButton>
+      </ToggleButtonGroup>
+      <ContactSelector home={home}><h1>hi!</h1></ContactSelector>
+    </React.Fragment>
   );
 }
 
