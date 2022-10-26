@@ -54,7 +54,7 @@ function EditFlagsToggle() {
           {/* Restricted */}
         </ToggleButton>
       </ToggleButtonGroup>
-      <ContactSelector home={home}><h1>hi!</h1></ContactSelector>
+      <ContactSelector home={home}/>
     </React.Fragment>
   );
 }

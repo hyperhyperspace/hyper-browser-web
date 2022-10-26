@@ -5,7 +5,7 @@ import { Stack, Dialog, DialogContent, DialogTitle, useTheme, useMediaQuery, Tab
 import { Box } from '@mui/system';
 import { Home} from '@hyper-hyper-space/home';
 import { useObjectState } from '@hyper-hyper-space/react';
-import { Hash, Identity } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Identity } from '@hyper-hyper-space/core';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
 import { BaseCollection, Collection } from '@hyper-hyper-space/core/dist/data/collections/mutable/Collection';
 
@@ -16,13 +16,11 @@ type LetterIndexEntry = {
 
 
 interface ContactSelectorProps {
-    homeContacts: BaseCollection<Identity> | undefined,
-    selectedContacts: BaseCollection<Identity> | undefined,
-    self: Identity | undefined
+    home: Home | undefined,
 }
 
 
-const ContactSelector: React.FC<ContactSelectorProps> = ({homeContacts, selectedContacts, self, children}) => {
+const ContactSelector = ({home}: ContactSelectorProps) => {
     const navigate = useNavigate();
     const [open, setOpen] = useState(true);
 
@@ -33,9 +31,11 @@ const ContactSelector: React.FC<ContactSelectorProps> = ({homeContacts, selected
         navigate('..');
     };
 
+    const contactsState = useObjectState(home?.contacts?.current);
+    
     // const { home } = useOutletContext<HomeContext>();
-    const selectedContactsState = useObjectState(selectedContacts!);
-    const homeContactsState = useObjectState(homeContacts!);
+    // const selectedContactsState = useObjectState(selectedContacts);
+    // const homeContactsState = useObjectState(homeContacts);
 
 
     const handleChangeTab = () => {
@@ -70,11 +70,11 @@ const ContactSelector: React.FC<ContactSelectorProps> = ({homeContacts, selected
         };
 
         const load = async () => {
-            if (homeContactsState?.value !== undefined) {
+            if (contactsState?.value !== undefined) {
 
                 const keywords = ProfileUtils.normalizeStringForKeywordSearch(searchValue).split(/[ -]+/);
 
-                const contactProfiles = Array.from(homeContactsState.value._elements?.values());
+                const contactProfiles = Array.from(contactsState.value?.values());
 
                 const p = home?.profile;
 
@@ -143,12 +143,12 @@ const ContactSelector: React.FC<ContactSelectorProps> = ({homeContacts, selected
                     setCurrentLetter(firstLetter);
                 }
             }
-            const cs = homeContactsState?.getValue()
+            const cs = contactsState?.getValue()
         };
 
         load();
 
-    }, [homeContactsState, searchValue]);
+    }, [contactsState, searchValue]);
 
 
     //const sx = fullScreen? {} : {maxHeight: '80%'}
@@ -234,7 +234,7 @@ const ContactSelector: React.FC<ContactSelectorProps> = ({homeContacts, selected
                                         disablePadding
                                         key={'contact-' + c.hash}
                                         ref={(instance: HTMLLIElement | null) => { contactElements.current[c.hash] = instance; }}
-                                        secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? children : undefined}
+                                        // secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? children : undefined}
                                     >
                                         <ListItemButton component="a" onClick={() => { navigate(c.hash === home?.getAuthor()?.getLastHash() ? '../edit-profile' : '../view-profile/' + encodeURIComponent(c.hash)) }}>
                                             <ListItemIcon>
