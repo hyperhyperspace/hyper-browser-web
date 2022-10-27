@@ -11,13 +11,18 @@ import { WikiContext } from "./WikiSpaceView"
 
 function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
 
-    const {nav, wiki} = useOutletContext<WikiContext>();
+    const {nav, wiki, spaceContext} = useOutletContext<WikiContext>();
 
     const { pageName } = useParams();
 
     const wikiState = useObjectState(wiki);
-    const pageSetState = useObjectState(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
+    const pageSetState = useObjectState(wiki?.pages, {debounceFreq: 250});
 
+    const [canCreatePages, setCanCreatePages] = useState<boolean>(false);
+
+    useEffect(() => {
+        pageSetState?.getValue()?.canAdd(spaceContext?.home?.getAuthor()).then((canAdd: boolean) => {setCanCreatePages(canAdd)});
+    }, [pageSetState, spaceContext?.home])
 
     const [filterText, setFilterText] = useState<string>('');
 
@@ -30,8 +35,8 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
 
     useEffect(() => {
         if (props.redirect) {
-            if (pageSetState?.getValue()?.pages?.size() || 0 > 0) {
-                nav.goToPage(pageSetState?.getValue()?.pages?.values().next().value.name);
+            if (pageSetState?.getValue()?.size() || 0 > 0) {
+                nav.goToPage(pageSetState?.getValue()?.values().next().value.name);
             }
         }
     }, [pageSetState]);
@@ -78,7 +83,7 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
                         })}
                         {!Array.from(wikiState?.getValue()?.getAllowedPages()!).map(p => p.name).includes(pageName)
                             && <ListItem><Typography style={{textDecoration: "underline dotted", ...currentPageStyle}}>{pageName}</Typography></ListItem>}
-                        <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>
+                        {canCreatePages && <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>}
                         {/*<ListItem style={{justifyContent: 'center'}}><Button onClick={nav.goToAddPage}>Add page</Button></ListItem>*/}
                     </List>
                     </Box>
