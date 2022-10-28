@@ -7,7 +7,7 @@ import { WikiContext } from './WikiSpaceView';
 
 function NewPage(props: {noNavigation: boolean, contentWidth: string}) {
 
-    const {wiki, nav} = useOutletContext<WikiContext>();
+    const {wiki, nav, spaceContext} = useOutletContext<WikiContext>();
 
     const [name, setName] = useState('');
     const [nameError, setNameError] = useState(false);
@@ -34,11 +34,18 @@ function NewPage(props: {noNavigation: boolean, contentWidth: string}) {
             err = true;
         }
         
-        if (!err) {
+        const author = spaceContext.home?.getAuthor();
+
+        if (author === undefined) {
+            // TODO: make an actual window with a link to set up an identity?
+            alert('This page does not exist, you need to set up an account to be able to create it');
+        }
+
+        if (!err && author !== undefined) {
 
             if (wiki.getPage(name) === undefined) {
                 const p = wiki.createPage(name);
-                wiki.addPage(p);
+                wiki.addPage(p, author);
             }
 
             nav.goToPage(name);
