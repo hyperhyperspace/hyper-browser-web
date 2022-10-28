@@ -21,7 +21,7 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
     const [canCreatePages, setCanCreatePages] = useState<boolean>(false);
 
     useEffect(() => {
-        pageSetState?.getValue()?.canAdd(spaceContext?.home?.getAuthor()).then((canAdd: boolean) => {setCanCreatePages(canAdd)});
+        pageSetState?.getValue()?.canAdd(undefined, spaceContext?.home?.getAuthor()).then((canAdd: boolean) => {setCanCreatePages(canAdd)});
     }, [pageSetState, spaceContext?.home])
 
     const [filterText, setFilterText] = useState<string>('');
