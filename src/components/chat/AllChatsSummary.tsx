@@ -61,13 +61,13 @@ function AllChatsSummary(props: {onClose: () => void, summaryWidth: string, conv
         const newProfile = new Profile(conv.getRemoteIdentity());
 
         let p = await props.resources.store.load(newProfile.hash(), true, true) as Profile|undefined;
-        p?.addMutationObserver(profileObs);
+        p?.addObserver(profileObs);
 
         if (p === undefined) {
             
             await props.resources.store.save(newProfile);
             p = await props.resources.store.load(newProfile.hash(), true, true) as Profile;
-            p.addMutationObserver(profileObs);
+            p.addObserver(profileObs);
         }
 
         return p;
@@ -75,7 +75,7 @@ function AllChatsSummary(props: {onClose: () => void, summaryWidth: string, conv
 
     const disposeProfile = (p: Profile, obs: MutationObserver) => {
         p.dontWatchForChanges();
-        p.removeMutationObserver(obs);
+        p.removeObserver(obs);
     }
 
     const updateConvs = () => {
@@ -155,13 +155,13 @@ function AllChatsSummary(props: {onClose: () => void, summaryWidth: string, conv
 
         let convs = props.chats.conversations
 
-        convs?.addMutationObserver(convObs);
+        convs?.addObserver(convObs);
 
         updateProfiles();
         updateConvs();
         
         return () => {
-            convs?.removeMutationObserver(convObs);
+            convs?.removeObserver(convObs);
 
             if (profiles !== undefined) {
                 for (const p of profiles.values()) {

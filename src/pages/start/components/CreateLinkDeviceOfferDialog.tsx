@@ -47,7 +47,7 @@ function CreateLinkDeviceOfferDialog() {
 
             let gotReply = false;
 
-            offer.reply?.addMutationObserver(() => {
+            offer.reply?.addObserver(() => {
 
                 if (!gotReply) {
                     offer?.decodeReply().then(async (reply: {id: Identity, remoteDevice: Device} |undefined) => {

@@ -243,7 +243,7 @@ function HomeSpace() {
         
             };
 
-            newHome.desktop?.addMutationObserver(spacesObserver);
+            newHome.desktop?.addObserver(spacesObserver);
 
             await newHome.findLocalDevice();
 
@@ -279,7 +279,7 @@ function HomeSpace() {
                 }
             };
 
-            newHome.contacts?.addMutationObserver(contactsObserver);
+            newHome.contacts?.addObserver(contactsObserver);
 
             await new Promise(r => setTimeout(r, 100));
 
@@ -290,7 +290,7 @@ function HomeSpace() {
             await newHome.startSync();
             console.log('DONE STARTING SYNC')
 
-            newHome.contacts?.addMutationObserver(contactsObserver);
+            newHome.contacts?.addObserver(contactsObserver);
 
             for (const p of (newHome.contacts?.current as MutableSet<Profile>)._elements.values()) {
                 p.about?.loadAndWatchForChanges();
