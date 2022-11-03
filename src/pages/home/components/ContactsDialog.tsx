@@ -8,6 +8,7 @@ import { HomeContext } from '../HomeSpace';
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Hash } from '@hyper-hyper-space/core';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
+import { Home } from '@hyper-hyper-space/home';
 
 type LetterIndexEntry = {
     letter: string,
@@ -16,7 +17,7 @@ type LetterIndexEntry = {
 
 
 
-function ContactsDialog() {
+function ContactsDialog({home}:{ home?: Home | undefined}) {
 
     const navigate = useNavigate();
     const [open, setOpen] = useState(true);
@@ -29,7 +30,8 @@ function ContactsDialog() {
         navigate('..');
     };
 
-    const { home, resources, resourcesForDiscovery } = useOutletContext<HomeContext>();
+    const contextHome = useOutletContext<HomeContext>()?.home;
+    home = home || contextHome
     const contactsState = useObjectState(home?.contacts?.current);
 
 

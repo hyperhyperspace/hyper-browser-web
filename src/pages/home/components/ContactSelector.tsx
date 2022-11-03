@@ -1,42 +1,36 @@
-import React, { useState, useEffect, useRef, Fragment, ReactChildren } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { useNavigate, useOutletContext } from 'react-router';
 
-import { Stack, Dialog, DialogContent, DialogTitle, useTheme, useMediaQuery, Tabs, Tab, Card, CardContent, Button, DialogActions, TextField, InputAdornment, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar, Divider, Chip } from '@mui/material';
+import { Stack, Tabs, Tab, Card, CardContent, TextField, InputAdornment, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar, Divider, Chip } from '@mui/material';
 import { Box } from '@mui/system';
-import { Home} from '@hyper-hyper-space/home';
 import { useObjectState } from '@hyper-hyper-space/react';
-import { Hash, HashedObject, Identity } from '@hyper-hyper-space/core';
+import { Hash } from '@hyper-hyper-space/core';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
-import { BaseCollection, Collection } from '@hyper-hyper-space/core/dist/data/collections/mutable/Collection';
+import { WikiContext } from '../../space/wiki/WikiSpaceView';
 
 type LetterIndexEntry = {
     letter: string,
     hash?: Hash
 }
 
-
-interface ContactSelectorProps {
-    home: Home | undefined,
+type ContactSelectorProps = {
+    handleSelect?: Function
 }
 
-
-const ContactSelector = ({home}: ContactSelectorProps) => {
+const ContactSelector = ({ handleSelect }: ContactSelectorProps) => {
+    const { spaceContext } = useOutletContext<WikiContext>();
+    const { home } = spaceContext;
     const navigate = useNavigate();
-    const [open, setOpen] = useState(true);
-
-    const theme = useTheme();
-
-    const close = () => {
-        setOpen(false);
-        navigate('..');
-    };
-
     const contactsState = useObjectState(home?.contacts?.current);
-    
-    // const { home } = useOutletContext<HomeContext>();
-    // const selectedContactsState = useObjectState(selectedContacts);
-    // const homeContactsState = useObjectState(homeContacts);
 
+    const attemptSelection = (...x: any[]) => {
+        try {
+            handleSelect!(...x)
+        } catch (e) {
+            // todo: handle errors such as invalid selection, maybe by showing a warning
+            throw(e)
+        }
+    }
 
     const handleChangeTab = () => {
 
@@ -65,10 +59,6 @@ const ContactSelector = ({home}: ContactSelectorProps) => {
 
     useEffect(() => {
 
-        const initials = (name?: string) => {
-            return (name || '').split(' ').filter((s: string) => s.length > 0).map((s: string) => s[0].toUpperCase()).join('').slice(0, 3);
-        };
-
         const load = async () => {
             if (contactsState?.value !== undefined) {
 
@@ -83,10 +73,6 @@ const ContactSelector = ({home}: ContactSelectorProps) => {
                 }
 
                 const cs = contactProfiles.map(ProfileUtils.createContact).filter((c: Contact) => ProfileUtils.filterContactForKeywordSearch(c, keywords));
-
-                //for (let i=0; i<20; i++) {
-                //    cs.push({hash: '0_' + i, code: 'pepa pig plush', name: 'just testing', initials: 'JT', order: 'just testing'});
-                //}
 
                 cs.sort((a: { order: string }, b: { order: string }) => a.order.localeCompare(b.order));
 
@@ -220,23 +206,23 @@ const ContactSelector = ({home}: ContactSelectorProps) => {
                         </Tabs>
                         <Box style={{ height: '100%', width: '100%', overflow: 'scroll' }} onScroll={onScroll}>
                             <List style={{ width: '100%' }}>
-                                <ListItem disablePadding>
+                                {/* <ListItem disablePadding>
                                     <ListItemButton component="a" onClick={() => { navigate('../add-contact'); }}>
                                         <ListItemIcon>
                                             <Avatar sx={{ bgcolor: 'lightblue' }} alt="Add new contact">+</Avatar>
                                         </ListItemIcon>
                                         <ListItemText primary="Add new contact" primaryTypographyProps={{ style: { textDecoration: 'underline', color: 'blue' } }} />
                                     </ListItemButton>
-                                </ListItem>
+                                </ListItem> */}
                                 <Divider />
                                 {contacts.map((c: Contact) => (
                                     <ListItem
                                         disablePadding
                                         key={'contact-' + c.hash}
                                         ref={(instance: HTMLLIElement | null) => { contactElements.current[c.hash] = instance; }}
-                                        // secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? children : undefined}
+                                    // secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? children : undefined}
                                     >
-                                        <ListItemButton component="a" onClick={() => { navigate(c.hash === home?.getAuthor()?.getLastHash() ? '../edit-profile' : '../view-profile/' + encodeURIComponent(c.hash)) }}>
+                                        <ListItemButton component="a" onClick={attemptSelection}>
                                             <ListItemIcon>
                                                 {c.picture !== undefined &&
                                                     <Avatar alt={c.name} src={c.picture} />

@@ -49,7 +49,7 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
                             {wikiState?.getValue()?.title?.getValue() || 'Fetching title...'}
                         </Typography>
                     </ListItem>
-                    <ListItem><WikiSpacePermissionsDialog/></ListItem>
+                    {/* <ListItem><WikiSpacePermissionsDialog/></ListItem> */}
                     <ListItem style={{paddingTop: '1px', paddingBottom: '5px'}}>
                     <TextField
                         placeholder='Filter pages'

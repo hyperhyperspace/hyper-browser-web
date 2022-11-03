@@ -6,6 +6,9 @@ import { Outlet, Route, Routes, useNavigate, useOutletContext } from 'react-rout
 import NewPage from './NewPage';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 import { SpaceContext } from '../SpaceFrame';
+import './WikiSpaceView.css'
+import WikiSpacePermissionSettings from './WikiSpacePermissionSettings';
+import WikiSpaceSettingsPage from './WikiSpaceSettingsPage';
 
 type WikiNav = {
     goToPage: (pageName: string) => void,
@@ -69,12 +72,12 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
             <Route path="" element={
                 <Fragment>
                     
-                <Outlet context={context}/>
-                {/*showNewPageDialog && <NewPageDialog wiki={wiki} open={showNewPageDialog} onClose={closeNewPageDialog} goToPage={goToPage}/>*/}
-            </Fragment>}>
+                    <Outlet context={context}/>
+                
+                </Fragment>}>
                 
                 <Route path="" element={
-                            <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
+                            <div className='wiki-container'>
                                 <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
                                     <WikiSpaceNavigation width={navigationWidth} redirect/>
                                     <Paper style={{width: contentWidth}}>
@@ -83,14 +86,22 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                                 </Stack>
                             </div>} />
                 <Route path="index" element={
-                            <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
+                            <div className='wiki-container'>
                                 <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
                                     <WikiSpaceNavigation width="100%"/>
                                 </Stack>
                             </div>} />
                 <Route path="contents/:pageName" element={<WikiSpacePage noNavigation={noNavigation} navigationWidth={navigationWidth} contentWidth={contentWidth}/>} />
+                <Route path="settings/*" element={
+                            <div className='wiki-container'>
+                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
+                                    {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
+                                    
+                                    <WikiSpaceSettingsPage/>
+                                </Stack>
+                            </div>}/>
                 <Route path="add-page" element={
-                            <div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
+                            <div className='wiki-container'>
                                 <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
                                     {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
                                     
@@ -99,34 +110,6 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                             </div>} />
             </Route>
     </Routes>
-    
-    
-    {/* <Paper style={{ padding: '60px 1rem', height: '100%' }}>
-        <TextField
-            value={targetPageName}
-            // value={pate}
-            onKeyPress={onNavigationUpdate}
-            //inputRef={navigationRef}
-            onChange={onTargetPageNameChange}
-            InputProps={{
-                style:{fontSize: 25, fontWeight: 'bold'},
-                endAdornment:
-                    <InputAdornment position="end">
-                        <IconButton
-                            onClick={navigate}
-                            aria-label="navigate to wiki page"
-                        ><ExploreIcon></ExploreIcon></IconButton>
-                    </InputAdornment>
-            }}
-        ></TextField>
-        {currentPage === undefined &&
-            <Typography>Loading...</Typography>
-        }
-        {currentPage !== undefined &&
-            <WikiSpacePage page={currentPage}></WikiSpacePage>
-        }
-
-    </Paper>*/};
 }
 
 export type { WikiContext };

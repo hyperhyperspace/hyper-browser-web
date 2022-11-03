@@ -1,4 +1,4 @@
-import './WikiSpaceBlock.scss'
+import './WikiSpaceBlock.css'
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Add, DragIndicator, Delete } from '@mui/icons-material';

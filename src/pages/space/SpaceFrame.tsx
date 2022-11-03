@@ -70,6 +70,13 @@ function SpaceFrame(props: {homes: MutableSet<Hash>}) {
                 setHome(await homeStore.load(homeHash, false));
                 homeStore.close();
 
+                homeResources = await HyperBrowserConfig.initHomeResources(homeHash, (e) => { console.log('ERROR'); console.log(e);}, 'worker');
+                setHomeResources(homeResources);
+                console.log('ok got home resources');
+                
+                home = await homeResources.store.loadAndWatchForChanges(homeHash) as Home;     
+                setHome(home);
+
                 isSaved = await HyperBrowserConfig.savedSpaceStoreExists(homeHash, spaceEntryPointHash);
 
                 if (isSaved) {
