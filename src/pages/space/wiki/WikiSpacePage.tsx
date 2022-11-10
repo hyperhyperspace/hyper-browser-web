@@ -86,7 +86,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
         let to = result.destination?.index;
         if (to === undefined) { return }
 
-        page?.moveBlock(from, to)
+        page?.moveBlock(from, to, home?.getAuthor()!)
     }
 
 
