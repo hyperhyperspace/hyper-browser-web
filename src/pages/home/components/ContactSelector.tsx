@@ -222,7 +222,7 @@ const ContactSelector = ({ handleSelect }: ContactSelectorProps) => {
                                         ref={(instance: HTMLLIElement | null) => { contactElements.current[c.hash] = instance; }}
                                     // secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? children : undefined}
                                     >
-                                        <ListItemButton component="a" onClick={attemptSelection}>
+                                        <ListItemButton component="a" onClick={() => attemptSelection(c)}>
                                             <ListItemIcon>
                                                 {c.picture !== undefined &&
                                                     <Avatar alt={c.name} src={c.picture} />

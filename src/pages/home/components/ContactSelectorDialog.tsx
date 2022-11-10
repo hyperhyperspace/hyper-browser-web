@@ -7,8 +7,13 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import ContactSelector from './ContactSelector';
 
-const ContactSelectorDialog = () => {
+type ContactSelectorDialogProps = {
+    handleSelect?: Function
+}
+
+const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
   const [open, setOpen] = React.useState(false);
+  const {handleSelect} = props;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -36,7 +41,7 @@ const ContactSelectorDialog = () => {
           <DialogContentText id="alert-dialog-description">
           Add an editor from your contacts:
           </DialogContentText>
-          <ContactSelector/>
+          <ContactSelector handleSelect={handleSelect}/>
         </DialogContent>
         <DialogActions>
           {/* <Button onClick={handleClose}>Disagree</Button>

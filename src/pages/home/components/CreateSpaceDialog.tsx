@@ -79,7 +79,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 // Maybe there's a way to fix `WikiSpace` so it doesn't need this?
                 let entryPoint;
                 if (spaceType === WikiSpace.className) {
-                    entryPoint = new WikiSpace([home.getAuthor() as Identity].values(), name.trim());
+                    entryPoint = await new WikiSpace([home.getAuthor() as Identity].values(), name.trim());
                     await entryPoint.editFlags?.add(WikiSpace.OpenlyEditableFlag, home.getAuthor());
                 } else {
                     entryPoint = new clazz();

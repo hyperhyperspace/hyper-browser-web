@@ -1,7 +1,5 @@
 import * as React from 'react';
-import DialogTitle from '@mui/material/DialogTitle';
-import Dialog from '@mui/material/Dialog';
-import { Box, Icon, IconButton, Paper, Typography } from '@mui/material';
+import { IconButton, List, ListItem, Paper, Typography } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { useObjectState } from '@hyper-hyper-space/react';
@@ -12,6 +10,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import ContactSelectorDialog from '../../home/components/ContactSelectorDialog';
+import { Identity } from '@hyper-hyper-space/core';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 // import ContactSelector from '../../home/components/ContactSelector';
 // import { HyperBrowserConfig } from '../../../model/HyperBrowserConfig';
 // import { Home } from '@hyper-hyper-space/home';
@@ -28,11 +28,11 @@ function EditFlagsToggle() {
   ) => {
     // console.log('toggling editability for', wiki, editFlagsState?.getValue())
     if (openlyEditable) {
-      await editFlagsState?.getValue()?.add(WikiSpace.OpenlyEditableFlag);
+      await editFlagsState?.getValue()?.add(WikiSpace.OpenlyEditableFlag, author);
       await editFlagsState?.getValue()?.save()
       console.log('wiki permissions set', [...editFlagsState?.getValue()?.values()!])
     } else {
-      await editFlagsState?.getValue()?.delete(WikiSpace.OpenlyEditableFlag);
+      await editFlagsState?.getValue()?.delete(WikiSpace.OpenlyEditableFlag, author);
       await editFlagsState?.getValue()?.save()
       console.log('wiki permissions set', [...editFlagsState?.getValue()?.values()!])
     } 
@@ -57,15 +57,34 @@ function EditFlagsToggle() {
         </ToggleButton>
       </ToggleButtonGroup>
       <Typography>
-        {editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag) ? 'Anyone can edit' : 'Only some people are allowed to edit'}
+        {editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag) ? 'Anyone can edit' : 'Only some people can edit'}
       </Typography>
     </div>
   );
 }
 
+function EditorsList() {
+  const {spaceContext, wiki} = useOutletContext<WikiContext>();
+  const editorsState = useObjectState(wiki.editors)
+  const owners = wiki.owners!
+
+  return <List>
+    {[...owners?.values()!].map(x => <ListItem>{x.info.name}</ListItem>)}
+    {[...editorsState?.value?.values()!].map(x =>
+    <ListItem>
+      {x.info.name}
+      <IconButton onClick={() => {
+        editorsState?.value?.delete(x, spaceContext.home?.getAuthor())
+        editorsState?.value?.save()
+      }}><PersonRemoveIcon/></IconButton>
+    </ListItem>)}
+  </List>
+}
+
 export default function WikiSpacePermissionSettings() {
-  // const {spaceContext} = useOutletContext<WikiContext>();
-  // const { home, homeResources } = spaceContext;
+  const {spaceContext, wiki} = useOutletContext<WikiContext>();
+  const { home, homeResources } = spaceContext;
+  const editorsState = useObjectState(wiki.editors)
   // React.useEffect(() => {
   //   // console.log('LOADING HOME...')
   //   const loadHomeResources = async () => {
@@ -77,8 +96,13 @@ export default function WikiSpacePermissionSettings() {
   return (
     <Paper style={{width: '100%'}} sx={{ p: 3 }}>
       <EditFlagsToggle/>
-      <ContactSelectorDialog/>
-      {/* <ContactsDialog home={home}/> */}
+      <ContactSelectorDialog handleSelect={async (x: any, y: any) => {
+        console.log('selected', x)
+        const identity = await homeResources?.store.load(x.hash!)! as Identity
+        editorsState?.value?.add(identity, home?.getAuthor()!)
+        editorsState?.value?.save()
+      }}/>
+      <EditorsList/>
     </Paper>
   );
 }
