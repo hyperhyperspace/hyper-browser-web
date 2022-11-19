@@ -80,7 +80,7 @@ function CreateSpaceDialog(props: {folder: Folder, context: HomeContext, onClose
                 let entryPoint;
                 if (spaceType === WikiSpace.className) {
                     entryPoint = await new WikiSpace([home.getAuthor() as Identity].values(), name.trim());
-                    await entryPoint.editFlags?.add(WikiSpace.OpenlyEditableFlag, home.getAuthor());
+                    await entryPoint.writeConfig?.add('everyone', home.getAuthor());
                 } else {
                     entryPoint = new clazz();
                 }

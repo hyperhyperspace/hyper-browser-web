@@ -29,8 +29,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
 
     useEffect(() => {
         wiki.startSync();
-        wiki.title?.loadAndWatchForChanges();
-
+        
         return () => {
             wiki.stopSync();
             wiki.title?.dontWatchForChanges();

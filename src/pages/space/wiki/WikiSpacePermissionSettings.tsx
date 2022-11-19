@@ -19,7 +19,13 @@ import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 
 function EditFlagsToggle() {
   const {wiki, spaceContext} = useOutletContext<WikiContext>();
-  const editFlagsState = useObjectState(wiki.editFlags);
+
+  // FIXME! #november: the toggle used to be open editing yes/no
+  //                   now it needs to be editing: owners / members / everyone
+
+  // for now it works as before, using only the "everyone" setting
+
+  const writeConfigState = useObjectState(wiki.writeConfig);
   const author = spaceContext?.home?.getAuthor();
 
   const handleToggle = async (
@@ -28,20 +34,20 @@ function EditFlagsToggle() {
   ) => {
     // console.log('toggling editability for', wiki, editFlagsState?.getValue())
     if (openlyEditable) {
-      await editFlagsState?.getValue()?.add(WikiSpace.OpenlyEditableFlag, author);
-      await editFlagsState?.getValue()?.save()
-      console.log('wiki permissions set', [...editFlagsState?.getValue()?.values()!])
+      await writeConfigState?.getValue()?.add('everyone', author);
+      await writeConfigState?.getValue()?.save()
+      console.log('wiki permissions set', [...writeConfigState?.getValue()?.values()!])
     } else {
-      await editFlagsState?.getValue()?.delete(WikiSpace.OpenlyEditableFlag, author);
-      await editFlagsState?.getValue()?.save()
-      console.log('wiki permissions set', [...editFlagsState?.getValue()?.values()!])
+      await writeConfigState?.getValue()?.delete('everyone', author);
+      await writeConfigState?.getValue()?.save()
+      console.log('wiki permissions set', [...writeConfigState?.getValue()?.values()!])
     } 
   };
 
   return (
     <div style={{display: 'grid', gridTemplateColumns: 'min-content auto', alignItems: "center", gap: "1em"}}>
       <ToggleButtonGroup
-        value={editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag)}
+        value={writeConfigState?.getValue()?.has('everyone')}
         exclusive
         onChange={handleToggle}
         aria-label="wiki permissions"
@@ -57,7 +63,7 @@ function EditFlagsToggle() {
         </ToggleButton>
       </ToggleButtonGroup>
       <Typography>
-        {editFlagsState?.getValue()?.has(WikiSpace.OpenlyEditableFlag) ? 'Anyone can edit' : 'Only some people can edit'}
+        {writeConfigState?.getValue()?.has('everyone') ? 'Anyone can edit' : 'Only some people can edit'}
       </Typography>
     </div>
   );
@@ -65,17 +71,17 @@ function EditFlagsToggle() {
 
 function EditorsList() {
   const {spaceContext, wiki} = useOutletContext<WikiContext>();
-  const editorsState = useObjectState(wiki.editors)
+  const membersState = useObjectState(wiki.members)
   const owners = wiki.owners!
 
   return <List>
     {[...owners?.values()!].map(x => <ListItem>{x.info.name}</ListItem>)}
-    {[...editorsState?.value?.values()!].map(x =>
+    {[...membersState?.value?.values()!].map(x =>
     <ListItem>
       {x.info.name}
       <IconButton onClick={() => {
-        editorsState?.value?.delete(x, spaceContext.home?.getAuthor())
-        editorsState?.value?.save()
+        membersState?.value?.delete(x, spaceContext.home?.getAuthor())
+        membersState?.value?.save()
       }}><PersonRemoveIcon/></IconButton>
     </ListItem>)}
   </List>
@@ -84,7 +90,7 @@ function EditorsList() {
 export default function WikiSpacePermissionSettings() {
   const {spaceContext, wiki} = useOutletContext<WikiContext>();
   const { home, homeResources } = spaceContext;
-  const editorsState = useObjectState(wiki.editors)
+  const membersState = useObjectState(wiki.members);
   // React.useEffect(() => {
   //   // console.log('LOADING HOME...')
   //   const loadHomeResources = async () => {
@@ -99,8 +105,8 @@ export default function WikiSpacePermissionSettings() {
       <ContactSelectorDialog handleSelect={async (x: any, y: any) => {
         console.log('selected', x)
         const identity = await homeResources?.store.load(x.hash!)! as Identity
-        editorsState?.value?.add(identity, home?.getAuthor()!)
-        editorsState?.value?.save()
+        membersState?.value?.add(identity, home?.getAuthor()!)
+        membersState?.value?.save()
       }}/>
       <EditorsList/>
     </Paper>
