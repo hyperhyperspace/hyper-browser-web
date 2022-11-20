@@ -6,9 +6,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import ContactSelector from './ContactSelector';
+import { Contact } from '../../../model/ProfileUtils';
+import { Hash } from '@hyper-hyper-space/core';
 
 type ContactSelectorDialogProps = {
     handleSelect?: Function
+    preFilter?: (c: Contact) => boolean,
+    excludedHashes?: Hash[]
 }
 
 const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
@@ -26,7 +30,7 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
   return (
     <div>
       <Button variant="outlined" onClick={handleClickOpen}>
-        Add an editor from contacts
+        Add member
       </Button>
       <Dialog
         open={open}
@@ -35,13 +39,13 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Add an editor"}
+          {"Add members"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-          Add an editor from your contacts:
+          Add members from your contacts:
           </DialogContentText>
-          <ContactSelector handleSelect={handleSelect}/>
+          <ContactSelector handleSelect={handleSelect} preFilter={props.preFilter} excludedHashes={props.excludedHashes} />
         </DialogContent>
         <DialogActions>
           {/* <Button onClick={handleClose}>Disagree</Button>

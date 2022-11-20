@@ -21,7 +21,7 @@ class ProfileUtils {
             name: (p.owner?.info?.name as string || '').trim(),
             initials: ProfileUtils.initials(p.owner?.info?.name as string),
             order: (p.owner?.info?.name as string || '').toLowerCase().trim(),
-            code: Space.getWordCodingForHash((p.owner as Identity).getLastHash()).join(' '),
+            code: Space.getWordCodingForHash((p.owner as Identity)?.getLastHash()).join(' '),
             picture: p.getPictureDataUrl()
         } as Contact;
     }

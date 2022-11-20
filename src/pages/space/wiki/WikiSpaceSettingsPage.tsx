@@ -6,14 +6,9 @@ import { useNavigate, useParams } from 'react-router';
 import WikiSpacePermissionSettings from './WikiSpacePermissionSettings';
 
 const tabs = [
-  // {
-  //   label: "Settings",
-  //   path: '',
-  //   component: <div></div>
-  // },
   {
-    label: "Editors",
-    path: "editors",
+    label: "Permissions",
+    path: "permissions",
     component: <WikiSpacePermissionSettings />
   },
 ]

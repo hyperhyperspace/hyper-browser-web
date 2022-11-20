@@ -1,8 +1,7 @@
 import { useObjectState } from '@hyper-hyper-space/react';
 import { Block, BlockType, Page, WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpaceBlock from './WikiSpaceBlock';
-import { Box, Button, IconButton, Link, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
-import PostAddIcon from '@mui/icons-material/PostAdd';
+import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { CausalArray, Identity, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';

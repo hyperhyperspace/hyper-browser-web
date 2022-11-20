@@ -7,6 +7,7 @@ import { useObjectState } from '@hyper-hyper-space/react';
 import { Hash } from '@hyper-hyper-space/core';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
 import { WikiContext } from '../../space/wiki/WikiSpaceView';
+import ContactListDisplay from './ContactListDisplay';
 
 type LetterIndexEntry = {
     letter: string,
@@ -15,9 +16,12 @@ type LetterIndexEntry = {
 
 type ContactSelectorProps = {
     handleSelect?: Function
+    preFilter?: (c: Contact) => boolean,
+    excludedHashes?: Hash[]
 }
 
-const ContactSelector = ({ handleSelect }: ContactSelectorProps) => {
+const ContactSelector = ({ handleSelect, preFilter, excludedHashes}: ContactSelectorProps) => {
+    preFilter = preFilter || ((c: Contact) => true)
     const { spaceContext } = useOutletContext<WikiContext>();
     const { home } = spaceContext;
     const navigate = useNavigate();
@@ -72,7 +76,7 @@ const ContactSelector = ({ handleSelect }: ContactSelectorProps) => {
                     contactProfiles.push(p);
                 }
 
-                const cs = contactProfiles.map(ProfileUtils.createContact).filter((c: Contact) => ProfileUtils.filterContactForKeywordSearch(c, keywords));
+                const cs = contactProfiles.map(ProfileUtils.createContact).filter((c: Contact) => preFilter!(c!) && ProfileUtils.filterContactForKeywordSearch(c, keywords));
 
                 cs.sort((a: { order: string }, b: { order: string }) => a.order.localeCompare(b.order));
 
@@ -215,7 +219,7 @@ const ContactSelector = ({ handleSelect }: ContactSelectorProps) => {
                                     </ListItemButton>
                                 </ListItem> */}
                                 <Divider />
-                                {contacts.map((c: Contact) => (
+                                {contacts.filter((c: Contact) => !(excludedHashes || []).includes(c.hash)).map((c: Contact) => (
                                     <ListItem
                                         disablePadding
                                         key={'contact-' + c.hash}
@@ -223,18 +227,7 @@ const ContactSelector = ({ handleSelect }: ContactSelectorProps) => {
                                     // secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? children : undefined}
                                     >
                                         <ListItemButton component="a" onClick={() => attemptSelection(c)}>
-                                            <ListItemIcon>
-                                                {c.picture !== undefined &&
-                                                    <Avatar alt={c.name} src={c.picture} />
-                                                }
-                                                {c.picture === undefined &&
-                                                    <Avatar alt={c.name}>{c.initials}</Avatar>
-                                                }
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={<Stack direction="row" spacing={1}><Typography>{c.name}</Typography>{c.hash === home?.getAuthor()?.getLastHash() && <Chip size="small" label='You' />}</Stack>}
-                                                secondary={c.code}
-                                            />
+                                            <ContactListDisplay contact={c} selfHash={home?.getAuthor()?.getLastHash()}/>
                                         </ListItemButton>
                                     </ListItem>
                                 ))}
