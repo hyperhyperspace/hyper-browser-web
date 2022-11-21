@@ -21,7 +21,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import History from '@tiptap/extension-history';
 import { lowlight } from 'lowlight/lib/all.js'
 import { EditorContent, useEditor } from '@tiptap/react'
-import { MutableReference, MutationEvent } from '@hyper-hyper-space/core';
+import { CausalReference, MutableReference, MutationEvent } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
 import { Icon, Tooltip } from '@mui/material';
 import { useOutletContext } from 'react-router';
@@ -42,7 +42,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const { spaceContext } = useOutletContext<WikiContext>();
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
-    const blockContentsState = useObjectState(props.block?.contents, {debounceFreq: 250});
+    const blockContentsState = useObjectState(props.block, {debounceFreq: 250});
 
     const { wiki }     = useOutletContext<WikiContext>();
     const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
@@ -50,7 +50,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     // disable debouncing once state has arrived:
     
     useEffect(() => {
-        if (blockState?.getValue()?.contents?.getValue() !== undefined && blockState.getDebounceFreq() !== undefined) {
+        if (blockState?.getValue()?.getValue() !== undefined && blockState.getDebounceFreq() !== undefined) {
             blockState.setDebounceFreq(undefined);
         }
     }, [blockState]);
@@ -124,7 +124,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     // later on it might be desirable to use a custom tiptap `Block` type instead
     // and share a single tiptap `Editor`.
 
-    const updateBlockWithHtml = useRef(debounce(async (blockContents: MutableReference<string>, html: string) => {
+    const updateBlockWithHtml = useRef(debounce(async (blockContents: CausalReference<string>, html: string) => {
         await blockContents.setValue(html)
         blockContents.setResources(resources!);
         blockContents.saveQueuedOps();
@@ -212,7 +212,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                                         {editor?.isEditable && isEditing && !editor?.state.selection?.empty && <BlockStyleBar editor={editor}></BlockStyleBar>}
                                     </Fragment>
                                 }
-                                {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.contents?.getValue()} />}
+                                {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.getValue()} />}
                             </div>                            
                             
                             <Tooltip title="Click to remove this block">

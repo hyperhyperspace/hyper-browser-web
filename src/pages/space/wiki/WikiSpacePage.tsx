@@ -112,8 +112,8 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
         console.log('CALLED ADD IMAGE BLOCK')
         page?.addBlock(idx, BlockType.Image).then(async (b: Block) => {
             console.log('SET IMAGE VALUE TO ', dataUrl)
-            await b.contents?.setValue(dataUrl);
-            await b.contents?.save();
+            await b.setValue(dataUrl);
+            await b.save();
         });
     }
 
