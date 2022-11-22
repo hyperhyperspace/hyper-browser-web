@@ -15,15 +15,19 @@ type Contact = {
 
 class ProfileUtils {
 
-    static createContact(p: Profile) {
-        return {
-            hash: p.owner?.getLastHash(),
-            name: (p.owner?.info?.name as string || '').trim(),
-            initials: ProfileUtils.initials(p.owner?.info?.name as string),
-            order: (p.owner?.info?.name as string || '').toLowerCase().trim(),
-            code: Space.getWordCodingForHash((p.owner as Identity)?.getLastHash()).join(' '),
-            picture: p.getPictureDataUrl()
+    static createContact(p: Profile | Identity) {
+        const id = p instanceof Profile ? p.owner! : p
+        const contact = {
+            hash: id?.getLastHash(),
+            name: (id?.info?.name as string || '').trim(),
+            initials: ProfileUtils.initials(id?.info?.name as string),
+            order: (id?.info?.name as string || '').toLowerCase().trim(),
+            code: Space.getWordCodingForHash((id as Identity)?.getLastHash()).join(' '),
         } as Contact;
+        if (p instanceof Profile) {
+            contact.picture = p.getPictureDataUrl()
+        }
+        return contact
     }
 
     static initials (name?: string) {

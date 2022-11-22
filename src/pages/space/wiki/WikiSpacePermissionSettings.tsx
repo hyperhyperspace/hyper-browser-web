@@ -74,55 +74,19 @@ function MemberList() {
   const [membersProfiles, setMembersProfiles] = React.useState<Profile[]>([])
   const owners = wiki.owners!
 
-  const profileForIdentity =
-    React.useRef(
-      memoize(
-        async (id: Identity) => {
-          const profile = await homeResources?.store.load(new Profile(id).getLastHash(), true, true) as Profile;
-          // console.log('getting profile for id', id, id.hash(), profile)
-          return profile
-        }
-        , (id: Identity) => id.getLastHash())
-    )
-
-  const contactForProfile =
-    React.useRef(
-      memoize(
-        (profile: Profile) => {
-          return ProfileUtils.createContact(profile)
-        }, (profile: Profile) => profile.getLastHash())
-    )
-
-  React.useEffect(() => {
-    const members = [...membersState?.getValue()?.values()!]
-    Promise.all([...owners.values()!].map(
-      profileForIdentity.current
-    )).then(profiles => {
-      setOwnersProfiles(profiles)
-      // console.log(profiles)
-    })
-    Promise.all(members.map(
-      profileForIdentity.current
-    )).then(profiles => {
-      setMembersProfiles(profiles)
-      // console.log(profiles)
-    })
-  }, [membersState])
-
-
   return <>
     <h4>Members:</h4>
     <Box>
       <List>
-        {ownersProfiles.map(profile =>
+        {[...owners.values()!].map(id =>
           <ListItem>
-            <ContactListDisplay contact={contactForProfile.current(profile!)} />
+            <ContactListDisplay contact={ProfileUtils.createContact(id)!} />
           </ListItem>)}
-        {membersProfiles.map(profile =>
+        {[...membersState?.value?.values()!].map(id =>
           <ListItem>
-            <ContactListDisplay contact={contactForProfile.current(profile!)} />
+            <ContactListDisplay contact={ProfileUtils.createContact(id)!} />
             <IconButton onClick={() => {
-              membersState?.value?.delete(profile.owner!, spaceContext.home?.getAuthor())
+              membersState?.value?.delete(id, spaceContext.home?.getAuthor())
               membersState?.value?.save()
             }}><PersonRemoveIcon /></IconButton>
           </ListItem>)}
