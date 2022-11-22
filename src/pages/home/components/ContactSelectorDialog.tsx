@@ -8,6 +8,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import ContactSelector from './ContactSelector';
 import { Contact } from '../../../model/ProfileUtils';
 import { Hash } from '@hyper-hyper-space/core';
+import { Tab, Tabs } from '@mui/material';
+import { TabPanel } from '@mui/lab';
 
 type ContactSelectorDialogProps = {
     handleSelect?: Function
@@ -19,6 +21,9 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
   const [open, setOpen] = React.useState(false);
   const {handleSelect} = props;
 
+  type ContactSource = 'contacts' | 'someone new'
+  const [contactSource, setContactSource] = React.useState<ContactSource>('contacts')
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -26,6 +31,10 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
   const handleClose = () => {
     setOpen(false);
   };
+  const handleChangeContactSource = (event: React.SyntheticEvent, newValue: ContactSource) => {
+    setContactSource(newValue);
+  };
+
 
   return (
     <div>
@@ -42,10 +51,13 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
           {"Add members"}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-          Add members from your contacts:
-          </DialogContentText>
+        <Tabs value={contactSource} aria-label="add a contact..." onChange={handleChangeContactSource}>
+          <Tab value="contacts" label="From contacts" />
+          <Tab value="someone new" label="Someone new" />
+        </Tabs>
+        <div hidden={contactSource !== 'contacts'}>
           <ContactSelector handleSelect={handleSelect} preFilter={props.preFilter} excludedHashes={props.excludedHashes} />
+        </div>
         </DialogContent>
         <DialogActions>
           {/* <Button onClick={handleClose}>Disagree</Button>

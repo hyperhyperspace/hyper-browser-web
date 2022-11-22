@@ -14,7 +14,7 @@ import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
 import ContactListDisplay from '../../home/components/ContactListDisplay';
 
 function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
-  const { wiki, spaceContext } = useOutletContext<WikiContext>();
+  const { spaceContext } = useOutletContext<WikiContext>();
   const flagState = useObjectState(props.flag);
   const author = spaceContext?.home?.getAuthor();
 
