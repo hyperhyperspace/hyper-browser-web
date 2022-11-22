@@ -1,34 +1,28 @@
 import * as React from 'react';
-import { Box, IconButton, List, ListItem, Paper, Typography } from '@mui/material';
+import { Box, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { useObjectState } from '@hyper-hyper-space/react';
 
 import PublicIcon from '@mui/icons-material/Public';
 import PeopleIcon from '@mui/icons-material/People';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { PermFlag, PermFlagEveryone } from '@hyper-hyper-space/wiki-collab';
+import { PermFlag, PermFlagEveryone, PermFlagMembers } from '@hyper-hyper-space/wiki-collab';
 import ContactSelectorDialog from '../../home/components/ContactSelectorDialog';
 import { CausalSet, Identity } from '@hyper-hyper-space/core';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import { memoize } from 'lodash-es';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
-import { Profile } from '@hyper-hyper-space/home';
 import ContactListDisplay from '../../home/components/ContactListDisplay';
-import { profile } from 'console';
 
 function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
   const { wiki, spaceContext } = useOutletContext<WikiContext>();
-  const { resources } = spaceContext;
   const flagState = useObjectState(props.flag);
   const author = spaceContext?.home?.getAuthor();
 
-  const handleToggle = async (
-    event: React.MouseEvent<HTMLElement>,
-    openlyEditable: boolean,
+  const handleChange = async (
+    event: SelectChangeEvent,
   ) => {
-    if (openlyEditable) {
+    const flag = event.target.value;
+    if (flag === PermFlagEveryone) {
       await flagState?.getValue()?.add(PermFlagEveryone, author);
       await flagState?.getValue()?.save()
       console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
@@ -38,40 +32,30 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
       console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
     }
   };
-
-  const statusTextEverybody = `Everybody can ${props.name}`
-  const statusTextMembers = `Only members can ${props.name}`
+  const flagStateEverybody = flagState?.getValue()?.has(PermFlagEveryone)
+  const statusText = `Who can ${props.name}:`
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'min-content auto', alignItems: "center", gap: "1em" }}>
-      <ToggleButtonGroup
-        value={flagState?.getValue()?.has(PermFlagEveryone)}
-        exclusive
-        onChange={handleToggle}
-        aria-label={`Toggle ${props.name} permission`}
-        disabled={!wiki.owners?.has(author!)}
-      >
-        <ToggleButton value={true} aria-label={statusTextEverybody}>
-          <PublicIcon />
-          {/* Open */}
-        </ToggleButton>
-        <ToggleButton value={false} aria-label={statusTextMembers}>
-          <PeopleIcon />
-          {/* Restricted */}
-        </ToggleButton>
-      </ToggleButtonGroup>
+    <>
       <Typography>
-        {flagState?.getValue()?.has(PermFlagEveryone) ? statusTextEverybody : statusTextMembers}
+        { statusText }
       </Typography>
-    </div>
+      <FormControl fullWidth>
+        <Select
+          value={flagStateEverybody ? PermFlagEveryone : PermFlagMembers}
+          onChange={handleChange}
+        >
+          <MenuItem value={PermFlagEveryone}>Everybody</MenuItem>
+          <MenuItem value={PermFlagMembers}>Members</MenuItem>
+        </Select>
+      </FormControl>
+      { flagStateEverybody ? <PublicIcon/> : <PeopleIcon/> }
+    </>
   );
 }
 
 function MemberList() {
   const { spaceContext, wiki } = useOutletContext<WikiContext>();
-  const { homeResources } = spaceContext;
   const membersState = useObjectState(wiki.members)
-  const [ownersProfiles, setOwnersProfiles] = React.useState<Profile[]>([])
-  const [membersProfiles, setMembersProfiles] = React.useState<Profile[]>([])
   const owners = wiki.owners!
 
   return <>
@@ -103,8 +87,10 @@ export default function WikiSpacePermissionSettings() {
 
   return (
     <Paper style={{ width: '100%' }} sx={{ p: 3 }}>
-      <PermFlagToggle flag={wiki.readConfig!} name='read' />
-      <PermFlagToggle flag={wiki.writeConfig!} name='write' />
+      <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
+        <PermFlagToggle flag={wiki.readConfig!} name='read' />
+        <PermFlagToggle flag={wiki.writeConfig!} name='write' />
+      </div>
       <MemberList />
       <ContactSelectorDialog
         preFilter={(c) => {
