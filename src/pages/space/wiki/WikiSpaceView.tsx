@@ -7,7 +7,6 @@ import NewPage from './NewPage';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 import { SpaceContext } from '../SpaceFrame';
 import './WikiSpaceView.css'
-import WikiSpacePermissionSettings from './WikiSpacePermissionSettings';
 import WikiSpaceSettingsPage from './WikiSpaceSettingsPage';
 
 type WikiNav = {

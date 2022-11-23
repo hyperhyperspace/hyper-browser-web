@@ -27,6 +27,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     const [page, setPage] = useState<Page>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
+    const [latestNewBlockHash, setlatestNewBlockHash] = useState<string>();
 
     const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
 
@@ -105,14 +106,17 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
         console.log('adding text block with author:', home?.getAuthor(), '...')
         console.log('hasKeyPair()=', home?.getAuthor()?.hasKeyPair(), '...')
 
-        page?.addBlock(idx, undefined, (home?.getAuthor() as Identity)!);
+        const newBlock = page?.addBlock(idx, undefined, (home?.getAuthor() as Identity)!);
+        newBlock?.then(block => {
+            setlatestNewBlockHash(block?.getLastHash())
+        })
     }
 
     const addImageBlock = (dataUrl: string, idx?: number) => {
         console.log('CALLED ADD IMAGE BLOCK')
-        page?.addBlock(idx, BlockType.Image).then(async (b: Block) => {
+        page?.addBlock(idx, BlockType.Image, home?.getAuthor() as Identity).then(async (b: Block) => {
             console.log('SET IMAGE VALUE TO ', dataUrl)
-            await b.setValue(dataUrl);
+            await b.setValue(dataUrl, home?.getAuthor() as Identity);
             await b.save();
         });
     }
@@ -128,7 +132,8 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                                     <WikiSpaceBlock
                                         block={block} {...{startedEditing, stoppedEditing}}
                                         idx={index} showAddBlockMenu={showAddBlockMenu}
-                                        removeBlock={() => page?.removeBlock(block)}
+                                        removeBlock={() => page?.removeBlock(block, home?.getAuthor())}
+                                        latestNewBlockHash={latestNewBlockHash}
                                     ></WikiSpaceBlock>
                                 </div>
                     

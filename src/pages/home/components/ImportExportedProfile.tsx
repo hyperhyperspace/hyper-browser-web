@@ -66,7 +66,7 @@ export default function ImportExportedProfile({ renderIdentity }: ImportExported
                 <Typography style={{ alignSelf: 'center' }}>
                     <span style={{ background: 'orange', color: 'white' }}>{importedIdentity.info?.type || 'Identity'}</span> named <Fragment>{importedIdentity.info?.name}</Fragment>
                 </Typography>
-                {renderIdentity!(importedIdentity)}
+                {renderIdentity && renderIdentity(importedIdentity)}
             </Stack>
         }
     </Box>)

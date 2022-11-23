@@ -106,7 +106,7 @@ export default function LookupThreeWordCode({ resourcesForDiscovery, renderIdent
                             <Typography style={{ alignSelf: 'center' }}>
                                 <span style={{ background: 'orange', color: 'white' }}>{id.info?.type || 'Identity'}</span> named <Fragment>{id.info?.name}</Fragment>
                             </Typography>
-                            {renderIdentity!(id)}
+                            { renderIdentity && renderIdentity(id) }
                         </Stack>
                     ))}
                 </Stack>

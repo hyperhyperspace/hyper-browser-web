@@ -37,9 +37,12 @@ import { Box } from '@mui/system';
 // import OrderedList from '@tiptap/extension-ordered-list';
 
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number,
-        showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void, removeBlock: () => void},
-    ) {
+        showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void, removeBlock: () => void,
+        latestNewBlockHash?: string
+}) {
     const { spaceContext } = useOutletContext<WikiContext>();
+    const { home } = spaceContext
+    const selfAuthor = home?.getAuthor()!
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
     const blockContentsState = useObjectState(props.block, {debounceFreq: 250});
@@ -125,7 +128,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     // and share a single tiptap `Editor`.
 
     const updateBlockWithHtml = useRef(debounce(async (blockContents: CausalReference<string>, html: string) => {
-        await blockContents.setValue(html)
+        await blockContents.setValue(html, selfAuthor)
         blockContents.setResources(resources!);
         blockContents.saveQueuedOps();
         console.log('SAVED BLOCK')
@@ -164,6 +167,12 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         onBlur: stoppedEditing,
         onFocus: startedEditing
     });
+
+    useEffect(() => {
+        if (props.block.getLastHash() === props.latestNewBlockHash) {
+            editor?.commands.focus()
+        }
+    }, [props.latestNewBlockHash])
 
     /*editor?.on('focus', () => {
         console.log('focusing editor')
