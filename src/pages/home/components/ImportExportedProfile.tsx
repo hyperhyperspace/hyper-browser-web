@@ -46,7 +46,7 @@ export default function ImportExportedProfile({ renderIdentity }: ImportExported
 
 
     }, [exportedIdentity]);
-    return (<Box style={{ padding: '1rem', marginTop: '1.5rem' }}>
+    return (<Box style={{ padding: '1rem' }}>
         <TextField
             label="Paste exported profile here"
             value={exportedIdentity}

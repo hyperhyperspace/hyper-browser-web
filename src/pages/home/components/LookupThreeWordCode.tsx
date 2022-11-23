@@ -1,10 +1,8 @@
 import { Identity, ObjectDiscoveryReply, Resources, WordCode } from "@hyper-hyper-space/core";
 import { useObjectDiscoveryWithResources } from "@hyper-hyper-space/react";
-import { Button, CircularProgress, Divider, TextField, Typography } from "@mui/material";
+import { CircularProgress, Divider, TextField, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import { Fragment, ReactElement, useEffect, useRef, useState } from "react";
-import { useOutletContext } from "react-router";
-import { HomeContext } from "../HomeSpace";
 
 type LookupThreeWordCodeProps = {
     resourcesForDiscovery: Resources,
@@ -79,7 +77,7 @@ export default function LookupThreeWordCode({ resourcesForDiscovery, renderIdent
     //     close();
     // };
     return (
-        <Box style={{ padding: '1rem', marginTop: '1.5rem' }}>
+        <Box style={{ padding: '1rem' }}>
             <Stack direction="row" spacing={1} style={{ alignItems: 'baseline' }}>
                 <Typography >
                     Code:

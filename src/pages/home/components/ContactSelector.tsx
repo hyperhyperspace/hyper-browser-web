@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { useNavigate, useOutletContext } from 'react-router';
 
-import { Stack, Tabs, Tab, Card, CardContent, TextField, InputAdornment, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar, Divider, Chip } from '@mui/material';
+import { Tabs, Tab, TextField, InputAdornment, Typography, List, ListItem, ListItemButton, Divider } from '@mui/material';
 import { Box } from '@mui/system';
 import { useObjectState } from '@hyper-hyper-space/react';
-import { Hash } from '@hyper-hyper-space/core';
+import { Hash, Resources } from '@hyper-hyper-space/core';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
-import { WikiContext } from '../../space/wiki/WikiSpaceView';
 import ContactListDisplay from './ContactListDisplay';
+import { Home } from '@hyper-hyper-space/home';
 
 type LetterIndexEntry = {
     letter: string,
@@ -17,13 +17,14 @@ type LetterIndexEntry = {
 type ContactSelectorProps = {
     handleSelect?: Function
     preFilter?: (c: Contact) => boolean,
-    excludedHashes?: Hash[]
+    excludedHashes?: Hash[],
+    selectedHashes?: Hash[],
+    resourcesForDiscovery: Resources,
+    home: Home
 }
 
-const ContactSelector = ({ handleSelect, preFilter, excludedHashes}: ContactSelectorProps) => {
+const ContactSelector = ({ handleSelect, preFilter, excludedHashes, selectedHashes, home}: ContactSelectorProps) => {
     preFilter = preFilter || ((c: Contact) => true)
-    const { spaceContext } = useOutletContext<WikiContext>();
-    const { home } = spaceContext;
     const navigate = useNavigate();
     const contactsState = useObjectState(home?.contacts?.current);
 
@@ -191,8 +192,8 @@ const ContactSelector = ({ handleSelect, preFilter, excludedHashes}: ContactSele
                 onChange={searchValueChanged}
                 onKeyUp={searchKeyUp}
             />
-            <Card style={{ width: '100%', height: 'calc(100% - 80px)' }}>
-                <CardContent style={{ width: '100%', height: '100%' }}>
+            {/* <Card style={{ width: '100%', height: 'calc(100% - 80px)' }}>
+                <CardContent style={{ width: '100%', height: '100%' }}> */}
 
                     <Box sx={{ bgcolor: 'background.paper', display: 'flex', height: { xs: '100%', sm: '100%', md: '450px', lg: '475px', xl: '500px' } }}>
                         <Tabs
@@ -208,16 +209,8 @@ const ContactSelector = ({ handleSelect, preFilter, excludedHashes}: ContactSele
                                 <Tab key={'idx-' + idx.letter} value={idx.letter} disabled={idx.hash === undefined} label={idx.letter} href={idx.hash ? '#' : ''} onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { e.preventDefault(); setCurrentLetter(idx.letter); if (idx.hash !== undefined) { contactElements.current[idx.hash].scrollIntoView(); } }} />
                             ))}
                         </Tabs>
-                        <Box style={{ height: '100%', width: '100%', overflow: 'scroll' }} onScroll={onScroll}>
+                        <Box style={{ height: '100%', width: '100%', overflow: 'auto' }} onScroll={onScroll}>
                             <List style={{ width: '100%' }}>
-                                {/* <ListItem disablePadding>
-                                    <ListItemButton component="a" onClick={() => { navigate('../add-contact'); }}>
-                                        <ListItemIcon>
-                                            <Avatar sx={{ bgcolor: 'lightblue' }} alt="Add new contact">+</Avatar>
-                                        </ListItemIcon>
-                                        <ListItemText primary="Add new contact" primaryTypographyProps={{ style: { textDecoration: 'underline', color: 'blue' } }} />
-                                    </ListItemButton>
-                                </ListItem> */}
                                 <Divider />
                                 {contacts.filter((c: Contact) => !(excludedHashes || []).includes(c.hash)).map((c: Contact) => (
                                     <ListItem
@@ -226,7 +219,7 @@ const ContactSelector = ({ handleSelect, preFilter, excludedHashes}: ContactSele
                                         ref={(instance: HTMLLIElement | null) => { contactElements.current[c.hash] = instance; }}
                                     // secondaryAction={c.hash !== home?.getAuthor()?.getLastHash() ? children : undefined}
                                     >
-                                        <ListItemButton component="a" onClick={() => attemptSelection(c)}>
+                                        <ListItemButton disabled={(selectedHashes || []).includes(c.hash)} component="a" onClick={() => attemptSelection(c)}>
                                             <ContactListDisplay contact={c} selfHash={home?.getAuthor()?.getLastHash()}/>
                                         </ListItemButton>
                                     </ListItem>
@@ -234,8 +227,8 @@ const ContactSelector = ({ handleSelect, preFilter, excludedHashes}: ContactSele
                             </List>
                         </Box>
                     </Box>
-                </CardContent>
-            </Card>
+                {/* </CardContent>
+            </Card> */}
         </Fragment>
     );
 }

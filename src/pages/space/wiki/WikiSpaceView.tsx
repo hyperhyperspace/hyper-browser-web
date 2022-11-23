@@ -14,6 +14,7 @@ type WikiNav = {
     goToPage: (pageName: string) => void,
     goToAddPage: () => void,
     goToIndex: () => void
+    goToPermissionSettings: () => void
 }
 
 type WikiContext = {
@@ -50,12 +51,17 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
         navigate('/space/' + encodeURIComponent(wiki.getLastHash()) + '/index');
     }
 
+    const goToPermissionSettings = () => {
+        navigate('/space/' + encodeURIComponent(wiki.getLastHash()) + '/settings/permissions');
+    }
+
     const context: WikiContext = {
         wiki: wiki,
         nav: {
             goToPage: goToPage,
             goToAddPage: goToAddPage,
-            goToIndex: goToIndex
+            goToIndex: goToIndex,
+            goToPermissionSettings,
         },
         spaceContext: spaceContext
     }

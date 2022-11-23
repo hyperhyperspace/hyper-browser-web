@@ -1,10 +1,10 @@
 import { MutationEvent } from "@hyper-hyper-space/core"
 import { useObjectState } from "@hyper-hyper-space/react"
 import { Page } from "@hyper-hyper-space/wiki-collab"
-import { Button, InputAdornment, Link, List, ListItem, TextField, Typography } from "@mui/material"
+import { Button, Divider, InputAdornment, Link, List, ListItem, ListItemButton, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
-import { useOutletContext, useParams } from "react-router"
+import { useLocation, useNavigation, useOutletContext, useParams } from "react-router"
 import WikiSpacePermissionsDialog from "./WikiSpacePermissionSettings"
 import { WikiContext } from "./WikiSpaceView"
 
@@ -14,6 +14,8 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
     const {nav, wiki, spaceContext} = useOutletContext<WikiContext>();
 
     const { pageName } = useParams();
+    const {pathname} = useLocation();
+    const onSettingsPage = pathname.includes('/settings/')
 
     const wikiState = useObjectState(wiki);
     const pageSetState = useObjectState(wiki?.pages, {debounceFreq: 250});
@@ -73,6 +75,7 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
                         }}
                     ></TextField>
                     </ListItem>
+                        {/* saved pages */}
                         {Array.from((wikiState?.getValue()?.getAllowedPages() || [])).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
                             return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}>
                                         {pageName !== p.name && <Button size="small" style={{textTransform:'none', textAlign: 'left', minWidth: 'unset'}} variant="text" onClick={() => nav.goToPage(p.name as string)}>
@@ -81,10 +84,13 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
                                         {pageName === p.name && <Typography style={currentPageStyle}><b>{p.name}</b></Typography>}
                                    </ListItem>
                         })}
-                        {!Array.from(wikiState?.getValue()?.getAllowedPages()!).map(p => p.name).includes(pageName)
+                        {/* unsaved pages */}
+                        {pageName && !Array.from(wikiState?.getValue()?.getAllowedPages()!).map(p => p.name).includes(pageName)
                             && <ListItem><Typography style={{textDecoration: "underline dotted", ...currentPageStyle}}>{pageName}</Typography></ListItem>}
-                        {canCreatePages && <ListItem style={{paddingTop: '3px', paddingBottom: '1px'}}><Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToAddPage}><Typography>Add page +</Typography></Button></ListItem>}
-                        {/*<ListItem style={{justifyContent: 'center'}}><Button onClick={nav.goToAddPage}>Add page</Button></ListItem>*/}
+                        {/* add page */}
+                        {canCreatePages && <ListItemButton onClick={nav.goToAddPage}><Typography>Add page +</Typography></ListItemButton>}
+                        <Divider/>
+                        {canCreatePages && <ListItemButton selected={onSettingsPage} onClick={nav.goToPermissionSettings}><Typography>Settings</Typography></ListItemButton>}
                     </List>
                     </Box>
 }

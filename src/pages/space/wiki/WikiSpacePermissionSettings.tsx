@@ -63,11 +63,11 @@ function MemberList() {
     <Box>
       <List>
         {[...owners.values()!].map(id =>
-          <ListItem>
+          <ListItem key={id.getLastHash()!}>
             <ContactListDisplay contact={ProfileUtils.createContact(id)!} />
           </ListItem>)}
         {[...membersState?.value?.values()!].map(id =>
-          <ListItem>
+          <ListItem key={id.getLastHash()!}>
             <ContactListDisplay contact={ProfileUtils.createContact(id)!} />
             <IconButton onClick={() => {
               membersState?.value?.delete(id, spaceContext.home?.getAuthor())
@@ -81,7 +81,7 @@ function MemberList() {
 
 export default function WikiSpacePermissionSettings() {
   const { spaceContext, wiki } = useOutletContext<WikiContext>();
-  const { home, homeResources } = spaceContext;
+  const { home, homeResources, resources } = spaceContext;
   const membersState = useObjectState(wiki.members)
   const owners = wiki.owners!
 
@@ -93,15 +93,12 @@ export default function WikiSpacePermissionSettings() {
       </div>
       <MemberList />
       <ContactSelectorDialog
-        preFilter={(c) => {
-          const includedHashes = [...membersState?.getValue()?.values()!, ...owners.values()!].map(id => id.getLastHash())
-          console.log('filtering over', c.hash, includedHashes, 'from', [...membersState?.getValue()?.values()!],[...owners.values()]);
-          return !includedHashes.includes(c.hash)
-        }}
+        home={home!}
+        resourcesForDiscovery={resources!}
+        selectedHashes={[...membersState?.getValue()?.values()!, ...owners.values()!].map(id => id.getLastHash())}
         handleSelect={async (contact: Contact) => {
           console.log('attempting to select', contact)
           const identity = await homeResources?.store.load(contact.hash)! as Identity
-          // console.log('selected', id, identity)
           membersState?.value?.add(identity, home?.getAuthor()!)
           membersState?.value?.save()
         }}
