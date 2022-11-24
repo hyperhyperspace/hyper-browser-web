@@ -4,13 +4,16 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router';
 import {  Typography, CircularProgress, DialogContent, DialogTitle, Stack, Card, CardContent, DialogActions, Button, Chip } from '@mui/material';
-import { Hash, Resources, Identity, Space } from '@hyper-hyper-space/core';
+import { Hash, Resources, Identity, Space, SpaceEntryPoint, MutationEvent, MutableContentEvents } from '@hyper-hyper-space/core';
 import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
-import { Home } from '@hyper-hyper-space/home';
+import { Home, SpaceLink } from '@hyper-hyper-space/home';
 
 import { Box } from '@mui/system';
 import { Profile } from '@hyper-hyper-space/home';
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
+import { TextSpace } from '../../model/text/TextSpace';
+import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
+import HomeItem from '../../pages/home/components/HomeItem';
 
 function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home, resources?: Resources, resourcesForDiscovery?: Resources, anonMode?: boolean, startChat?: (id: Identity) => void}) {
 
@@ -52,7 +55,25 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
     
                     await p.loadAndWatchForChanges();
     
-                    p.startSync({requester: tmpResources.getId()});
+                    await p.startSync({requester: tmpResources.getId()});
+
+                    p.published?.addObserver( (ev: MutationEvent) => {
+                        if (ev.emitter === p.published) {
+                            if (ev.action === MutableContentEvents.AddObject) {
+                                const link = ev.data as SpaceLink;
+                                link.name?.loadAndWatchForChanges();
+                                console.log('WATCH')
+                            } else if (ev.action === MutableContentEvents.RemoveObject) {
+                                const link = ev.data as SpaceLink;
+                                link.name?.dontWatchForChanges();
+                            }    
+                        }
+                    });
+
+                    for (const link of p.published?.values() || []) {
+                        link.name?.loadAndWatchForChanges();
+                        console.log('WATCH')
+                    }
 
                     tearDown = async () => { 
                         p.dontWatchForChanges();
@@ -105,8 +126,29 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                 if (loaded !== undefined) {
                     console.log(loaded);
                     p = loaded;
-                    p.startSync();
+
+                    console.log('published', p.published)
+
+                    p.published?.addObserver( (ev: MutationEvent) => {
+                        if (ev.emitter === p.published) {
+                            if (ev.action === MutableContentEvents.AddObject) {
+                                const link = ev.data as SpaceLink;
+                                link.name?.loadAndWatchForChanges();
+                                console.log('WATCH')
+                            } else if (ev.action === MutableContentEvents.RemoveObject) {
+                                const link = ev.data as SpaceLink;
+                                link.name?.dontWatchForChanges();
+                            }    
+                        }
+                    });
+
+                    await p.startSync();
                     setProfile(p);
+
+                    for (const link of p.published?.values() || []) {
+                        link.name?.loadAndWatchForChanges();
+                        console.log('WATCH')
+                    }
 
                     return () => {
                         p.stopSync();
@@ -235,9 +277,43 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                     </Card>
                     }
 
-                <Stack style={{paddingTop: '1.5rem'}} direction="row"><img src="icons/streamline-icon-folder-empty@48x48.png" style={{height: '20px', paddingRight: '0.5rem'}} /> <Typography>Public</Typography></Stack>
                 
-                <Typography style={{color: 'gray', paddingTop: '0.25rem'}}><i>This person is not sharing any spaces.</i></Typography>
+                <Stack style={{marginTop: '1.5rem'}}>
+
+                {profileState?.value?.published?.size() === 0 && 
+                    <Typography style={{color: 'gray', paddingTop: '0.25rem'}}><i>This person is not publishing any spaces.</i></Typography>
+                }
+                {profileState?.value?.published !== undefined && profileState?.value?.published?.size() > 0 && 
+                <Stack direction="row">
+                    {Array.from(profileState?.value?.published.values() || []).map((item: SpaceLink) => {
+                        const entry = item.spaceEntryPoint as any as SpaceEntryPoint;
+                        const name = item.name;
+                        let icon = "";
+                        let title: (string | undefined) = undefined;
+                        if (item.spaceEntryPoint instanceof TextSpace) {
+                            title = 'Text File';
+                            icon = 'streamline-icon-pencil-write-1@48x48.png';
+                        } else if (item.spaceEntryPoint instanceof WikiSpace) {
+                            title = 'Wiki';
+                            icon = 'streamlinehq-book-edit-content-48.png';
+                        }
+
+                        return <HomeItem 
+                                            key={item.getLastHash()}
+                                            icon={icon}
+                                            name={name?.getValue()}
+                                            click={() => { window.open('./#/space/' + encodeURIComponent(item.spaceEntryPoint?.getLastHash() as Hash), '_blank') }}
+                                            menu={[
+                                                {name: 'Remove from Profile', action: () => { profile?.published?.delete(item).then(() => { profile?.published?.save(); }) }} 
+                                                ]}
+                                            title={title}
+                                            dense={true}
+                                        />;
+                    })}
+                </Stack>
+                }
+                    
+                </Stack>
                 </DialogContent>
             </Fragment>
             }

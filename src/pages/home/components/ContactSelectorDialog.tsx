@@ -7,7 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import ContactSelector from './ContactSelector';
 import { Contact } from '../../../model/ProfileUtils';
 import { Hash, Resources } from '@hyper-hyper-space/core';
-import { Tab, Tabs } from '@mui/material';
+import { Stack, Tab, Tabs, useMediaQuery, useTheme } from '@mui/material';
 import ContactSelectorSomeoneNew from './ContactSelectorSomeoneNew';
 import { Home } from '@hyper-hyper-space/home';
 
@@ -41,6 +41,8 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
     setContactSource(newValue);
   };
 
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <div>
@@ -52,6 +54,7 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        fullScreen={fullScreen} fullWidth={!fullScreen} maxWidth='sm'PaperProps={{sx: {minHeight: '70%'}}}
       >
         <DialogTitle id="alert-dialog-title">
           {"Add members"}
@@ -69,8 +72,10 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
           }
         </DialogContent>
         <DialogActions>
-          {/* <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
+          <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}>
+            <Button onClick={handleClose}>Close</Button>
+          </Stack>
+          {/* <Button onClick={handleClose} autoFocus>
             Agree
           </Button> */}
         </DialogActions>

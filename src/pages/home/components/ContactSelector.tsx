@@ -195,7 +195,7 @@ const ContactSelector = ({ handleSelect, preFilter, excludedHashes, selectedHash
             {/* <Card style={{ width: '100%', height: 'calc(100% - 80px)' }}>
                 <CardContent style={{ width: '100%', height: '100%' }}> */}
 
-                    <Box sx={{ bgcolor: 'background.paper', display: 'flex', height: { xs: '100%', sm: '100%', md: '450px', lg: '475px', xl: '500px' } }}>
+                    <Box sx={{ bgcolor: 'background.paper', display: 'flex', height: { xs: '80%', sm: '80%', md: '400px', lg: '425px', xl: '450px' } }}>
                         <Tabs
                             orientation="vertical"
                             variant="scrollable"
