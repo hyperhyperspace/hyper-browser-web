@@ -1,4 +1,4 @@
-import { useTheme, useMediaQuery, Stack, Paper, Typography } from '@mui/material';
+import { useTheme, useMediaQuery, Stack, Paper, Typography, Button } from '@mui/material';
 import { useEffect, Fragment } from 'react';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import WikiSpacePage from './WikiSpacePage';
@@ -72,10 +72,16 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
     const navigationWidth = noNavigation? '100%' : (tablet? '20' : '22%');
     const contentWidth    = noNavigation? '100%' : (tablet? '80%' : '78%');
 
+    const BackToIndexButton = () => <>
+                        <Stack direction="row" spacing="3px" style={{ alignItems: 'center' }}>
+                            <a onClick={context.nav.goToIndex} style={{ cursor: 'pointer', paddingTop: '6px', paddingRight: '3px' }}><img src="icons/streamlinehq-arrow-thick-left-arrows-diagrams-48x48.png" style={{ width: '24px', height: '24px', margin: '1px', padding: '2px' }}></img></a>
+                            <Button size="small" style={{ textTransform: 'none', textAlign: 'left' }} variant="text" onClick={context.nav.goToIndex}><Typography> Index</Typography></Button>
+                        </Stack>
+                    </>
+
     return  <Routes>
             <Route path="" element={
                 <Fragment>
-                    
                     <Outlet context={context}/>
                 
                 </Fragment>}>
@@ -98,10 +104,13 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                 <Route path="contents/:pageName" element={<WikiSpacePage noNavigation={noNavigation} navigationWidth={navigationWidth} contentWidth={contentWidth}/>} />
                 <Route path="settings/*" element={
                             <div className='wiki-container'>
-                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
-                                    {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
-                                    
-                                    <WikiSpaceSettingsPage/>
+                                <Stack style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
+                                    { noNavigation && <BackToIndexButton/>}
+                                    <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
+                                        {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
+                                        
+                                        <WikiSpaceSettingsPage/>
+                                    </Stack>
                                 </Stack>
                             </div>}/>
                 <Route path="add-page" element={
