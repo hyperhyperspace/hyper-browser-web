@@ -1,7 +1,7 @@
 import { Hash } from "@hyper-hyper-space/core";
 import { Home } from "@hyper-hyper-space/home";
 import { Avatar, Chip, ListItemIcon, ListItemText, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
+import { Stack } from "@mui/material";
 import { useOutletContext } from "react-router";
 import { Contact } from "../../../model/ProfileUtils";
 import { SpaceContext } from "../../space/SpaceFrame";

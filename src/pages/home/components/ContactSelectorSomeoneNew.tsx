@@ -11,7 +11,7 @@ import LookupThreeWordCode from './LookupThreeWordCode';
 import { Identity, Resources } from '@hyper-hyper-space/core';
 import ImportExportedProfile from './ImportExportedProfile';
 import { Button } from '@mui/material';
-import { Stack } from '@mui/system';
+import { Stack } from '@mui/material';
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />

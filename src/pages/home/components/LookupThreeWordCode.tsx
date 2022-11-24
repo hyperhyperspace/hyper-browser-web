@@ -1,7 +1,7 @@
 import { Identity, ObjectDiscoveryReply, Resources, WordCode } from "@hyper-hyper-space/core";
 import { useObjectDiscoveryWithResources } from "@hyper-hyper-space/react";
-import { CircularProgress, Divider, TextField, Typography } from "@mui/material";
-import { Box, Stack } from "@mui/system";
+import { CircularProgress, Divider, TextField, Typography, Stack } from "@mui/material";
+import { Box } from "@mui/system";
 import { Fragment, ReactElement, useEffect, useRef, useState } from "react";
 
 type LookupThreeWordCodeProps = {

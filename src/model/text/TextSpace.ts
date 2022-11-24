@@ -7,6 +7,7 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
     static className = 'hhs-web/v0/Text';
 
     content?: MutableReference<string>;
+    name?: MutableReference<string>;
 
     _node?: MeshNode;
 
@@ -17,6 +18,9 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 
         const content = new MutableReference<string>({acceptedTypes: ['string']});
         this.addDerivedField('content', content);
+
+        const name = new MutableReference<string>({acceptedTypes: ['string']});
+        this.addDerivedField('name', name);
     }
     
     getClassName(): string {
@@ -30,6 +34,7 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
     setAuthor(author: Identity) {
         super.setAuthor(author);
         this.content?.addWriter(author);
+        this.name?.addWriter(author);
     }
 
     async validate(_references: Map<string, HashedObject>): Promise<boolean> {
@@ -56,6 +61,39 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
             return false;
         }
 
+        if (!this.checkDerivedField('content')) {
+            return false;
+        }
+
+
+
+        if (!(this.name instanceof MutableReference)) {
+            return false;
+        }
+
+        if (this.name.hasAuthor()) {
+            return false;
+        }
+
+        if (this.getAuthor() === undefined) {
+            if (this.name.hasSingleWriter()) {
+                return false;
+            }
+        } else {
+            if (!this.name.hasSingleWriter() || !this.getAuthor()?.equals(this.name.getSingleWriter())) {
+                return false;
+            }
+        }
+
+        if (!this.name.validateAcceptedTypes(['string'])) {
+            return false;
+        }
+
+        if (!this.checkDerivedField('name')) {
+            return false;
+        }
+
+        
         return true;
     }
 
@@ -85,7 +123,7 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
     }
 
     getName() {
-        return undefined;
+        return this.name;
     }
 }
 

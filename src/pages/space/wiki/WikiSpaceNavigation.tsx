@@ -4,7 +4,7 @@ import { Page } from "@hyper-hyper-space/wiki-collab"
 import { Button, Divider, InputAdornment, Link, List, ListItem, ListItemButton, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
-import { useLocation, useNavigation, useOutletContext, useParams } from "react-router"
+import { useLocation, useOutletContext, useParams } from "react-router"
 import WikiSpacePermissionsDialog from "./WikiSpacePermissionSettings"
 import { WikiContext } from "./WikiSpaceView"
 

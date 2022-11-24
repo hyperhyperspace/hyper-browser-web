@@ -9,13 +9,16 @@ import InfoIcon from '@mui/icons-material/Info';
 
 import { useObjectState } from '@hyper-hyper-space/react';
 
-import { Contacts, Profile } from '@hyper-hyper-space/home';
+import { Contacts, Profile, SpaceLink } from '@hyper-hyper-space/home';
 
 import { HomeContext } from '../HomeSpace';
 
-import { Hash, HashedObject, Space } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Space, SpaceEntryPoint } from '@hyper-hyper-space/core';
 import { Box } from '@mui/system';
 import InfoDialog from '../../../components/InfoDialog';
+import { TextSpace } from '../../../model/text/TextSpace';
+import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
+import HomeItem from './HomeItem';
 
 
 function EditProfileDialog() {
@@ -62,6 +65,10 @@ function EditProfileDialog() {
                     if (p.picture?._value !== undefined && p.pictureMIMEType?._value !== undefined) {
                         setBase64PicData(p.picture?._value);
                         setPicMIMEType(p.pictureMIMEType?._value);
+                    }
+
+                    for (const link of p.published?.values() || []) {
+                        link.name?.loadAllChanges();
                     }
                 }
             });
@@ -228,6 +235,7 @@ function EditProfileDialog() {
     }, [home, resources]);
 
     const [showWordCodeInfo, setShowWordCodeInfo] = useState(false);
+    const [showPublicFolderInfo, setShowPublicFolderInfo] = useState(false);
 
     return (
         <Fragment>
@@ -256,6 +264,22 @@ function EditProfileDialog() {
                         
                     }
                     onClose={() => {setShowWordCodeInfo(false);}}
+                />
+            }
+            {showPublicFolderInfo && 
+                <InfoDialog 
+                    open={showPublicFolderInfo}
+                    title="About your Public folder"
+                    content={
+                        <Stack spacing={1}>
+                        <Typography>The contents of the <b>Public</b> shared folder on your desktop are shown in your profile.</Typography>
+                        
+                        <Typography>People can easily help you keep them online by adding you to their <b>Contacts</b> and re-sharing.</Typography>
+                        </Stack>
+
+                        
+                    }
+                    onClose={() => {setShowPublicFolderInfo(false);}}
                 />
             }
 
@@ -300,7 +324,7 @@ function EditProfileDialog() {
                                                 return <span key={'prop-'+entry[0]}>{entry[0]}: <b>{entry[1]}</b><br /></span>;
                                             })
                                         }
-                                        <span>code: <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner.getLastHash() as Hash).join(' ')}</span> <IconButton onClick={() => {setShowWordCodeInfo(true);}} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon color="info" /> </IconButton></span>
+                                        <span>code: <span style={{backgroundColor: 'yellow'}}>{Space.getWordCodingForHash(owner.getLastHash() as Hash).join(' ')}</span> <IconButton onClick={() => {setShowWordCodeInfo(true);}} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon fontSize="small" color="info" /> </IconButton></span>
                                     </Fragment>
                                 }
                             </Typography>
@@ -315,8 +339,8 @@ function EditProfileDialog() {
                         value={about||''}
                         onChange={handleAboutChange} 
                         onKeyPress={handleAboutKeyPress} 
-                        maxRows={5}
-                        minRows={5}
+                        maxRows={3}
+                        minRows={3}
                         multiline
                         inputProps={{maxLength: 500}}
                         autoFocus
@@ -324,6 +348,42 @@ function EditProfileDialog() {
                         fullWidth
                     />
                     
+                    <Stack style={{marginTop: '1.5rem'}}>
+
+                    {profileState?.value?.published?.size() === 0 && 
+                        <Typography style={{color: 'gray', paddingTop: '0.25rem'}}><i>You're not sharing any spaces in your profile.</i></Typography>
+                    }
+                    {profileState?.value?.published !== undefined && profileState?.value?.published?.size() > 0 && 
+                    <Stack direction="row">
+                        {Array.from(profileState?.value?.published.values() || []).map((item: SpaceLink) => {
+                            const entry = item.spaceEntryPoint as any as SpaceEntryPoint;
+                            const name = item.name;
+                            let icon = "";
+                            let title: (string | undefined) = undefined;
+                            if (item.spaceEntryPoint instanceof TextSpace) {
+                                title = 'Text File';
+                                icon = 'streamline-icon-pencil-write-1@48x48.png';
+                            } else if (item.spaceEntryPoint instanceof WikiSpace) {
+                                title = 'Wiki';
+                                icon = 'streamlinehq-book-edit-content-48.png';
+                            }
+
+                            return <HomeItem 
+                                                key={item.getLastHash()}
+                                                icon={icon}
+                                                name={name?.getValue()}
+                                                click={() => { window.open('./#/space/' + encodeURIComponent(item.spaceEntryPoint?.getLastHash() as Hash), '_blank') }}
+                                                menu={[
+                                                       {name: 'Remove from Profile', action: () => { profile?.published?.delete(item).then(() => { profile?.published?.save(); }) }} 
+                                                      ]}
+                                                title={title}
+                                                dense={true}
+                                            />;
+                        })}
+                    </Stack>
+                    }
+                        
+                </Stack>
                 </DialogContent>
 
                 <DialogActions>

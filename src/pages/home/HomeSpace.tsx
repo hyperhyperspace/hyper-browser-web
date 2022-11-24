@@ -17,6 +17,8 @@ import CreateSpaceDialog from './components/CreateSpaceDialog';
 import { SpaceDisplayInfo, supportedSpaces } from '../../model/SupportedSpaces';
 import { FolderTreeSearch } from '../../model/FolderTreeSearch';
 import AskForPersistentStorageDialog from './components/AskForPersistentStorageDialog';
+import { TextSpace } from '../../model/text/TextSpace';
+import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 
 type HomeContext = {
     resources: Resources | undefined,
@@ -140,6 +142,16 @@ function HomeSpace() {
 
     const openSpace = (entryPointHash: Hash) => {
         window.open('./#/space/' + encodeURIComponent(entryPointHash), '_blank');
+    }
+
+    const showSpaceInProfile = (item: SpaceLink) => {
+        home?.profile?.published?.add(item);
+        home?.profile?.published?.save();
+    }
+
+    const removeSpaceFromProfile = (item: SpaceLink) => {
+        home?.profile?.published?.delete(item);
+        home?.profile?.published?.save();
     }
 
 
@@ -639,18 +651,35 @@ function HomeSpace() {
                                                             click={() => { openFolder(item); }}
                                                             menu={[{name: 'Open',   action: () => { openFolder(item); } }, 
                                                                    {name: 'Rename', action: () => { openRenameFolderItem(item); }}, 
-                                                                   {name: 'Delete', action: () => { deleteFolderItem(item, desktopFolder); }}]}
+                                                                   {name: 'Delete', action: () => { deleteFolderItem(item, desktopFolder); }}
+                                                                ]}
                                                         />;
                                             } else if (item instanceof SpaceLink && item.name?.getValue() !== undefined) { 
                                                 const name = item.name;
+                                                let icon = "";
+                                                let title: (string | undefined) = undefined;
+                                                if (item.spaceEntryPoint instanceof TextSpace) {
+                                                    title = 'Text File';
+                                                    icon = 'streamline-icon-pencil-write-1@48x48.png';
+                                                } else if (item.spaceEntryPoint instanceof WikiSpace) {
+                                                    title = 'Wiki';
+                                                    icon = 'streamlinehq-book-edit-content-48.png';
+                                                }
+
+                                                const inProfile = item.spaceEntryPoint !== undefined && 
+                                                                  home?.profile?.published?.has(item);
+
                                                 return <HomeItem 
                                                 key={item.getLastHash()}
-                                                icon="streamline-icon-pencil-write-1@48x48.png" 
+                                                icon={icon}
                                                 name={name?.getValue()}
                                                 click={() => { openSpace(item.spaceEntryPoint?.getLastHash() as Hash); }}
+                                                published={inProfile}
                                                 menu={[{name: 'Open',   action: () => { openSpace(item.spaceEntryPoint?.getLastHash() as Hash); } }, 
                                                        {name: 'Rename', action: () => { openRenameFolderItem(item); }}, 
-                                                       {name: 'Delete', action: () => { deleteFolderItem(item, desktopFolder); }}]}
+                                                       {name: 'Delete', action: () => { deleteFolderItem(item, desktopFolder); }},
+                                                       inProfile? {name: 'Remove from Profile', action: () => { removeSpaceFromProfile(item); }} : {name: 'Show in Profile', action: () => { showSpaceInProfile(item); }}]}
+                                                title={title}
                                             />;
                                             } else {
                                                 return <Fragment key={item.getLastHash()}></Fragment>;

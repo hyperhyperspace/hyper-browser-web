@@ -234,6 +234,10 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                         </CardContent>
                     </Card>
                     }
+
+                <Stack style={{paddingTop: '1.5rem'}} direction="row"><img src="icons/streamline-icon-folder-empty@48x48.png" style={{height: '20px', paddingRight: '0.5rem'}} /> <Typography>Public</Typography></Stack>
+                
+                <Typography style={{color: 'gray', paddingTop: '0.25rem'}}><i>This person is not sharing any spaces.</i></Typography>
                 </DialogContent>
             </Fragment>
             }
