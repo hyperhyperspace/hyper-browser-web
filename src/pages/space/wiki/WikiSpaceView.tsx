@@ -115,10 +115,13 @@ function WikiSpaceView(props: { entryPoint: WikiSpace, path?: string }) {
                             </div>}/>
                 <Route path="add-page" element={
                             <div className='wiki-container'>
-                                <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
-                                    {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
-                                    
-                                    <NewPage noNavigation={noNavigation} contentWidth={contentWidth}/>
+                                <Stack style={{ height: '100%', width: '100%' }} spacing='0.1rem' sx={{ maxWidth: 'lg' }}>
+                                    {noNavigation && <BackToIndexButton />}
+                                    <Stack direction="row" style={{ height: '100%', width: '100%' }} spacing='0.1rem' sx={{ maxWidth: 'lg' }}>
+                                        {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
+
+                                        <NewPage noNavigation={noNavigation} contentWidth={contentWidth} />
+                                    </Stack>
                                 </Stack>
                             </div>} />
             </Route>
