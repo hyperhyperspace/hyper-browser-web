@@ -12,6 +12,7 @@ import { CausalSet, Identity } from '@hyper-hyper-space/core';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
 import ContactListDisplay from '../../home/components/ContactListDisplay';
+import LockPersonIcon from '@mui/icons-material/LockPerson';
 
 function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
   const { spaceContext } = useOutletContext<WikiContext>();
@@ -24,15 +25,26 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
     const flag = event.target.value;
     if (flag === PermFlagEveryone) {
       await flagState?.getValue()?.add(PermFlagEveryone, author);
+      await flagState?.getValue()?.delete(PermFlagMembers, author);
       await flagState?.getValue()?.save()
       console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
-    } else {
+    } else if (flag === PermFlagMembers) {
       await flagState?.getValue()?.delete(PermFlagEveryone, author);
+      await flagState?.getValue()?.add(PermFlagMembers, author);
+      await flagState?.getValue()?.save()
+      console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
+    } else if (flag === 'admins') {
+      await flagState?.getValue()?.delete(PermFlagEveryone, author);
+      await flagState?.getValue()?.delete(PermFlagMembers, author);
       await flagState?.getValue()?.save()
       console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
     }
   };
-  const flagStateEverybody = flagState?.getValue()?.has(PermFlagEveryone)
+  const flag =
+    flagState?.getValue()?.has(PermFlagEveryone) ? PermFlagEveryone :
+    flagState?.getValue()?.has(PermFlagMembers) ? PermFlagMembers :
+    'admins'
+
   const statusText = `Who can ${props.name}:`
   return (
     <>
@@ -41,14 +53,18 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
       </Typography>
       <FormControl fullWidth>
         <Select
-          value={flagStateEverybody ? PermFlagEveryone : PermFlagMembers}
+          value={flag}
           onChange={handleChange}
         >
           <MenuItem value={PermFlagEveryone}>Everybody</MenuItem>
           <MenuItem value={PermFlagMembers}>Members</MenuItem>
+          <MenuItem value='admins'>Admins</MenuItem>
         </Select>
       </FormControl>
-      { flagStateEverybody ? <PublicIcon/> : <PeopleIcon/> }
+      { flag === PermFlagEveryone ? <PublicIcon/> :
+        flag === PermFlagMembers ? <PeopleIcon/> : 
+        <LockPersonIcon/> 
+      }
     </>
   );
 }
