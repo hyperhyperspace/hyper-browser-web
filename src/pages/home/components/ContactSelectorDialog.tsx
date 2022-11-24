@@ -62,10 +62,10 @@ const ContactSelectorDialog = (props: ContactSelectorDialogProps) => {
             <Tab value={SomeoneNewTab} label="Someone new" />
           </Tabs>
           {contactSource === ContactsTab &&
-            <ContactSelector home={home!} resourcesForDiscovery={resourcesForDiscovery!} handleSelect={handleSelect} preFilter={props.preFilter} excludedHashes={props.excludedHashes} selectedHashes={props.selectedHashes} />
+            <ContactSelector home={home!} resourcesForDiscovery={resourcesForDiscovery!} handleSelect={handleSelect!} preFilter={props.preFilter} excludedHashes={props.excludedHashes} selectedHashes={props.selectedHashes} />
           }
           {contactSource === SomeoneNewTab &&
-            <ContactSelectorSomeoneNew resourcesForDiscovery={resourcesForDiscovery} />
+            <ContactSelectorSomeoneNew resourcesForDiscovery={resourcesForDiscovery} handleSelect={handleSelect!}/>
           }
         </DialogContent>
         <DialogActions>

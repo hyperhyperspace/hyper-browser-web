@@ -8,8 +8,10 @@ import MuiAccordionSummary, {
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import LookupThreeWordCode from './LookupThreeWordCode';
-import { Resources } from '@hyper-hyper-space/core';
+import { Identity, Resources } from '@hyper-hyper-space/core';
 import ImportExportedProfile from './ImportExportedProfile';
+import { Button } from '@mui/material';
+import { Stack } from '@mui/system';
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -47,7 +49,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
-export default function ContactSelectorSomeoneNew(props: {resourcesForDiscovery: Resources}) {
+export default function ContactSelectorSomeoneNew(props: {resourcesForDiscovery: Resources, handleSelect: Function}) {
   const {resourcesForDiscovery} = props;
   const [expanded, setExpanded] = React.useState<string | false>('panel1');
 
@@ -56,6 +58,13 @@ export default function ContactSelectorSomeoneNew(props: {resourcesForDiscovery:
       setExpanded(newExpanded ? panel : false);
     };
 
+    const renderIdentity = (id?: Identity) => (
+        <Stack direction="row" spacing={2}>
+            {/* <Button variant="outlined" size="small" onClick={() => { navigate('../view-profile/' + encodeURIComponent(id!.getLastHash() as Hash)); }}>Open</Button> */}
+            <Button variant="contained" size="small" onClick={() => { props.handleSelect(id!) }}>Add</Button>
+        </Stack>
+    )
+
   return (
     <div>
       <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
@@ -63,7 +72,7 @@ export default function ContactSelectorSomeoneNew(props: {resourcesForDiscovery:
           <Typography>Using a 3-word code</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <LookupThreeWordCode resourcesForDiscovery={resourcesForDiscovery}/>
+          <LookupThreeWordCode resourcesForDiscovery={resourcesForDiscovery} renderIdentity={renderIdentity}/>
         </AccordionDetails>
       </Accordion>
       <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
@@ -71,7 +80,7 @@ export default function ContactSelectorSomeoneNew(props: {resourcesForDiscovery:
           <Typography>Using an exported profile</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <ImportExportedProfile/>
+          <ImportExportedProfile renderIdentity={renderIdentity}/>
         </AccordionDetails>
       </Accordion>
     </div>

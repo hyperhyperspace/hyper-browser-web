@@ -96,9 +96,11 @@ export default function WikiSpacePermissionSettings() {
         home={home!}
         resourcesForDiscovery={resources!}
         selectedHashes={[...membersState?.getValue()?.values()!, ...owners.values()!].map(id => id.getLastHash())}
-        handleSelect={async (contact: Contact) => {
+        handleSelect={async (contact: Contact | Identity) => {
           console.log('attempting to select', contact)
-          const identity = await homeResources?.store.load(contact.hash)! as Identity
+          const identity = contact instanceof Identity ?
+            contact :
+            await homeResources?.store.load(contact.hash)! as Identity
           membersState?.value?.add(identity, home?.getAuthor()!)
           membersState?.value?.save()
         }}
