@@ -10,17 +10,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 
 function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, contentWidth: string}) {
-    
-    //const pageSetState    = useObjectState<MutableSet<Page>>(props.page.wiki?.pages);
-    
-    
-    // todo: buttons adding/removing/editing blocks
-    // todo: implement drag+drop using react-beautiful-dnd
-
     const { pageName } = useParams();
     const { wiki, nav, spaceContext}     = useOutletContext<WikiContext>();
     const { home } = spaceContext;
-    
+
     //const wikiState = useObjectState<WikiSpace>(wiki, {debounceFreq: 250});
     const wikiTitleState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.title, debounceFreq: 250});
     const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
@@ -31,6 +24,17 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
 
+    // check if blocks are draggable
+    const wikiWriteFlags = useObjectState(wiki.writeConfig, {debounceFreq: 250})
+    const wikiMembers = useObjectState(wiki.members, {debounceFreq: 250})
+    const [editable, setEditable] = useState<boolean>(false)
+
+    useEffect(() => {
+        page?.canUpdate(home?.getAuthor())?.then( canUpdate => {
+            setEditable(canUpdate)
+        })
+    }, [wikiWriteFlags, wikiMembers])
+    
     // remove debouncing after loading:
 
     useEffect(() => {
@@ -123,7 +127,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     const blockElements = blocksListState?.getValue()?.contents().map((block, index) => 
         (
-            <Draggable draggableId={block.getLastHash()} index={index} key={block.getLastHash()}>
+            <Draggable isDragDisabled={!editable} draggableId={block.getLastHash()} index={index} key={block.getLastHash()}>
                 {(provided) =>  <div
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
