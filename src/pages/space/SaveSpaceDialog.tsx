@@ -1,5 +1,4 @@
-
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import { Folder, Home, SpaceLink } from '@hyper-hyper-space/home';
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material';
@@ -20,6 +19,10 @@ function SaveSpaceDialog(props: {home?: Home, spaceEntryPoint: HashedObject & Sp
     const [nameError, setNameError] = useState(false);
 
     const [destination, setDestination] = useState(props.home?.desktop?.root as Folder);
+
+    useEffect(() => {
+        setDestination(props.home?.desktop?.root as Folder);
+    }, [props.home]);
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
@@ -47,6 +50,9 @@ function SaveSpaceDialog(props: {home?: Home, spaceEntryPoint: HashedObject & Sp
 
         const link = new SpaceLink((props.home as Home).getAuthor() as Identity, props.spaceEntryPoint);
         link.name?.setValue(name);
+
+        console.log('destination is defined', destination !== undefined);
+        console.log('destination', destination);
 
         await store.save(link);
         destination.items?.push(link);
