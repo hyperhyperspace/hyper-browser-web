@@ -62,7 +62,6 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                             if (ev.action === MutableContentEvents.AddObject) {
                                 const link = ev.data as SpaceLink;
                                 link.name?.loadAndWatchForChanges();
-                                console.log('WATCH')
                             } else if (ev.action === MutableContentEvents.RemoveObject) {
                                 const link = ev.data as SpaceLink;
                                 link.name?.dontWatchForChanges();
@@ -72,7 +71,6 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
 
                     for (const link of p.published?.values() || []) {
                         link.name?.loadAndWatchForChanges();
-                        console.log('WATCH')
                     }
 
                     tearDown = async () => { 
@@ -134,7 +132,6 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                             if (ev.action === MutableContentEvents.AddObject) {
                                 const link = ev.data as SpaceLink;
                                 link.name?.loadAndWatchForChanges();
-                                console.log('WATCH')
                             } else if (ev.action === MutableContentEvents.RemoveObject) {
                                 const link = ev.data as SpaceLink;
                                 link.name?.dontWatchForChanges();
@@ -147,7 +144,6 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
 
                     for (const link of p.published?.values() || []) {
                         link.name?.loadAndWatchForChanges();
-                        console.log('WATCH')
                     }
 
                     return () => {
