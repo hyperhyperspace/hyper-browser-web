@@ -46,10 +46,25 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const resources = spaceContext.resources;
     const blockState = useObjectState(props.block, {debounceFreq: 250});
     const blockContentsState = useObjectState(props.block, {debounceFreq: 250});
+    const [rejectedEdit, setRejectedEdit] = useState<string>()
 
     const { wiki }     = useOutletContext<WikiContext>();
     const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
+    const wikiWriteFlags = useObjectState(wiki.writeConfig, {debounceFreq: 250})
+    const wikiMembers = useObjectState(wiki.members, {debounceFreq: 250})
+
+    // check if editable
+    const [editable, setEditable] = useState<boolean>(false)
+
+    useEffect(() => {
+        blockState?.getValue()?.canUpdate(selfAuthor).then( canUpdate => {
+            console.log('setting editable to', canUpdate)
+            editor?.setEditable(canUpdate)
+            setEditable(canUpdate)
+        })
+    }, [wikiWriteFlags, wikiMembers])
+    
     // disable debouncing once state has arrived:
     
     useEffect(() => {
@@ -112,22 +127,12 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
 
     }
 
-    // console.log('instantiating block editor component') // this is happening *a lot* sometimes when focusing the editor ...
-
-    // since this obejct is being sync'd, the following should happen automatically:
-    /*useEffect(() => {
-        blockState?.getValue()?.loadAndWatchForChanges();
-        blockContentsState?.getValue()?.loadAndWatchForChanges();
-    }, [blockState, blockContentsState])*/
-
-    const author = blockState?.getValue()?.getAuthor();
-    const editable = author === undefined || author.hasKeyPair();
-
     // for now just use one tiptap `Editor` per block...
     // later on it might be desirable to use a custom tiptap `Block` type instead
     // and share a single tiptap `Editor`.
 
     const updateBlockWithHtml = useRef(debounce(async (blockContents: CausalReference<string>, html: string) => {
+        console.log('attempting to update block...')
         await blockContents.setValue(html, selfAuthor)
         blockContents.setResources(resources!);
         blockContents.saveQueuedOps();
@@ -160,10 +165,19 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             console.log('UPDATE')
             console.log(blockContentsState)
             if (blockContentsState && !editor.isDestroyed) {
-                updateBlockWithHtml.current(blockContentsState.getValue()!, editor.getHTML())
+                // const existingContent = blockContentsState.getValue()?.getValue()
+                const attemptedContent = editor.getHTML()
+                updateBlockWithHtml.current(blockContentsState.getValue()!, editor.getHTML())?.then(
+                    () => console.log('successfully updated block'),
+                    () => {
+                        console.log("couldn't edit!", attemptedContent)
+                        editor.commands.setContent(blockContentsState?.getValue()?.getValue()!)
+                        setRejectedEdit(attemptedContent)   
+                    }
+                )
             }
         },
-        editable,
+        editable: false,
         onBlur: stoppedEditing,
         onFocus: startedEditing
     });
@@ -204,15 +218,19 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const blockContentView =
                     <Fragment>                    
                         <Box className='wiki-block'>
-                            <Tooltip title="Click to add a block below">
-                                <Icon onClick={handleAddBlock} style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
-                                    <Add></Add>
-                                </Icon>
-                            </Tooltip>
+                            <div>
+                                {editable && <Tooltip title="Click to add a block below">
+                                    <Icon onClick={handleAddBlock} style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
+                                        <Add></Add>
+                                    </Icon>
+                                </Tooltip> }
+                            </div>
                             
-                            <Icon style={{height: 'default', width: 'default', marginRight: '0.25rem', overflow: 'visible'}}>
-                                <DragIndicator></DragIndicator>
-                            </Icon>
+                            <div>
+                                {editable && <Icon style={{height: 'default', width: 'default', marginRight: '0.25rem', overflow: 'visible'}}>
+                                    <DragIndicator></DragIndicator>
+                                </Icon> }
+                            </div>
                             
                             <div>
                                 {props.block?.type === BlockType.Text  && 
@@ -224,11 +242,13 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                                 {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.getValue()} />}
                             </div>                            
                             
-                            <Tooltip title="Click to remove this block">
-                                <Icon onClick={handleRemoveBlock} style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
-                                    <Delete></Delete>
-                                </Icon>
-                            </Tooltip>
+                            <div>
+                                {editable && <Tooltip hidden={!editable} title="Click to remove this block">
+                                    <Icon onClick={handleRemoveBlock} style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
+                                        <Delete></Delete>
+                                    </Icon>
+                                </Tooltip>}
+                            </div>
                         </Box>
                         
                     </Fragment>
