@@ -4,15 +4,17 @@ import { Page } from "@hyper-hyper-space/wiki-collab"
 import { Button, Divider, InputAdornment, Link, List, ListItem, ListItemButton, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
+import { DropResult } from "react-beautiful-dnd"
 import { useLocation, useOutletContext, useParams } from "react-router"
 import WikiSpacePermissionsDialog from "./WikiSpacePermissionSettings"
 import { WikiContext } from "./WikiSpaceView"
 
 
+
 function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
 
     const {nav, wiki, spaceContext} = useOutletContext<WikiContext>();
-
+    const {home} = spaceContext
     const { pageName } = useParams();
     const {pathname} = useLocation();
     const onSettingsPage = pathname.includes('/settings/')
@@ -22,8 +24,16 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
 
     const [canCreatePages, setCanCreatePages] = useState<boolean>(false);
 
+    const onDragEnd = async (result: DropResult) => {
+        const from = result.source.index;
+        let to = result.destination?.index;
+        if (to === undefined) { return }
+
+        wiki.movePage(from, to, home?.getAuthor()!)
+    }
+
     useEffect(() => {
-        pageSetState?.getValue()?.canAdd(undefined, spaceContext?.home?.getAuthor()).then((canAdd: boolean) => {setCanCreatePages(canAdd)});
+        pageSetState?.getValue()?.canInsert(undefined, 0, spaceContext?.home?.getAuthor()).then((canInsert: boolean) => {setCanCreatePages(canInsert)});
     }, [pageSetState, spaceContext?.home])
 
     const [filterText, setFilterText] = useState<string>('');
@@ -77,8 +87,7 @@ function WikiSpaceNavigation(props: {width: string, redirect?: boolean}) {
                     </ListItem>
                         {/* saved pages */}
                         {Array.from((wikiState?.getValue()?.getAllowedPages() || [])).filter((p: Page) => filterPage(p, filterText)).map((p: Page) => {
-                            return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}>
-                                        {pageName !== p.name && <Button size="small" style={{textTransform:'none', textAlign: 'left', minWidth: 'unset'}} variant="text" onClick={() => nav.goToPage(p.name as string)}>
+                            return <ListItem key={'navigation-for-' + p.getLastHash()} style={{paddingTop: '0px', paddingBottom: '0px'}}> {pageName !== p.name && <Button size="small" style={{textTransform:'none', textAlign: 'left', minWidth: 'unset'}} variant="text" onClick={() => nav.goToPage(p.name as string)}>
                                             <Typography>{p.name}</Typography>
                                         </Button>}
                                         {pageName === p.name && <Typography style={currentPageStyle}><b>{p.name}</b></Typography>}
