@@ -234,11 +234,11 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                             
                             <div>
                                 {props.block?.type === BlockType.Text  && 
-                                    <Fragment>
+                                    <div style={{position: 'relative'}}>
                                         <EditorContent editor={editor} />
                                         {/* {editor?.isEditable && isEditing && !editor?.state.selection?.empty && <BlockStyleBar editor={editor}></BlockStyleBar>} */}
                                         {editor?.isEditable && isEditing && <BlockStyleBar editor={editor}></BlockStyleBar>}
-                                    </Fragment>
+                                    </div>
                                 }
                                 {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.getValue()} />}
                             </div>                            
