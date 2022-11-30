@@ -1,9 +1,9 @@
-.editable-tab .material-icons {
+.editable-tab .material-icons, .editable-tab .delete-page {
   opacity: 0;
   line-height: default;
 }
 
-.editable-tab:hover .material-icons {
+.editable-tab:hover .material-icons, .editable-tab:hover .delete-page {
   opacity: 1;
 }
 

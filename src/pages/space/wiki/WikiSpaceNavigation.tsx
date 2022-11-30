@@ -3,12 +3,14 @@ import { Page } from "@hyper-hyper-space/wiki-collab";
 import {
   Divider,
   Icon,
+  IconButton,
   InputAdornment,
   List,
   ListItem,
   ListItemButton,
   Paper,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -20,8 +22,9 @@ import {
 } from "react-beautiful-dnd";
 import { useLocation, useOutletContext, useParams } from "react-router";
 import { WikiContext } from "./WikiSpaceView";
-import { DragIndicator } from "@mui/icons-material";
+import { Delete, DragIndicator, Remove } from "@mui/icons-material";
 import "./WikiSpaceNavigation.css";
+import { PageArray } from "@hyper-hyper-space/wiki-collab";
 
 function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   const { nav, wiki, spaceContext } = useOutletContext<WikiContext>();
@@ -32,7 +35,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   const onAddPage = pathname.includes("/add-page");
 
   const wikiState = useObjectState(wiki);
-  const pageArrayState = useObjectState(wiki?.pages, { debounceFreq: 250 });
+  const pageArrayState = useObjectState<PageArray>(wiki?.pages, { debounceFreq: 250 });
 
   const [canEditPageArray, setCanEditPageArray] = useState<boolean>(false);
 
@@ -45,6 +48,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
 
     wiki.movePage(from, to, home?.getAuthor()!);
   };
+  
 
   useEffect(() => {
     pageArrayState
@@ -116,6 +120,22 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
               >
                 {page.name}
               </Typography>
+              {canEditPageArray && (
+                <Tooltip hidden={!canEditPageArray} title="Click to remove this page">
+                  <IconButton
+                    className="delete-page"
+                    onClick={() => pageArrayState?.getValue()?.deleteElement(page, home?.getAuthor())}
+                    style={{
+                      cursor: "pointer",
+                      height: "default",
+                      width: "default",
+                      overflow: "visible",
+                    }}
+                  >
+                    <Delete/>
+                  </IconButton>
+                </Tooltip>
+              )}
             </ListItemButton>
           </>
         )}
@@ -128,8 +148,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
       style={{ minWidth: props.width, maxWidth: props.width, height: "100%" }}
     >
       <List style={{ width: "100%", paddingTop: "0px" }} dense>
-        <ListItem
-        >
+        <ListItem>
           <Typography
             variant="h5"
             style={{
@@ -142,8 +161,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
             {wikiState?.getValue()?.title?.getValue() || "Fetching title..."}
           </Typography>
         </ListItem>
-        <ListItem
-        >
+        <ListItem>
           <TextField
             placeholder="Filter pages"
             value={filterText}
@@ -211,8 +229,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                     overflow: "visible",
                     color: "light-grey",
                   }}
-                >
-                </Icon>
+                ></Icon>
               )}
               <Typography
                 className="currently-selected"
@@ -238,8 +255,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                 marginRight: "0.25rem",
                 overflow: "visible",
               }}
-            >
-            </Icon>
+            ></Icon>
             <Typography className={onAddPage ? "currently-selected" : ""}>
               + add page
             </Typography>
