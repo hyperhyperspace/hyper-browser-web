@@ -75,7 +75,7 @@ function MemberList() {
   const owners = wiki.owners!
 
   return <Box>
-    <Typography variant="h6">Members</Typography>
+    <Typography variant="overline">Members</Typography>
     <Divider/>
     <Box>
       <List>
@@ -104,7 +104,9 @@ export default function WikiSpacePermissionSettings() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ m: 2 }}>
+    {/* <Typography variant="overline">Permissions</Typography>
+    <Divider/> */}
+      <Box sx={{ m: 1 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
           <PermFlagToggle flag={wiki.readConfig!} name='read' />
           <PermFlagToggle flag={wiki.writeConfig!} name='write' />

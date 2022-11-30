@@ -55,7 +55,7 @@ function NewPage(props: {noNavigation: boolean, contentWidth: string}) {
     const navigate = useNavigate();
 
     return (
-        <Stack style={{width: props.contentWidth}} spacing={2} direction="column">
+        <Stack style={{width: "100%"}} spacing={2} direction="column">
             <TextField
                 value={name} onChange={handleNameChange} 
                 onKeyPress={handleNameKeyPress} 

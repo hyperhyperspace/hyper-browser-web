@@ -148,7 +148,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
               <Typography variant="h6" align="center">
                 {title || pageName}
               </Typography>
-              <Box sx={{marginTop: 5}}>
+              <Box sx={{marginTop: pageName ? 5 : 0}}>
                 {children}
               </Box>
             </div>
@@ -212,7 +212,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
         <Route
           path="settings/*"
           element={
-            <Frame>
+            <Frame title="Settings">
               <WikiSpaceSettingsPage />
             </Frame>
           }
@@ -220,7 +220,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
         <Route
           path="add-page"
           element={
-            <Frame>
+            <Frame title="New Page">
               <NewPage
                 noNavigation={noNavigation}
                 contentWidth={contentWidth}
