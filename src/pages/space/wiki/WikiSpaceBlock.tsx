@@ -102,7 +102,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     
                 return true;
             });    
-        }, 10);
+        }, 100);
 
     }
 
