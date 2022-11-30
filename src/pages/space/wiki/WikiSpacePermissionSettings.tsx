@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Divider, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, Chip, Divider, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { useObjectState } from '@hyper-hyper-space/react';
@@ -81,7 +81,9 @@ function MemberList() {
       <List>
         {[...owners.values()!].map(id =>
           <ListItem key={id.getLastHash()!}>
-            <ContactListDisplay contact={ProfileUtils.createContact(id)!} />
+            <ContactListDisplay contact={ProfileUtils.createContact(id)!} chips={[
+              <Chip size="small" label="admin" color="primary"/>
+            ]}/>
           </ListItem>)}
         {[...membersState?.value?.values()!].map(id =>
           <ListItem key={id.getLastHash()!}>
