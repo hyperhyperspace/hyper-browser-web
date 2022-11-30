@@ -122,7 +122,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
         
                     return false;
                 });
-            }, 500
+            }, 10
         );
 
     }
@@ -236,7 +236,8 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                                 {props.block?.type === BlockType.Text  && 
                                     <Fragment>
                                         <EditorContent editor={editor} />
-                                        {editor?.isEditable && isEditing && !editor?.state.selection?.empty && <BlockStyleBar editor={editor}></BlockStyleBar>}
+                                        {/* {editor?.isEditable && isEditing && !editor?.state.selection?.empty && <BlockStyleBar editor={editor}></BlockStyleBar>} */}
+                                        {editor?.isEditable && isEditing && <BlockStyleBar editor={editor}></BlockStyleBar>}
                                     </Fragment>
                                 }
                                 {props.block?.type === BlockType.Image && <img style={{width: '100%'}} src={blockState?.getValue()?.getValue()} />}

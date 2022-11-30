@@ -250,7 +250,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
           <ListItemButton
             onClick={nav.goToAddPage}
             selected={onAddPage}
-            // className={canEditPageArray ? "editable-tab page-tab" : "page-tab"}
+            className={canEditPageArray ? "editable-tab page-tab" : "page-tab"}
           >
             <Icon
               style={{
@@ -261,6 +261,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                 // color: "light-grey",
               }}
             >
+              {/* <Add /> */}
             </Icon>
             <Typography className={onAddPage ? "currently-selected" : ""}>
               + add page
