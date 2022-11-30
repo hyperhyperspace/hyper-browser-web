@@ -23,7 +23,7 @@ import { lowlight } from 'lowlight/lib/all.js'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { CausalReference, MutableReference, MutationEvent } from '@hyper-hyper-space/core';
 import { debounce } from 'lodash-es';
-import { Icon, Tooltip } from '@mui/material';
+import { Icon, IconButton, Tooltip } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { Box } from '@mui/system';
@@ -245,9 +245,9 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
                             
                             <div>
                                 {editable && <Tooltip hidden={!editable} title="Click to remove this block">
-                                    <Icon onClick={handleRemoveBlock} style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
+                                    <IconButton onClick={handleRemoveBlock} className="delete-block" style={{cursor: 'pointer', height: 'default', width: 'default', overflow: 'visible'}}>
                                         <Delete></Delete>
-                                    </Icon>
+                                    </IconButton>
                                 </Tooltip>}
                             </div>
                         </Box>

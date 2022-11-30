@@ -53,12 +53,12 @@
   background-color: #ddd
 }
 
-.wiki-block .material-icons {
+.wiki-block .material-icons, .delete-block {
   opacity: 0;
   line-height: default;
 }
 
-.wiki-block:hover .material-icons {
+.wiki-block:hover .material-icons, .wiki-block:hover .delete-block, .delete-block:focus {
   opacity: 1;
 }
 
