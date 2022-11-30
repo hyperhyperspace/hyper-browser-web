@@ -1,4 +1,3 @@
-import { MutationEvent } from "@hyper-hyper-space/core";
 import { useObjectState } from "@hyper-hyper-space/react";
 import { Page } from "@hyper-hyper-space/wiki-collab";
 import {
@@ -12,7 +11,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 import {
   DragDropContext,
@@ -23,12 +21,7 @@ import {
 import { useLocation, useOutletContext, useParams } from "react-router";
 import { WikiContext } from "./WikiSpaceView";
 import { DragIndicator } from "@mui/icons-material";
-import { Add } from "@mui/icons-material";
 import "./WikiSpaceNavigation.css";
-
-function NavigationTab(props: {}) {
-  return null;
-}
 
 function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   const { nav, wiki, spaceContext } = useOutletContext<WikiContext>();
@@ -94,15 +87,8 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
         key={page.getLastHash()}
       >
         {(provided) => (
-          // <div
-          // >
           <>
             <ListItemButton
-              //   style={{
-              //     textTransform: "none",
-              //     textAlign: "left",
-              //     minWidth: "unset",
-              //   }}
               selected={pageName === page.name}
               onClick={() => nav.goToPage(page.name as string)}
               key={"navigation-for-" + page.getLastHash()}
@@ -143,7 +129,6 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
     >
       <List style={{ width: "100%", paddingTop: "0px" }} dense>
         <ListItem
-        // style={{paddingBottom: '1.5rem', paddingTop: '0px'}}
         >
           <Typography
             variant="h5"
@@ -157,16 +142,11 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
             {wikiState?.getValue()?.title?.getValue() || "Fetching title..."}
           </Typography>
         </ListItem>
-        {/* <ListItem><WikiSpacePermissionsDialog/></ListItem> */}
         <ListItem
-        // style={{paddingTop: '1px', paddingBottom: '5px'}}
         >
           <TextField
             placeholder="Filter pages"
             value={filterText}
-            // value={pate}
-            // onKeyPress={onNavigationUpdate}
-            //inputRef={navigationRef}
             onChange={onFilterTextChange}
             size="small"
             InputProps={{
@@ -232,7 +212,6 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                     color: "light-grey",
                   }}
                 >
-                  {/* <DragIndicator /> */}
                 </Icon>
               )}
               <Typography
@@ -258,10 +237,8 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                 width: "default",
                 marginRight: "0.25rem",
                 overflow: "visible",
-                // color: "light-grey",
               }}
             >
-              {/* <Add /> */}
             </Icon>
             <Typography className={onAddPage ? "currently-selected" : ""}>
               + add page

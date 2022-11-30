@@ -6,8 +6,9 @@ import {
   Typography,
   Button,
   Box,
+  Divider,
 } from "@mui/material";
-import { useEffect, Fragment, ReactElement } from "react";
+import { useEffect, Fragment, ReactElement, ReactChildren } from "react";
 import { WikiSpace } from "@hyper-hyper-space/wiki-collab";
 import WikiSpacePage from "./WikiSpacePage";
 import {
@@ -16,6 +17,7 @@ import {
   Routes,
   useNavigate,
   useOutletContext,
+  useParams,
 } from "react-router";
 import NewPage from "./NewPage";
 import WikiSpaceNavigation from "./WikiSpaceNavigation";
@@ -123,28 +125,38 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
     </>
   );
 
-  const Frame = (contents: ReactElement) => (
-    <div className="wiki-container">
-      <Stack
-        style={{ height: "100%", width: "100%" }}
-        spacing="0.1rem"
-        sx={{ maxWidth: "lg" }}
-      >
-        {noNavigation && <BackToIndexButton />}
+  const Frame: React.FC<{ title?: string }> = ({ children, title }) => {
+    const { pageName } = useParams();
+    return (
+      <div className="wiki-container">
         <Stack
-          direction="row"
           style={{ height: "100%", width: "100%" }}
           spacing="0.1rem"
           sx={{ maxWidth: "lg" }}
         >
-          {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
-          <div style={{ padding: noNavigation ? '0' : '0 2rem', width: '100%'}}>
-            {contents}
-          </div>
+          {noNavigation && <BackToIndexButton />}
+          <Stack
+            direction="row"
+            style={{ height: "100%", width: "100%" }}
+            spacing="0.1rem"
+            sx={{ maxWidth: "lg" }}
+          >
+            {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
+            <div
+              style={{ padding: noNavigation ? "0" : "0 2rem", width: "100%" }}
+            >
+              <Typography variant="h6" align="center">
+                {title || pageName}
+              </Typography>
+              <Box sx={{marginTop: 5}}>
+                {children}
+              </Box>
+            </div>
+          </Stack>
         </Stack>
-      </Stack>
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
     <Routes>
@@ -191,19 +203,30 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
         />
         <Route
           path="contents/:pageName"
-          element={Frame(
-            <WikiSpacePage/>
-        )}
+          element={
+            <Frame>
+              <WikiSpacePage />
+            </Frame>
+          }
         />
         <Route
           path="settings/*"
-          element={Frame(<WikiSpaceSettingsPage/>)}
+          element={
+            <Frame>
+              <WikiSpaceSettingsPage />
+            </Frame>
+          }
         />
         <Route
           path="add-page"
-          element={Frame(
-            <NewPage noNavigation={noNavigation} contentWidth={contentWidth} />
-          )}
+          element={
+            <Frame>
+              <NewPage
+                noNavigation={noNavigation}
+                contentWidth={contentWidth}
+              />
+            </Frame>
+          }
         />
       </Route>
     </Routes>

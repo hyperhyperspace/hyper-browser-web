@@ -30,7 +30,9 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
           <LinkIcon/>
         </Button>
         <Button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            onClick={(e) => {
+                editor.chain().focus().toggleHeading({ level: 1 }).run()
+            }}
             variant={editor.isActive('heading', { level: 1 }) ? 'contained' : 'outlined'}
             aria-label="bold">
           h1

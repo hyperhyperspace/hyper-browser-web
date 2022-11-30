@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, Divider, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { useObjectState } from '@hyper-hyper-space/react';
@@ -74,8 +74,9 @@ function MemberList() {
   const membersState = useObjectState(wiki.members)
   const owners = wiki.owners!
 
-  return <>
-    <h4>Members:</h4>
+  return <Box>
+    <Typography variant="h6">Members</Typography>
+    <Divider/>
     <Box>
       <List>
         {[...owners.values()!].map(id =>
@@ -92,7 +93,7 @@ function MemberList() {
           </ListItem>)}
       </List>
     </Box>
-  </>
+  </Box>
 }
 
 export default function WikiSpacePermissionSettings() {
@@ -103,10 +104,12 @@ export default function WikiSpacePermissionSettings() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
-        <PermFlagToggle flag={wiki.readConfig!} name='read' />
-        <PermFlagToggle flag={wiki.writeConfig!} name='write' />
-      </div>
+      <Box sx={{ m: 2 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
+          <PermFlagToggle flag={wiki.readConfig!} name='read' />
+          <PermFlagToggle flag={wiki.writeConfig!} name='write' />
+        </div>
+      </Box>
       <MemberList />
       <ContactSelectorDialog
         home={home!}

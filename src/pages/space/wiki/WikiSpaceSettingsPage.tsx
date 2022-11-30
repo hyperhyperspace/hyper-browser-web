@@ -60,7 +60,7 @@ export default function WikiSpaceSettingsPage() {
   return (
     <Stack>
       {/* <Box sx={{ borderBottom: 1, borderColor: 'divider' }}> */}
-        <Tabs onChange={handleChange} aria-label="basic tabs example" value={params['*']!}>
+        <Tabs onChange={handleChange} style={{display: 'none'}} aria-label="basic tabs example" value={params['*']!}>
           {tabs.map(({ label, path }, key) => <Tab key={key} value={path} label={label!} {...a11yProps(key)} />)}
         </Tabs>
       {/* </Box> */}
