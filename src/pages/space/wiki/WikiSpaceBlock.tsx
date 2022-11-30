@@ -49,7 +49,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const [rejectedEdit, setRejectedEdit] = useState<string>()
 
     const { wiki }     = useOutletContext<WikiContext>();
-    const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
+    const pageArrayState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
     const wikiWriteFlags = useObjectState(wiki.writeConfig, {debounceFreq: 250})
     const wikiMembers = useObjectState(wiki.members, {debounceFreq: 250})
@@ -153,7 +153,7 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             TextAlign,
             Underline,
             WikiLink.configure({
-                definedPageNames: [...pageSetState?.getValue()?.pages?.values()!].map(page => page.name!)
+                definedPageNames: [...pageArrayState?.getValue()?.pages?.values()!].map(page => page.name!)
             }),
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })

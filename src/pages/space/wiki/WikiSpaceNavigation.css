@@ -1,0 +1,26 @@
+.editable-tab .material-icons {
+  opacity: 0;
+  line-height: default;
+}
+
+.editable-tab:hover .material-icons {
+  opacity: 1;
+}
+
+.editable-tab {
+    padding-left: 0
+}
+.editable-tab .material-icons {
+
+  margin: 0.1rem;
+  color: grey;
+}
+
+.currently-selected {
+    font-weight: bold !important;
+}
+
+.page-tab p {
+    color: #1976d2;
+    /* font-weight: bold; */
+}

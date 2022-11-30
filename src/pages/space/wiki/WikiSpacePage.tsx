@@ -9,14 +9,14 @@ import { WikiContext } from './WikiSpaceView';
 import React, { useEffect, useRef, useState } from 'react';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 
-function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, contentWidth: string}) {
+function WikiSpacePage() {
     const { pageName } = useParams();
     const { wiki, nav, spaceContext}     = useOutletContext<WikiContext>();
     const { home } = spaceContext;
 
     //const wikiState = useObjectState<WikiSpace>(wiki, {debounceFreq: 250});
     const wikiTitleState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.title, debounceFreq: 250});
-    const pageSetState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
+    const pageArrayState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
     const [page, setPage] = useState<Page>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
@@ -46,28 +46,28 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     useEffect(() => {
 
-        if (pageName !== undefined && pageSetState?.getValue() !== undefined) {
+        if (pageName !== undefined && pageArrayState?.getValue() !== undefined) {
             const updateCurrentPage = async () => {
 
                 console.log('PAGE IS "' + pageName + '"')
 
                 if (page?.name !== pageName || !pageIsSaved) {
-                    const existingPage = pageSetState?.getValue()?.getPage(pageName);
+                    const existingPage = pageArrayState?.getValue()?.getPage(pageName);
                     if (existingPage !== undefined) {
                         setPage(existingPage);
                         setPageIsSaved(true);
                         console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
                     } else if (page === undefined || page?.name !== pageName){
-                        setPage(pageSetState?.getValue()?.createPage(pageName));
+                        setPage(pageArrayState?.getValue()?.createPage(pageName));
                         setPageIsSaved(false);
                         console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
                     } else {
                         console.log('NOT NAVIGATING 1')
                     }
                 } else {
-                    if (!pageIsSaved && pageSetState?.getValue()?.hasPage(pageName)) {
+                    if (!pageIsSaved && pageArrayState?.getValue()?.hasPage(pageName)) {
                         await page?.save();
-                        const foundPage = pageSetState?.getValue()?.getPage(pageName);
+                        const foundPage = pageArrayState?.getValue()?.getPage(pageName);
                         if (page !== undefined) {
                             setPage(page);
                             setPageIsSaved(true);
@@ -83,7 +83,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
             updateCurrentPage();
         }
-    }, [pageName, page, pageSetState]);
+    }, [pageName, page, pageArrayState]);
 
     const onDragEnd = async (result: DropResult) => {
         const from = result.source.index;
@@ -185,33 +185,17 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
 
     return (
 
-<div style={{ padding: '90px 1rem', height: '100%', display: 'flex', justifyContent: 'center' }}>
-                        <Stack direction="row" style={{height: '100%', width: '100%'}} spacing='0.1rem' sx={{maxWidth: 'lg'}}>
-                {(!props.noNavigation || pageName === undefined) &&
-                    <WikiSpaceNavigation width={props.navigationWidth} />  
-                }
-                {(!props.noNavigation || pageName !== undefined) && 
-                    <Box style={{width: props.contentWidth, height: '100%'}}>
-                        
+<>
+{/* <div style={{ padding: '90px 1rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center' }}> */}
+        <Stack direction="row" style={{height: '100%', minWidth: '100%'}} spacing='0.1rem' width="100%">
+            <Box style={{minWidth: '100%', height: '100%'}} width="100%">
                         
                 {page === undefined &&
                     <Typography>Loading...</Typography>
                 }
 
-
-
                 {page !== undefined &&
                     <Box>
-                    {props.noNavigation && 
-                    <Stack direction="row" style={{paddingBottom:'.75rem', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
-                        <Stack direction="row" spacing="3px" style={{alignItems: 'center'}}>
-                            <a onClick={nav.goToIndex} style={{cursor:'pointer', paddingTop: '6px', paddingRight: '3px'}}><img src="icons/streamlinehq-arrow-thick-left-arrows-diagrams-48x48.png" style={{width:'24px', height:'24px', margin:'1px', padding: '2px'}}></img></a>
-                            <Button size="small" style={{textTransform:'none', textAlign: 'left'}} variant="text" onClick={nav.goToIndex}><Typography> Index</Typography></Button>
-                        </Stack>
-                        <Typography variant='h5'>{pageName || ''}</Typography>
-                        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-                    </Stack>
-                    }
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId={page.getId()!}>
                             { provided =>
@@ -227,7 +211,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                     </DragDropContext>
                     {!blocksListState?.getValue()?.contents().length && wikiTitleState?.getValue()?.title?.getValue() !== undefined &&
                         <Stack direction='row' spacing={3} style={{alignItems: 'baseline'}}>
-                            <Typography>This looks empty.</Typography>
+                            <Typography>This page looks empty.</Typography>
                             <Button aria-label="add something to the page" variant="contained" onClick={handleAddBlock}>
                                 Add something
                             </Button>
@@ -238,10 +222,8 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                             <Typography>Fetching wiki contents...</Typography>
                         </Stack>
                     }
+                </Box>}
                 </Box>
-                }
-                    </Box>
-                }
 
             </Stack>
             <input type="file" id="pictureInput" style={{display: 'none'}} ref={newImageInputRef} accept="image/*" onChange={onNewPicture}/>
@@ -267,7 +249,7 @@ function WikiSpacePage(props: {noNavigation: boolean, navigationWidth: string, c
                     <ListItemText><Typography variant='body2' >Add an <b>image</b> below</Typography></ListItemText>    
                 </MenuItem>
             </Menu>
-            </div>
+        </>
 
         
     )

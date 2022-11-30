@@ -102,7 +102,7 @@ export default function WikiSpacePermissionSettings() {
   const owners = wiki.owners!
 
   return (
-    <Paper style={{ width: '100%' }} sx={{ p: 3 }}>
+    <Box sx={{ p: 3 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
         <PermFlagToggle flag={wiki.readConfig!} name='read' />
         <PermFlagToggle flag={wiki.writeConfig!} name='write' />
@@ -121,6 +121,6 @@ export default function WikiSpacePermissionSettings() {
           membersState?.value?.save()
         }}
       />
-    </Paper>
+    </Box>
   );
 }
