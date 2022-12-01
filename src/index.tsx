@@ -13,7 +13,7 @@ import { Hash, MutableSet, Store, WorkerSafeIdbBackend } from '@hyper-hyper-spac
 import { HyperBrowserConfig } from './model/HyperBrowserConfig';
 
 const main = async () => {
-  const configBackend = new WorkerSafeIdbBackend('hyper-browser-config-0.4');
+  const configBackend = new WorkerSafeIdbBackend('hyper-browser-config-0.5');
   let configBackendError: (string|undefined) = undefined;
   
   

@@ -64,8 +64,6 @@ function App(props: {homes: MutableSet<Hash>, config: Store}) {
 
   const confReady = props.config && homes && homes.value;
 
-  const params = useParams();
-
   return (
     <Fragment>
     { confReady &&
