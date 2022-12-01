@@ -1,9 +1,11 @@
 import { Hash } from '@hyper-hyper-space/core';
 import { Folder, FolderItem, SpaceLink } from '@hyper-hyper-space/home';
 import { useObjectState } from '@hyper-hyper-space/react';
+import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { AppBar, Dialog, DialogActions, DialogContent, IconButton, Stack, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Fragment, useState, useEffect } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router';
+import { TextSpace } from '../../../model/text/TextSpace';
 
 import { HomeContext } from '../HomeSpace';
 import HomeItem from './HomeItem';
@@ -24,7 +26,7 @@ function ViewFolderDialog() {
         navigate('..');
     }
 
-    const { openFolder, openCreateFolder, openRenameFolder, openCreateSpace, openSpace, deleteFolder, setViewingFolder, setViewingFolderByHash, viewingFolder } = useOutletContext<HomeContext>();
+    const { home, openFolder, openCreateFolder, openRenameFolderItem, openCreateSpace, openSpace, deleteFolderItem, setViewingFolder, setViewingFolderByHash, removeSpaceFromProfile, showSpaceInProfile, viewingFolder } = useOutletContext<HomeContext>();
 
     /*const isEventForFolder = (folder?: Folder) => (ev: MutationEvent) => 
         (ev.emitter.getLastHash() === folder?.getLastHash() || 
@@ -106,19 +108,35 @@ function ViewFolderDialog() {
                                                 name={name?.getValue()}
                                                 click={() => { openFolder(item, params.path); }}
                                                 menu={[{name: 'Open',   action: () => { openFolder(item, params.path); } }, 
-                                                    {name: 'Rename', action: () => { openRenameFolder(item); }}, 
-                                                    {name: 'Delete', action: () => { deleteFolder(item, folderState?.value as Folder); }}]}
+                                                    {name: 'Rename', action: () => { openRenameFolderItem(item); }}, 
+                                                    {name: 'Delete', action: () => { deleteFolderItem(item, folderState?.value as Folder); }}]}
                                             />;
                                 } else if (item instanceof SpaceLink && item.name?.getValue() !== undefined) { 
                                     const name = item.name;
+                                    let icon = "";
+                                    let title: (string | undefined) = undefined;
+                                    if (item.spaceEntryPoint instanceof TextSpace) {
+                                        title = 'Text File';
+                                        icon = 'streamline-icon-pencil-write-1@48x48.png';
+                                    } else if (item.spaceEntryPoint instanceof WikiSpace) {
+                                        title = 'Wiki';
+                                        icon = 'streamlinehq-book-edit-content-48.png';
+                                    }
+
+                                    const inProfile = item.spaceEntryPoint !== undefined && 
+                                                      home?.profile?.published?.has(item);
+
                                     return <HomeItem 
                                     key={item.getLastHash()}
-                                    icon="streamline-icon-pencil-write-1@48x48.png" 
+                                    icon={icon}
                                     name={name?.getValue()}
                                     click={() => { openSpace(item.spaceEntryPoint?.getLastHash() as Hash); }}
-                                    /*menu={[{name: 'Open',   action: () => { openFolder(item); } }, 
-                                           {name: 'Rename', action: () => { openRenameFolder(item); }}, 
-                                           {name: 'Delete', action: () => { deleteFolder(item, desktopFolder); }}]}*/
+                                    published={inProfile}
+                                    menu={[{name: 'Open',   action: () => { openSpace(item.spaceEntryPoint?.getLastHash() as Hash); } }, 
+                                           {name: 'Rename', action: () => { openRenameFolderItem(item); }}, 
+                                           {name: 'Delete', action: () => { deleteFolderItem(item, folderState?.value as Folder); }},
+                                            inProfile? {name: 'Remove from Profile', action: () => { removeSpaceFromProfile(item); }} : {name: 'Share in Profile', action: () => { showSpaceInProfile(item); }}]}
+                                    title={title}
                                 />;
                                 } else {
                                     return <Fragment key={item.getLastHash()}></Fragment>;

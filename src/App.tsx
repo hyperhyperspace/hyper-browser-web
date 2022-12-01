@@ -30,6 +30,7 @@ import NoHomeDialog from './pages/start/components/NoHomeDialog';
 import ViewProfileAnonDialog from './pages/start/components/ViewProfileAnonDialog';
 import ViewAuthorDialog from './pages/space/ViewAuthorDialog';
 import AllChatsDialog from './pages/home/components/AllChatsDialog';
+import SpaceSharingDialog from './pages/home/components/SpaceSharingDialog';
 
 
 function RedirectContactLink(props: {homes: ObjectState<MutableSet<Hash>>}) {
@@ -104,6 +105,7 @@ function App(props: {homes: MutableSet<Hash>, config: Store}) {
               <Route path="add-contact/:profile" element={<AddContactDialog />} />
               <Route path="chats" element={<AllChatsDialog />} />
               <Route path="chats/:identityHash" element={<AllChatsDialog />} />
+              <Route path="space-sharing" element={<SpaceSharingDialog />} />
             </Route>
             <Route path="space/:hash" element={<SpaceFrame homes={props.homes}/>}>
               <Route path="" element={<SpaceComponent />}/>

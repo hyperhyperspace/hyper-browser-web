@@ -30,7 +30,7 @@ function HomeItem(props: {icon: string, name?: string, badge?: number, click?: (
 
     const addBadge = (icon: React.ReactElement, name?: string) => {
         if (props.published) {
-            return <Badge badgeContent={<div style={{backgroundColor:"#22cc22", borderRadius: '2px', padding: '2px', marginLeft:'-30px', color: '#ffffff'}}>public</div>}>{icon}</Badge>;
+            return <Badge badgeContent={<div style={{backgroundColor:"#22cc22", borderRadius: '2px', padding: '2px', marginLeft:'-40px', color: '#ffffff'}}>shared</div>}>{icon}</Badge>;
             //return <Badge badgeContent={<img src="icons/streamline-icon-satellite-1@48x48.png" height="19px" width="19px" style={{backgroundColor:"#e8e8e8", borderRadius: '8px', padding: '2px'}}/>}>{icon}</Badge>;
         } else {
             return icon;

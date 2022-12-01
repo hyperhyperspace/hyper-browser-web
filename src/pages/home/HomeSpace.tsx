@@ -6,7 +6,7 @@ import { Outlet, useNavigate, useParams } from 'react-router';
 
 import HomeItem from './components/HomeItem';
 import HomeCommand from './components/HomeCommand';
-import { Hash, HashedObject, Identity, LinkupAddress, MutableSet, MutableSetEvents, MutationEvent, MutationObserver, ObjectBroadcastAgent, ObjectDiscoveryReply, PeerInfo, PeerSource, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
+import { Hash, HashedObject, Identity, LinkupAddress, MutableReference, MutableSet, MutableSetEvents, MutationEvent, MutationObserver, ObjectBroadcastAgent, ObjectDiscoveryReply, PeerInfo, PeerSource, Resources, SpaceEntryPoint, WordCode } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from '../../model/HyperBrowserConfig';
 import { PeerComponent, useObjectDiscoveryWithResources, useObjectState } from '@hyper-hyper-space/react';
 import { Home, Folder, Device, FolderItem, SpaceLink, FolderTreeEvents, Profile, ChatSpace, Conversation } from '@hyper-hyper-space/home';
@@ -27,15 +27,18 @@ type HomeContext = {
     owner: Identity | undefined,
     localDevice: Device | undefined,
     chats: ChatSpace | undefined,
+    spaceEntryPoints: Map<Hash, SpaceEntryPoint & HashedObject>,
     openFolder: (folder: Folder, path?: string) => void,
     openCreateFolder: () => void,
-    openRenameFolder: (folder: Folder) => void,
+    openRenameFolderItem: (item: FolderItem) => void,
     openSpace: (entryPointHash: Hash) => void,
     openCreateSpace: () => void,
-    deleteFolder: (folder: Folder, parent: Folder) => void,
+    deleteFolderItem: (item: FolderItem, parent: Folder) => void,
     setViewingFolder: (folder?: Folder) => void,
     setViewingFolderByHash: (hash: Hash) => void,
-    viewingFolder: Folder | undefined
+    viewingFolder: Folder | undefined,
+    removeSpaceFromProfile: (link: SpaceLink) => void,
+    showSpaceInProfile: (link: SpaceLink) => void
 }
 
 function HomeSpace() {
@@ -182,6 +185,8 @@ function HomeSpace() {
         })
     }, []);
 
+    const spaceEntryPoints = new Map<Hash, HashedObject & SpaceEntryPoint>();
+
     const homeContext: HomeContext = {
         resources: homeResources,
         resourcesForDiscovery: resourcesForDiscovery,
@@ -191,16 +196,17 @@ function HomeSpace() {
         chats: chats,
         openFolder: openFolder,
         openCreateFolder: openCreateFolder,
-        openRenameFolder: openRenameFolderItem,
+        openRenameFolderItem: openRenameFolderItem,
         openSpace: openSpace,
         openCreateSpace: openCreateSpace,
-        deleteFolder: deleteFolderItem,
+        deleteFolderItem: deleteFolderItem,
         setViewingFolder: setViewingFolder,
         setViewingFolderByHash: setViewingFolderByHash,
-        viewingFolder: viewingFolder
+        viewingFolder: viewingFolder,
+        removeSpaceFromProfile: removeSpaceFromProfile,
+        showSpaceInProfile: showSpaceInProfile,
+        spaceEntryPoints: spaceEntryPoints
     };
-
-    const spaceEntryPoints = new Map<Hash, HashedObject & SpaceEntryPoint>();
 
     useEffect(() => {
 
@@ -233,15 +239,13 @@ function HomeSpace() {
                             entryPoint.setResources(r);
                             entryPoint.startSync();
                             console.log('started sync of space ' + entryPointHash);
+                            console.log('with resources', r);
                         });
 
                     } else if (ev.action === FolderTreeEvents.RemoveSpace) {
                         const entryPointHash = (ev.data as HashedObject).getLastHash();
                         const entryPoint = spaceEntryPoints.get(entryPointHash);
                         entryPoint?.stopSync();
-                        console.log('X')
-                        console.log(entryPoint);
-                        console.log(entryPoint?.getResources())
                         setTimeout(() => {
                             entryPoint?.getResources()?.mesh?.shutdown();
                             setTimeout(() => {
@@ -302,6 +306,10 @@ function HomeSpace() {
             await newHome.startSync();
             console.log('DONE STARTING SYNC')
 
+            await newHome._localDevice?.name?.loadAndWatchForChanges();
+            await newHome._localDevice?.hostContactSpaces?.loadAndWatchForChanges();
+            
+
             newHome.contacts?.addObserver(contactsObserver);
 
             for (const p of (newHome.contacts?.current as MutableSet<Profile>)._elements.values()) {
@@ -333,6 +341,55 @@ function HomeSpace() {
             console.log('DONE STARTING CHAT SPACE SYNC');
 
             setChats(chats);
+
+            const synchronizing = new Map<Hash, SpaceLink>();
+
+            const updateCoHostedSpaces = () => {
+
+                const toStop = new Set<Hash>(synchronizing.keys());
+
+                if (newHome._localDevice?.hostContactSpaces?.getValue() !== false) {                    
+                    for (const id of newHome.contacts?.hosting?.values() || []) {
+                        const pHash = new Profile(id).hash();
+
+                        const p = newHome.contacts?.current?.get(pHash);
+                        if (p !== undefined) {
+
+                            for (const link of p.published?.values() || []) {
+                                const configHash = newHome.contacts?.getHostingConfig(link.getLastHash(), pHash)?.hash() as Hash;
+                                const config = newHome.contacts?._hostingConfig?.get(configHash);
+
+                                if (config?.getValue() !== 'off') {
+                                    if (!synchronizing.has(link.getLastHash())) {
+                                        (link.spaceEntryPoint as any as SpaceEntryPoint)?.startSync();
+                                        synchronizing.set(link.getLastHash(), link);
+                                    }
+
+                                    toStop.delete(link.hash())
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                for (const hash of toStop.values()) {
+                    (synchronizing.get(hash)?.spaceEntryPoint as any as SpaceEntryPoint)?.stopSync();
+                    synchronizing.delete(hash);
+                }
+
+
+
+            }
+
+            const hostingObserver: MutationObserver = (ev: MutationEvent) => {
+                updateCoHostedSpaces();
+            }
+
+            newHome._localDevice?.hostContactSpaces?.addObserver(hostingObserver);
+            newHome.contacts?.hosting?.addObserver(hostingObserver);
+            newHome.contacts?.current?.addObserver(hostingObserver);
+            newHome.contacts?._hostingConfig?.addObserver(hostingObserver);
 
         }
 
@@ -678,7 +735,7 @@ function HomeSpace() {
                                                 menu={[{name: 'Open',   action: () => { openSpace(item.spaceEntryPoint?.getLastHash() as Hash); } }, 
                                                        {name: 'Rename', action: () => { openRenameFolderItem(item); }}, 
                                                        {name: 'Delete', action: () => { deleteFolderItem(item, desktopFolder); }},
-                                                       inProfile? {name: 'Remove from Profile', action: () => { removeSpaceFromProfile(item); }} : {name: 'Show in Profile', action: () => { showSpaceInProfile(item); }}]}
+                                                       inProfile? {name: 'Remove from Profile', action: () => { removeSpaceFromProfile(item); }} : {name: 'Share in Profile', action: () => { showSpaceInProfile(item); }}]}
                                                 title={title}
                                             />;
                                             } else {
@@ -844,10 +901,10 @@ function HomeSpace() {
                     <Container maxWidth="lg" sx={{pt:12, pl:0, pr:0}}>
                         <div style={{textAlign: 'center'}}>
                         <ButtonGroup style={{flexWrap: 'wrap'}} variant="contained" color="inherit">
-                            <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile" action={() => {navigate('./edit-profile')}}></HomeCommand>
-                            <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts" action={() => {navigate('./contacts')}}></HomeCommand>
-                            <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={unreadChatsCount} action={() => {navigate('./chats')}/*() => {alert('Chat will be available soon')}*/}></HomeCommand>
-                            <HomeCommand icon="streamline-icon-satellite-1@48x48.png" title="Spaces" action={() => {alert('Space updates will be available soon.')}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-single-neutral-profile-picture@48x48.png" title="Profile" action={() => {navigate('./edit-profile');}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-book-address@48x48.png" title="Contacts" action={() => {navigate('./contacts');}}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-conversation-chat-2@48x48.png" title="Chat" badge={unreadChatsCount} action={() => {navigate('./chats');}/*() => {alert('Chat will be available soon')}*/}></HomeCommand>
+                            <HomeCommand icon="streamline-icon-satellite-1@48x48.png" title="Spaces" action={() => {navigate('./space-sharing');}}></HomeCommand>
                             {/*<HomeCommand icon="streamline-icon-cog-1@48x48.png" title="Config"></HomeCommand>
                             <HomeCommand icon="🙂" title="Profile"></HomeCommand>
                             <HomeCommand icon="📒" title="Contacts"></HomeCommand>

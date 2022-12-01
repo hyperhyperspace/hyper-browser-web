@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router';
-import {  Typography, CircularProgress, DialogContent, DialogTitle, Stack, Card, CardContent, DialogActions, Button, Chip } from '@mui/material';
+import {  Typography, CircularProgress, DialogContent, DialogTitle, Stack, Card, CardContent, DialogActions, Button, Chip, FormGroup, FormControlLabel, Switch } from '@mui/material';
 import { Hash, Resources, Identity, Space, SpaceEntryPoint, MutationEvent, MutableContentEvents } from '@hyper-hyper-space/core';
 import { useObjectDiscoveryIfNecessary, useObjectState } from '@hyper-hyper-space/react';
 import { Home, SpaceLink } from '@hyper-hyper-space/home';
@@ -24,6 +24,7 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
     const identity = useObjectDiscoveryIfNecessary<Identity>(props.resourcesForDiscovery, props.identityHash, locallyFoundIdentity);
 
     const contactsState = useObjectState(props.home?.contacts?.current);
+    const hostingState  = useObjectState(props.home?.contacts?.hosting);
 
     const [profile, setProfile] = useState<Profile>();
     const profileState = useObjectState(profile);
@@ -161,6 +162,15 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
     }, [identity, props.resources]);
 
     const contact = profileState?.value !== undefined && (contactsState?.value?.has(profileState.value) || false);
+
+    const [hosting, setHosting] = useState(false);
+
+    useEffect(() => {
+        setHosting(identity !== undefined && (hostingState?.value?.has(identity) || false));
+        console.log('hosting is', identity !== undefined && (hostingState?.value?.has(identity) || false));
+    }, [identity, hostingState]);
+
+    
     const you     = profile?.owner?.getLastHash() === props.home?.getAuthor()?.getLastHash();
 
     const removeFromContacts = async () => {
@@ -176,6 +186,37 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
             await props.home?.contacts?.current?.saveQueuedOps();
         }
     };
+
+    const toggleHosting = async () => {
+        if (hosting) {
+            await removeFromHosting();
+        } else {
+            await addToHosting();
+            if (profile !== undefined && !props.home?.contacts?.current?.has(profile)) {
+                await props.home?.contacts?.current?.add(profile);
+                await props.home?.contacts?.current?.saveQueuedOps();
+            }
+        }
+    }
+
+    const removeFromHosting = async () => {
+        if (identity !== undefined) {
+            await props.home?.contacts?.hosting?.delete(identity);
+            await props.home?.contacts?.hosting?.saveQueuedOps();
+        }
+        
+    };
+
+    const addToHosting = async () => {
+        console.log('identity', identity);
+        if (identity !== undefined) {
+            console.log('hosting', props.home?.contacts?.hosting);
+            await props.home?.contacts?.hosting?.add(identity);
+            await props.home?.contacts?.hosting?.saveQueuedOps();
+        }
+    };
+
+    
 
     return <Fragment>
         
@@ -276,6 +317,12 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                 
                 <Stack style={{marginTop: '1.5rem'}}>
 
+                    {!props.anonMode && 
+                        <FormGroup>
+                            <FormControlLabel control={<Switch checked={hosting} onChange={toggleHosting}/>} label={'Help ' + identity.info?.name + ' keep his published spaces online'}></FormControlLabel>
+                        </FormGroup>
+                    }
+
                 {profileState?.value?.published?.size() === 0 && 
                     <Typography style={{color: 'gray', paddingTop: '0.25rem'}}><i>This person is not publishing any spaces.</i></Typography>
                 }
@@ -300,7 +347,7 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                                             name={name?.getValue()}
                                             click={() => { window.open('./#/space/' + encodeURIComponent(item.spaceEntryPoint?.getLastHash() as Hash), '_blank') }}
                                             menu={[
-                                                {name: 'Remove from Profile', action: () => { profile?.published?.delete(item).then(() => { profile?.published?.save(); }) }} 
+                                                {name: 'Open', action: () => { window.open('./#/space/' + encodeURIComponent(item.spaceEntryPoint?.getLastHash() as Hash), '_blank') }}
                                                 ]}
                                             title={title}
                                             dense={true}

@@ -374,7 +374,8 @@ function EditProfileDialog() {
                                                 name={name?.getValue()}
                                                 click={() => { window.open('./#/space/' + encodeURIComponent(item.spaceEntryPoint?.getLastHash() as Hash), '_blank') }}
                                                 menu={[
-                                                       {name: 'Remove from Profile', action: () => { profile?.published?.delete(item).then(() => { profile?.published?.save(); }) }} 
+                                                       {name: 'Open', action: () => { window.open('./#/space/' + encodeURIComponent(item.spaceEntryPoint?.getLastHash() as Hash), '_blank') }},
+                                                       {name: 'Remove from Profile', action: () => { profile?.published?.delete(item).then(() => { profile?.published?.save(); }) }}
                                                       ]}
                                                 title={title}
                                                 dense={true}
