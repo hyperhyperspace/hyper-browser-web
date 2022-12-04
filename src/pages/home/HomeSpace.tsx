@@ -1,7 +1,7 @@
 import { AppBar, ButtonGroup, Card, CardContent, Container, SwipeableDrawer, IconButton, InputAdornment, Stack, TextField, Toolbar, Typography, List, ListItemButton, ListItemIcon, ListItemText, Divider, Button, CircularProgress } from '@mui/material';
 import { Box } from '@mui/system';
 
-import { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router';
 
 import HomeItem from './components/HomeItem';
@@ -27,7 +27,7 @@ type HomeContext = {
     owner: Identity | undefined,
     localDevice: Device | undefined,
     chats: ChatSpace | undefined,
-    spaceEntryPoints: Map<Hash, SpaceEntryPoint & HashedObject>,
+    spaceEntryPoints: {[key: Hash]: SpaceEntryPoint & HashedObject},
     openFolder: (folder: Folder, path?: string) => void,
     openCreateFolder: () => void,
     openRenameFolderItem: (item: FolderItem) => void,
@@ -186,6 +186,7 @@ function HomeSpace() {
     }, []);
 
     const spaceEntryPoints = new Map<Hash, HashedObject & SpaceEntryPoint>();
+    const [spaceEntryPointsState, setSpaceEntryPointsState] = useState<{[key: Hash]: HashedObject & SpaceEntryPoint}>({})
 
     const homeContext: HomeContext = {
         resources: homeResources,
@@ -205,7 +206,7 @@ function HomeSpace() {
         viewingFolder: viewingFolder,
         removeSpaceFromProfile: removeSpaceFromProfile,
         showSpaceInProfile: showSpaceInProfile,
-        spaceEntryPoints: spaceEntryPoints
+        spaceEntryPoints: spaceEntryPointsState
     };
 
     useEffect(() => {
@@ -236,6 +237,7 @@ function HomeSpace() {
 
                             const entryPointHash = entryPoint.getLastHash();
                             spaceEntryPoints.set(entryPointHash, entryPoint);
+                            setSpaceEntryPointsState(Object.fromEntries(spaceEntryPoints.entries()));
                             entryPoint.setResources(r);
                             entryPoint.startSync();
                             console.log('started sync of space ' + entryPointHash);
@@ -245,6 +247,7 @@ function HomeSpace() {
                     } else if (ev.action === FolderTreeEvents.RemoveSpace) {
                         const entryPointHash = (ev.data as HashedObject).getLastHash();
                         const entryPoint = spaceEntryPoints.get(entryPointHash);
+                        setSpaceEntryPointsState(Object.fromEntries(spaceEntryPoints.entries()));
                         entryPoint?.stopSync();
                         setTimeout(() => {
                             entryPoint?.getResources()?.mesh?.shutdown();
@@ -253,6 +256,7 @@ function HomeSpace() {
                             }, 2500);
                         }, 5000);
                         spaceEntryPoints.delete(entryPointHash);
+                        setSpaceEntryPointsState(Object.fromEntries(spaceEntryPoints.entries()));
                         console.log('stopped sync of space ' + entryPointHash);
                     }
                 }
@@ -421,6 +425,8 @@ function HomeSpace() {
             for (const entryPointHash of toDelete) {
                 spaceEntryPoints.delete(entryPointHash);
             }
+
+            setSpaceEntryPointsState(Object.fromEntries(spaceEntryPoints.entries()));
         };
 
     }, [homeHash, homeResources]);

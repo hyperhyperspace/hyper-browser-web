@@ -1,9 +1,9 @@
-import { Identity, Mesh, MutableObject, MutableReference, MutableSetEvents, MutationEvent, SyncState } from '@hyper-hyper-space/core';
+import { Identity, Mesh, MutableObject} from '@hyper-hyper-space/core';
 import { FolderItem, Profile, SpaceLink } from '@hyper-hyper-space/home';
-import { useObjectState, useSyncState, useSyncStates } from '@hyper-hyper-space/react';
+import { useObjectState, useSyncStates } from '@hyper-hyper-space/react';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { AppBar, Button, Dialog, DialogActions, DialogContent, FormControlLabel, FormGroup, IconButton, MenuItem, Select, SelectChangeEvent, Stack, Switch, Table, TableBody, TableCell, TableHead, TableRow, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Hash, useNavigate, useOutletContext } from 'react-router';
 import { TextSpace } from '../../../model/text/TextSpace';
 import { HomeContext } from '../HomeSpace';
@@ -32,7 +32,7 @@ function SpaceSharingDialog() {
     const { home, spaceEntryPoints } = useOutletContext<HomeContext>();
 
     const homeState = useObjectState(home);
-    const desktopState = useObjectState(home?.desktop)
+    const desktopState = useObjectState(home?.desktop);
     const deviceState = useObjectState(home?._localDevice);
     const configState = useObjectState(home?.contacts?._hostingConfig);
     const contactsState = useObjectState(home?.contacts);
@@ -82,14 +82,10 @@ function SpaceSharingDialog() {
             let mut: MutableObject|undefined  = undefined;
             let peerGroupId: string|undefined = undefined;
 
-            const entryPoint = spaceEntryPoints.get(link.spaceEntryPoint?.getLastHash() as Hash);
+            const entryPoint = spaceEntryPoints[link.spaceEntryPoint?.getLastHash() as Hash];
 
             if (entryPoint instanceof TextSpace) {
-                
-                
-                
                 mut = entryPoint.content;
-                console.log('resources', mut?.getResources())
                 peerGroupId = Mesh.discoveryPeerGroupId(entryPoint);
             } else if (entryPoint instanceof WikiSpace) {
                 mut = entryPoint.pages;
@@ -101,9 +97,11 @@ function SpaceSharingDialog() {
             }
         }
 
+        console.log('OWN SPACES', s);
+
         setOwnSpaces(s);
 
-    }, [desktopState]);
+    }, [desktopState, spaceEntryPoints]);
 
     const sharingSpacesSyncStates = useSyncStates(sharingSpaces);
     const ownSpacesSyncStates     = useSyncStates(ownSpaces);

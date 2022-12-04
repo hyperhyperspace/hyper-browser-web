@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemButton,
   Paper,
+  Stack,
   TextField,
   Tooltip,
   Typography,
@@ -102,7 +103,11 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
               {...provided.draggableProps}
               {...provided.dragHandleProps}
               ref={provided.innerRef}
+
+              style={{width: '100%'}}
             >
+              <Stack direction="row" style={{alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
+                <Stack direction="row" style={{alignItems: 'center', justifyContent: 'flex-start'}}>
               {canEditPageArray && (
                 <Icon
                   style={{
@@ -110,6 +115,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                     width: "default",
                     marginRight: "0.25rem",
                     overflow: "visible",
+                    marginTop: "-3px"
                   }}
                 >
                   <DragIndicator />
@@ -120,6 +126,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
               >
                 {page.name}
               </Typography>
+              </Stack>
               {canEditPageArray && (
                 <Tooltip hidden={!canEditPageArray} title="Click to remove this page">
                   <IconButton
@@ -136,6 +143,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                   </IconButton>
                 </Tooltip>
               )}
+              </Stack>
             </ListItemButton>
           </>
         )}
