@@ -5,9 +5,10 @@ import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { AppBar, Button, Dialog, DialogActions, DialogContent, FormControlLabel, FormGroup, IconButton, MenuItem, Select, SelectChangeEvent, Stack, Switch, Table, TableBody, TableCell, TableHead, TableRow, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
 import { Hash, useNavigate, useOutletContext } from 'react-router';
+import InfoDialog from '../../../components/InfoDialog';
 import { TextSpace } from '../../../model/text/TextSpace';
 import { HomeContext } from '../HomeSpace';
-
+import InfoIcon from '@mui/icons-material/Info';
 
 
 function SpaceSharingDialog() {
@@ -108,7 +109,35 @@ function SpaceSharingDialog() {
 
     const hostContactSpaces = deviceState?.getValue()?.hostContactSpaces?.getValue();
 
+    const [showInfoDialog, setShowInfoDialog] = useState(false);
+
     return (
+        <Fragment>
+
+            {showInfoDialog &&
+            <InfoDialog 
+                    open={showInfoDialog}
+                    title="Co-hosting of spaces"
+                    content={
+                        <Fragment>
+                            <Typography>
+                                <p>
+                                    You can share some of your spaces publicly by right-clicking on them and choosing <i>Share on my profile</i>.
+                                </p>
+                                <p>
+                                    Once you do that, other folks can help you keep these shared spaces online - even if you lose network access or close Hyper Hyper Space on all your devices.
+                                </p>
+                                <p>
+                                    To host some else's spaces, go to <i>Contacts</i>, open their profile, and enable space sharing there. You'll see their spaces show up here!
+                                </p>
+                            </Typography>
+                        </Fragment>
+                        
+                    }
+                    onClose={() => {setShowInfoDialog(false);}}
+                />
+            }
+        
         <Dialog open={open} scroll='paper' onClose={close} fullScreen={fullScreen} fullWidth={!fullScreen} maxWidth='md' PaperProps={{sx: {minHeight: '70%'}}}>
             <AppBar position="relative" color="default">
                 <Toolbar sx={{display: 'flex', justifyContent: 'space-between'}} style={{paddingRight: '12px'}}>
@@ -117,6 +146,7 @@ function SpaceSharingDialog() {
                     <Typography style={{textAlign: 'center', flexGrow: 1}} variant="h6" noWrap>
                         Space sharing
                     </Typography>
+                    <IconButton onClick={() => {setShowInfoDialog(true);}} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon fontSize="small" color="info" /> </IconButton>
                     </Stack>
                     <IconButton onClick={close}><img src="icons/streamline-icon-remove-circle-1@48x48.png" style={{height:'28px'}}></img></IconButton>
                 </Toolbar>
@@ -256,6 +286,7 @@ function SpaceSharingDialog() {
                 <Stack direction="row" style={{margin: 'auto', paddingBottom: '1rem'}} spacing={2}><Button onClick={close}>Close</Button></Stack>
             </DialogActions>
         </Dialog>
+        </Fragment>
     );
 }
 
