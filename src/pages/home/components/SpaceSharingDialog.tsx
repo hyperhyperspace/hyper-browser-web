@@ -146,7 +146,7 @@ function SpaceSharingDialog() {
                     <Typography style={{textAlign: 'center', flexGrow: 1}} variant="h6" noWrap>
                         Space sharing
                     </Typography>
-                    <IconButton onClick={() => {setShowInfoDialog(true);}} style={{padding: 0}} color="primary" aria-label="about home info" ><InfoIcon fontSize="small" color="info" /> </IconButton>
+                    <IconButton onClick={() => {setShowInfoDialog(true);}} style={{marginLeft: '6px', padding: 0}} color="primary" aria-label="About space sharing" ><InfoIcon fontSize="small" color="info" /> </IconButton>
                     </Stack>
                     <IconButton onClick={close}><img src="icons/streamline-icon-remove-circle-1@48x48.png" style={{height:'28px'}}></img></IconButton>
                 </Toolbar>

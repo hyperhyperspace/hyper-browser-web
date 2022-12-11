@@ -19,6 +19,7 @@ import { FolderTreeSearch } from '../../model/FolderTreeSearch';
 import AskForPersistentStorageDialog from './components/AskForPersistentStorageDialog';
 import { TextSpace } from '../../model/text/TextSpace';
 import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
+import InfoDialog from '../../components/InfoDialog';
 
 type HomeContext = {
     resources: Resources | undefined,
@@ -209,6 +210,8 @@ function HomeSpace() {
         spaceEntryPoints: spaceEntryPointsState
     };
 
+    const [showVersionMismatchAlert, setShowVersionMismatchAlert] = useState(false);
+
     useEffect(() => {
 
         const initHome = async () => {
@@ -223,6 +226,10 @@ function HomeSpace() {
             if (!(obj instanceof Home)) {
                 setLoadError('Error: The home object is of the wrong type:' + obj?.getClassName());
                 return;
+            }
+
+            if (obj.version !== Home.version) {
+                setShowVersionMismatchAlert(true);
             }
 
             const newHome = obj as Home;
@@ -981,6 +988,30 @@ function HomeSpace() {
             {/*  homeState?.value?.desktop?.root */}
 
             <Outlet context={homeContext} />
+
+            { showVersionMismatchAlert &&
+                <InfoDialog
+                    open={showVersionMismatchAlert}
+                    title="Home: wrong version"
+                    content={
+                        <Fragment>
+                            <Typography>
+                                <p>
+                                    While the home you're trying to open is in version <i>{homeState?.value?.version || '0.0.0'}</i>, this website can handle only version <i>{Home.version}</i>.
+                                </p>
+                                <p>
+                                    You may still try to open your home, but it may not work correctly.
+                                </p>
+                                <p>
+                                    We're working on keeping old versions of the Hyper Browser online, but they're not ready yet.
+                                </p>
+                            </Typography>
+                        </Fragment>
+                        
+                    }
+                    onClose={() => {setShowVersionMismatchAlert(false);}}
+                />
+            }
 
         </main>
 

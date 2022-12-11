@@ -5,9 +5,11 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 {
     
     static className = 'hhs-web/v0/Text';
+    static version   = '0.0.1';
 
     content?: MutableReference<string>;
     name?: MutableReference<string>;
+    version?: string;
 
     _node?: MeshNode;
 
@@ -21,6 +23,8 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 
         const name = new MutableReference<string>({acceptedTypes: ['string']});
         this.addDerivedField('name', name);
+
+        this.version = TextSpace.version;
     }
     
     getClassName(): string {
@@ -93,6 +97,10 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
             return false;
         }
 
+        if (typeof(this.version) !== 'string') {
+            return false;
+        }
+
         
         return true;
     }
@@ -124,6 +132,10 @@ class TextSpace extends HashedObject implements SpaceEntryPoint
 
     getName() {
         return this.name;
+    }
+
+    getVersion(): string {
+        return this.version as string;
     }
 }
 

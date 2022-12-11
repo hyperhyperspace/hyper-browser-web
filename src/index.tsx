@@ -11,9 +11,10 @@ import '@fontsource/roboto/700.css';
 
 import { Hash, MutableSet, Store, WorkerSafeIdbBackend } from '@hyper-hyper-space/core';
 import { HyperBrowserConfig } from './model/HyperBrowserConfig';
+import { Home } from '@hyper-hyper-space/home';
 
 const main = async () => {
-  const configBackend = new WorkerSafeIdbBackend('hyper-browser-config-0.5');
+  const configBackend = new WorkerSafeIdbBackend('hyper-browser-config-' + Home.version);
   let configBackendError: (string|undefined) = undefined;
   
   

@@ -53,9 +53,6 @@ function RedirectContactLink(props: {homes: ObjectState<MutableSet<Hash>>}) {
     }
     
   }
-  
-
-
 };
 
 function App(props: {homes: MutableSet<Hash>, config: Store}) {
