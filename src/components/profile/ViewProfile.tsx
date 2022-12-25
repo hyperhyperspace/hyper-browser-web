@@ -123,10 +123,8 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
                 const loaded = await props.resources?.store.load(profileHash, false) as Profile|undefined;
     
                 if (loaded !== undefined) {
-                    console.log(loaded);
+                    
                     p = loaded;
-
-                    console.log('published', p.published)
 
                     p.published?.addObserver( (ev: MutationEvent) => {
                         if (ev.emitter === p.published) {
@@ -167,7 +165,6 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
 
     useEffect(() => {
         setHosting(identity !== undefined && (hostingState?.value?.has(identity) || false));
-        console.log('hosting is', identity !== undefined && (hostingState?.value?.has(identity) || false));
     }, [identity, hostingState]);
 
     
@@ -208,9 +205,7 @@ function ViewProfile(props: {identityHash: Hash, close: () => void, home?: Home,
     };
 
     const addToHosting = async () => {
-        console.log('identity', identity);
         if (identity !== undefined) {
-            console.log('hosting', props.home?.contacts?.hosting);
             await props.home?.contacts?.hosting?.add(identity);
             await props.home?.contacts?.hosting?.saveQueuedOps();
         }
