@@ -25,8 +25,8 @@ function WikiSpacePage() {
     const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
 
     // check if blocks are draggable
-    const wikiWriteFlags = useObjectState(wiki.writeConfig, {debounceFreq: 250})
-    const wikiMembers = useObjectState(wiki.members, {debounceFreq: 250})
+    const wikiWriteFlags = useObjectState(wiki?.permissionLogic?.writeConfig, {debounceFreq: 250})
+    const wikiMembers = useObjectState(wiki?.permissionLogic?.members, {debounceFreq: 250})
     const [editable, setEditable] = useState<boolean>(false)
 
     useEffect(() => {

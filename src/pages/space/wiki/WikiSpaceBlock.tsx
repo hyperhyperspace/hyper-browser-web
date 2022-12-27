@@ -51,8 +51,8 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
     const { wiki }     = useOutletContext<WikiContext>();
     const pageArrayState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
-    const wikiWriteFlags = useObjectState(wiki.writeConfig, {debounceFreq: 250})
-    const wikiMembers = useObjectState(wiki.members, {debounceFreq: 250})
+    const wikiWriteFlags = useObjectState(wiki?.permissionLogic?.writeConfig, {debounceFreq: 250})
+    const wikiMembers = useObjectState(wiki?.permissionLogic?.members, {debounceFreq: 250})
 
     // check if editable
     const [editable, setEditable] = useState<boolean>(false)
