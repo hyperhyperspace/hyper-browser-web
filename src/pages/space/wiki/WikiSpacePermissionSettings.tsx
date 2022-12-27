@@ -71,7 +71,7 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
 
 function MemberList() {
   const { spaceContext, wiki } = useOutletContext<WikiContext>();
-  const membersState = useObjectState(wiki.members)
+  const membersState = useObjectState(wiki?.permissionLogic?.members)
   const owners = wiki.owners!
 
   return <Box>
@@ -101,7 +101,7 @@ function MemberList() {
 export default function WikiSpacePermissionSettings() {
   const { spaceContext, wiki } = useOutletContext<WikiContext>();
   const { home, homeResources, resources } = spaceContext;
-  const membersState = useObjectState(wiki.members)
+  const membersState = useObjectState(wiki?.permissionLogic?.members)
   const owners = wiki.owners!
 
   return (
@@ -110,8 +110,8 @@ export default function WikiSpacePermissionSettings() {
     <Divider/> */}
       <Box sx={{ m: 1 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
-          <PermFlagToggle flag={wiki.readConfig!} name='read' />
-          <PermFlagToggle flag={wiki.writeConfig!} name='write' />
+          <PermFlagToggle flag={wiki.permissionLogic?.readConfig!} name='read' />
+          <PermFlagToggle flag={wiki.permissionLogic?.writeConfig!} name='write' />
         </div>
       </Box>
       <MemberList />
