@@ -138,6 +138,9 @@ function WikiSpacePage() {
                                         idx={index} showAddBlockMenu={showAddBlockMenu}
                                         removeBlock={() => page?.removeBlock(block, home?.getAuthor())}
                                         latestNewBlockHash={latestNewBlockHash}
+                                        onEnter={() => {
+                                            addTextBlock(page?.blocks?.indexOf(block)!+1);
+                                        }}
                                     ></WikiSpaceBlock>
                                 </div>
                     

@@ -27,18 +27,28 @@ import { Icon, IconButton, Tooltip } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { Box } from '@mui/system';
-// other extensions from the tiptap StarterKit:
-// import BlockQuote from '@tiptap/extension-blockquote';
-// import BulletList from '@tiptap/extension-bullet-list';
-// import DropCursor from '@tiptap/extension-dropcursor';
-// import HardBreak from '@tiptap/extension-hard-break';
-// import HorizontalRule from '@tiptap/extension-horizontal-rule';
-// import List from '@tiptap/extension-list-item';
-// import OrderedList from '@tiptap/extension-ordered-list';
+import { Extension } from "@tiptap/core";
+
+const NewBlockOnEnter = Extension.create({
+  addOptions() {
+    return {
+      ...this.parent?.(),
+      onEnter: () => console.log('ENTER PRESSED'),
+    };
+  },
+  addKeyboardShortcuts() {
+    return {
+      Enter: () => {
+        this.options.onEnter()
+        return true
+      },
+    };
+  },
+});
 
 function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEditing?: any, idx: number,
         showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void, removeBlock: () => void,
-        latestNewBlockHash?: string
+        onEnter: () => void,  latestNewBlockHash?: string
 }) {
     const { spaceContext } = useOutletContext<WikiContext>();
     const { home } = spaceContext
@@ -154,6 +164,9 @@ function WikiSpaceBlock(props: { block: Block, startedEditing?: any, stoppedEdit
             Underline,
             WikiLink.configure({
                 definedPageNames: [...pageArrayState?.getValue()?.pages?.values()!].map(page => page.name!)
+            }),
+            NewBlockOnEnter.configure({
+                onEnter: props.onEnter
             }),
             CodeBlockLowlight.configure({lowlight}),
             Placeholder.configure({ placeholder: 'Write something...' })
