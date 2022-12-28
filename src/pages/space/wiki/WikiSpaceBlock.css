@@ -80,7 +80,8 @@ pre code {
 
 .wiki-toolbar {
   position: absolute;
-  left: 2em;
+  top: -2.3em;
+  right: 0;
   z-index: 100;
   background-color: rgba(255,255,255,0.75);
   opacity: 0.9;
