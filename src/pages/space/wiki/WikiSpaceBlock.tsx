@@ -89,7 +89,7 @@ function WikiSpaceBlock(props: {
       ?.getValue()
       ?.canUpdate(selfAuthor)
       .then((canUpdate) => {
-        console.log("setting editable to", canUpdate);
+        // console.log("setting editable to", canUpdate);
         editor?.setEditable(canUpdate);
         setEditable(canUpdate);
       });
@@ -119,7 +119,7 @@ function WikiSpaceBlock(props: {
   const lostFocusTimeout = useRef<number | undefined>();
 
   const startedEditing = (editor?: any, event?: any /*FocusEvent*/) => {
-    console.log("STARTED EDITING", editor, event);
+    // console.log("STARTED EDITING", editor, event);
 
     if (lostFocusTimeout.current !== undefined) {
       window.clearTimeout(lostFocusTimeout.current);
@@ -160,11 +160,11 @@ function WikiSpaceBlock(props: {
 
   const updateBlockWithHtml = useRef(
     debounce(async (blockContents: CausalReference<string>, html: string) => {
-      console.log("attempting to update block...");
+      // console.log("attempting to update block...");
       await blockContents.setValue(html, selfAuthor);
       blockContents.setResources(resources!);
       blockContents.saveQueuedOps();
-      console.log("SAVED BLOCK");
+      // console.log("SAVED BLOCK");
     }, 1500)
   );
 
@@ -212,8 +212,8 @@ function WikiSpaceBlock(props: {
       preserveWhitespace: "full",
     },
     onUpdate: async ({ editor }) => {
-      console.log("UPDATE");
-      console.log(blockContentsState);
+      // console.log("UPDATE");
+      // console.log(blockContentsState);
       if (blockContentsState && !editor.isDestroyed) {
         // const existingContent = blockContentsState.getValue()?.getValue()
         const attemptedContent = editor.getHTML();
