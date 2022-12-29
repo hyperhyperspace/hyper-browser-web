@@ -103,8 +103,6 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
               {...provided.draggableProps}
               {...provided.dragHandleProps}
               ref={provided.innerRef}
-
-              style={{width: '100%'}}
             >
               <Stack direction="row" style={{alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
                 <Stack direction="row" style={{alignItems: 'center', justifyContent: 'flex-start'}}>
