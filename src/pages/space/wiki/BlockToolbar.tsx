@@ -1,7 +1,6 @@
 import type { Editor } from '@tiptap/core'
 import { Button, ButtonGroup } from '@mui/material'
 import CodeIcon from '@mui/icons-material/Code';
-import HighlightIcon from '@mui/icons-material/Highlight';
 import LinkIcon from '@mui/icons-material/Link';
 
 
@@ -17,14 +16,21 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
         >
         <Button
             onClick={() => {
-                const baseLocation = window.location.hash.substring(1)?.split('/').slice(0,4).join('/')
-                const pageName = editor.state.doc.textBetween(editor.view.state.selection.from, editor.view.state.selection.to)
-                console.log('linking', baseLocation, pageName)
-                editor.chain().focus().toggleLink({
-                    href: `#${baseLocation}/${pageName}`,
-                    target: '_self'
-                }).run()}
-            }
+                const rangeSelected = editor.state.selection.to !== editor.state.selection.from
+                const currentLinkAttributes = editor.getAttributes('link')
+                if (currentLinkAttributes.href) {
+                    editor.commands.unsetLink()
+                } else if (!rangeSelected) {
+                   editor.commands.insertContent('🔗') 
+                } else {
+                    const baseLocation = window.location.hash.substring(1)?.split('/').slice(0,4).join('/')
+                    const pageName = editor.state.doc.textBetween(editor.view.state.selection.from, editor.view.state.selection.to)
+                    const result = editor.chain().focus().toggleLink({
+                        href: `#${baseLocation}/${pageName}`,
+                        target: '_self'
+                    }).run()
+                }
+            }}
             variant={editor.isActive('link') ? 'contained' : 'outlined'}
             aria-label="bold">
           <LinkIcon/>
