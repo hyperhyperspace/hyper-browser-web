@@ -85,14 +85,18 @@ function WikiSpaceBlock(props: {
   const [editable, setEditable] = useState<boolean>(false);
 
   useEffect(() => {
+    let cancel = false;
+
     blockState
       ?.getValue()
       ?.canUpdate(selfAuthor)
       .then((canUpdate) => {
-        // console.log("setting editable to", canUpdate);
+        if (cancel) return;
         editor?.setEditable(canUpdate);
         setEditable(canUpdate);
       });
+      return () => { cancel = true; }
+    
   }, [wikiWriteFlags, wikiMembers]);
 
   // disable debouncing once state has arrived:

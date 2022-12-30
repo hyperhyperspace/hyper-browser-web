@@ -69,7 +69,12 @@ export function MemberActionMenu(props: {memberId: Identity}) {
 
   const [actions, setActions] = React.useState<{[key: string]: Function | null}>({})
   React.useEffect(() => {
-    generateMemberActions().then(memberActions => setActions(memberActions))
+    let cancel = false
+    generateMemberActions().then(memberActions => {
+      if (cancel) return;
+      setActions(memberActions)
+    })
+    return () => { cancel = true }
   }, [moderatorsState])
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

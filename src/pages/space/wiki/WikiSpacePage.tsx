@@ -30,9 +30,12 @@ function WikiSpacePage() {
     const [editable, setEditable] = useState<boolean>(false)
 
     useEffect(() => {
+        let cancel = false
         page?.canUpdate(home?.getAuthor())?.then( canUpdate => {
+            if (cancel) return;
             setEditable(canUpdate)
         })
+        return () => { cancel = true }
     }, [wikiWriteFlags, wikiMembers])
     
     // remove debouncing after loading:
@@ -47,8 +50,9 @@ function WikiSpacePage() {
     useEffect(() => {
 
         if (pageName !== undefined && pageArrayState?.getValue() !== undefined) {
+            let cancel = false
             const updateCurrentPage = async () => {
-
+                
                 console.log('PAGE IS "' + pageName + '"')
 
                 if (page?.name !== pageName || !pageIsSaved) {
@@ -67,6 +71,7 @@ function WikiSpacePage() {
                 } else {
                     if (!pageIsSaved && pageArrayState?.getValue()?.hasPage(pageName)) {
                         await page?.save();
+                        if (cancel) return;
                         const foundPage = pageArrayState?.getValue()?.getPage(pageName);
                         if (page !== undefined) {
                             setPage(page);
@@ -82,6 +87,7 @@ function WikiSpacePage() {
             }
 
             updateCurrentPage();
+            return () => {cancel = true}
         }
     }, [pageName, page, pageArrayState]);
 

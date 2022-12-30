@@ -52,12 +52,19 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   
 
   useEffect(() => {
+    let cancel = false;
+
     pageArrayState
       ?.getValue()
       ?.canInsert(undefined, 0, spaceContext?.home?.getAuthor())
       .then((canInsert: boolean) => {
+        if (cancel) return;
         setCanEditPageArray(canInsert);
       });
+
+      return () => { 
+        cancel = true;
+      }
   }, [pageArrayState, spaceContext?.home]);
 
   const [filterText, setFilterText] = useState<string>("");
