@@ -13,7 +13,7 @@ import ContactListDisplay from '../../home/components/ContactListDisplay';
 import { AdminPanelSettings, Lock, SupervisedUserCircle, LockPerson, Public } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { sortBy } from 'lodash-es';
+import { pickBy, size, sortBy } from 'lodash-es';
 
 
 const ITEM_HEIGHT = 48;
@@ -146,6 +146,30 @@ function MemberList() {
   const moderatorsState = useObjectState(wiki?.permissionLogic?.moderators)
   const owners = wiki.owners!
 
+  const memberActions = (id: Identity) => pickBy({
+              [ADD_TO_MODERATORS]: () => {
+                moderatorsState?.getValue()?.add(id, author);
+                moderatorsState?.getValue()?.save()
+              },
+              [REMOVE_FROM_MODERATORS]: () => {
+                moderatorsState?.getValue()?.delete(id, author)
+                moderatorsState?.getValue()?.save()
+              },
+              [REMOVE_FROM_MEMBERS]: () => {
+                membersState?.getValue()?.delete(id, author)
+                membersState?.getValue()?.save()
+                moderatorsState?.getValue()?.delete(id, author)
+                moderatorsState?.getValue()?.save()
+              },
+            }, (_value, action: string) => {
+              if (action === REMOVE_FROM_MODERATORS) {
+                return owners?.has(author!) && moderatorsState?.value?.has(id) 
+              } else if (action === ADD_TO_MODERATORS) {
+                return owners?.has(author!) && !moderatorsState?.value?.has(id)
+              } else if (action === REMOVE_FROM_MEMBERS) {
+                return moderatorsState?.value?.has(author!) || owners?.has(author!)
+            }})
+
   return <Box>
     <Typography variant="overline">Members</Typography>
     <Divider/>
@@ -158,31 +182,19 @@ function MemberList() {
             ]}/>
           </ListItem>)}
         {sortBy([...membersState?.value?.values()!], [
-          id => moderatorsState?.value?.has(id) ? -1 : 1,
+          // id => moderatorsState?.value?.has(id) ? -1 : 1,
           id => ProfileUtils.createContact(id).name,
-        ]).map(id =>
-          <ListItem key={id.getLastHash()!}>
+        ]).map(id => {
+          const actions = memberActions(id)
+          return <ListItem key={id.getLastHash()!}>
             <ContactListDisplay contact={ProfileUtils.createContact(id)!} chips={
               moderatorsState?.value?.has(id) ? [
               <Chip size="small" label="moderator" color="secondary" icon={<AdminPanelSettings/>}/>
             ] : []}/>
-            <MemberActionMenu actions={{
-              [ADD_TO_MODERATORS]: () => {
-                moderatorsState?.getValue()?.add(id, author);
-                moderatorsState?.getValue()?.save()
-              },
-              [REMOVE_FROM_MEMBERS]: () => {
-                membersState?.getValue()?.delete(id, author)
-                membersState?.getValue()?.save()
-                moderatorsState?.getValue()?.delete(id, author)
-                moderatorsState?.getValue()?.save()
-              },
-              [REMOVE_FROM_MODERATORS]: () => {
-                moderatorsState?.getValue()?.delete(id, author)
-                moderatorsState?.getValue()?.save()
-              },
-            }}/>
-          </ListItem>)}
+            { size(actions) > 0 && <MemberActionMenu actions={actions}/> }
+          </ListItem>
+        }
+          )}
       </List>
     </Box>
   </Box>
