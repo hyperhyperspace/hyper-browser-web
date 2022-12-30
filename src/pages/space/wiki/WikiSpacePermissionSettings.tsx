@@ -163,11 +163,13 @@ function MemberList() {
               },
             }, (_value, action: string) => {
               if (action === REMOVE_FROM_MODERATORS) {
-                return owners?.has(author!) && moderatorsState?.value?.has(id) 
+                return moderatorsState?.value?.canDelete(id, author)
+                    && moderatorsState?.value?.has(id); 
               } else if (action === ADD_TO_MODERATORS) {
-                return owners?.has(author!) && !moderatorsState?.value?.has(id)
+                return moderatorsState?.value?.canAdd(id, author)
+                    && !moderatorsState?.value?.has(id);
               } else if (action === REMOVE_FROM_MEMBERS) {
-                return moderatorsState?.value?.has(author!) || owners?.has(author!)
+                return membersState?.value?.canDelete(id, author);
             }})
 
   return <Box>
