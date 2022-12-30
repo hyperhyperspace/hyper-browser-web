@@ -21,7 +21,58 @@ const ADD_TO_MODERATORS = 'Add to moderators';
 const REMOVE_FROM_MODERATORS = 'Remove from moderators';
 const REMOVE_FROM_MEMBERS = 'Remove from members';
 
-export function MemberActionMenu(props: {actions: {[key: string]: Function}}) {
+export function MemberActionMenu(props: {memberId: Identity}) {
+  const {memberId} = props
+  const { spaceContext, wiki } = useOutletContext<WikiContext>();
+  const author = spaceContext?.home?.getAuthor();
+  const membersState = useObjectState(wiki?.permissionLogic?.members)
+  const moderatorsState = useObjectState(wiki?.permissionLogic?.moderators)
+  const owners = wiki.owners!
+
+  const generateMemberActions = async () => {
+    const actions: { [key: string]: Function } = {};
+
+    const canAddToModerators =
+      (await moderatorsState?.getValue()?.canAdd(memberId, author)) &&
+      !moderatorsState?.value?.has(memberId);
+
+    if (canAddToModerators) {
+      actions[ADD_TO_MODERATORS] = () => {
+        moderatorsState?.getValue()?.add(memberId, author);
+        moderatorsState?.getValue()?.save();
+      };
+    }
+
+    const canRemoveFromModerators =
+      (await moderatorsState?.getValue()?.canDelete(memberId, author)) &&
+      moderatorsState?.value?.has(memberId);
+
+    if (canRemoveFromModerators) {
+      actions[REMOVE_FROM_MODERATORS] = () => {
+        moderatorsState?.getValue()?.delete(memberId, author);
+        moderatorsState?.getValue()?.save();
+      };
+    }
+
+    const canRemoveFromMembers = await membersState?.value?.canDelete(memberId, author);
+
+    if (canRemoveFromMembers) {
+      actions[REMOVE_FROM_MEMBERS] = () => {
+        membersState?.getValue()?.delete(memberId, author);
+        membersState?.getValue()?.save();
+        moderatorsState?.getValue()?.delete(memberId, author);
+        moderatorsState?.getValue()?.save();
+      };
+    }
+
+    return actions;
+  };
+
+  const [actions, setActions] = React.useState<{[key: string]: Function | null}>({})
+  React.useEffect(() => {
+    generateMemberActions().then(memberActions => setActions(memberActions))
+  }, [moderatorsState])
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -33,7 +84,7 @@ export function MemberActionMenu(props: {actions: {[key: string]: Function}}) {
 
   return (
     <div>
-      <IconButton
+      {size(actions) > 0 && <IconButton
         aria-label="more"
         id="member-action-button"
         aria-controls={open ? 'member-actions' : undefined}
@@ -42,7 +93,7 @@ export function MemberActionMenu(props: {actions: {[key: string]: Function}}) {
         onClick={handleClick}
       >
         <MoreVertIcon />
-      </IconButton>
+      </IconButton>}
       <Menu
         id="member-actions"
         MenuListProps={{
@@ -57,9 +108,9 @@ export function MemberActionMenu(props: {actions: {[key: string]: Function}}) {
           },
         }}
       >
-        {Object.entries(props.actions).map(([action, handler]) => (
+        {Object.entries(actions).map(([action, handler]) => (
           <MenuItem key={action} onClick={() => {
-            handler()
+            handler && handler()
             handleClose()
           }}>
             {action}
@@ -146,32 +197,6 @@ function MemberList() {
   const moderatorsState = useObjectState(wiki?.permissionLogic?.moderators)
   const owners = wiki.owners!
 
-  const memberActions = (id: Identity) => pickBy({
-              [ADD_TO_MODERATORS]: () => {
-                moderatorsState?.getValue()?.add(id, author);
-                moderatorsState?.getValue()?.save()
-              },
-              [REMOVE_FROM_MODERATORS]: () => {
-                moderatorsState?.getValue()?.delete(id, author)
-                moderatorsState?.getValue()?.save()
-              },
-              [REMOVE_FROM_MEMBERS]: () => {
-                membersState?.getValue()?.delete(id, author)
-                membersState?.getValue()?.save()
-                moderatorsState?.getValue()?.delete(id, author)
-                moderatorsState?.getValue()?.save()
-              },
-            }, (_value, action: string) => {
-              if (action === REMOVE_FROM_MODERATORS) {
-                return moderatorsState?.value?.canDelete(id, author)
-                    && moderatorsState?.value?.has(id); 
-              } else if (action === ADD_TO_MODERATORS) {
-                return moderatorsState?.value?.canAdd(id, author)
-                    && !moderatorsState?.value?.has(id);
-              } else if (action === REMOVE_FROM_MEMBERS) {
-                return membersState?.value?.canDelete(id, author);
-            }})
-
   return <Box>
     <Typography variant="overline">Members</Typography>
     <Divider/>
@@ -187,13 +212,12 @@ function MemberList() {
           // id => moderatorsState?.value?.has(id) ? -1 : 1,
           id => ProfileUtils.createContact(id).name,
         ]).map(id => {
-          const actions = memberActions(id)
           return <ListItem key={id.getLastHash()!}>
             <ContactListDisplay contact={ProfileUtils.createContact(id)!} chips={
               moderatorsState?.value?.has(id) ? [
               <Chip size="small" label="moderator" color="secondary" icon={<AdminPanelSettings/>}/>
             ] : []}/>
-            { size(actions) > 0 && <MemberActionMenu actions={actions}/> }
+            <MemberActionMenu memberId={id}/>
           </ListItem>
         }
           )}
