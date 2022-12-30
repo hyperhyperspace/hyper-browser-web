@@ -65,9 +65,6 @@ function LinkDeviceDialog(params: {id: Identity, offer: LinkDeviceOffer, remoteD
 
                     const remoteDevice = params.remoteDevice.clone();
                     remoteDevice.setResources(resources);
-                    remoteDevice.setAuthor(home.getAuthor() as Identity);
-                    remoteDevice.name?.setAuthor(home.getAuthor() as Identity);
-                    remoteDevice.name?.addWriter(home.getAuthor() as Identity);
                     
                     console.log(home.getAuthor() as Identity);
 
