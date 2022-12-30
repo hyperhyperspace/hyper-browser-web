@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Chip, Divider, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, Chip, Divider, FormControl, IconButton, InputLabel, List, ListItem, ListItemButton, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { useObjectState } from '@hyper-hyper-space/react';
@@ -7,13 +7,12 @@ import { useObjectState } from '@hyper-hyper-space/react';
 import { PermFlag, PermFlagEveryone, PermFlagMembers, PermFlagModerators, PermFlagOwners } from '@hyper-hyper-space/wiki-collab';
 import ContactSelectorDialog from '../../home/components/ContactSelectorDialog';
 import { CausalSet, Identity } from '@hyper-hyper-space/core';
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import { Contact, ProfileUtils } from '../../../model/ProfileUtils';
 import ContactListDisplay from '../../home/components/ContactListDisplay';
-import { AdminPanelSettings, Lock, SupervisedUserCircle, LockPerson, Public } from '@mui/icons-material';
+import { AdminPanelSettings, SupervisedUserCircle, LockPerson, Public } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { pickBy, size, sortBy } from 'lodash-es';
+import { size, sortBy } from 'lodash-es';
 
 
 const ITEM_HEIGHT = 48;
@@ -136,25 +135,25 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
       await flagState?.getValue()?.delete(PermFlagMembers, author);
       await flagState?.getValue()?.delete(PermFlagModerators, author);
       await flagState?.getValue()?.save()
-      console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
+      // console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
     } else if (flag === PermFlagMembers) {
       await flagState?.getValue()?.delete(PermFlagEveryone, author);
       await flagState?.getValue()?.add(PermFlagMembers, author);
       await flagState?.getValue()?.delete(PermFlagModerators, author);
       await flagState?.getValue()?.save()
-      console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
+      // console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
     } else if (flag === PermFlagModerators) {
       await flagState?.getValue()?.delete(PermFlagEveryone, author);
       await flagState?.getValue()?.delete(PermFlagMembers, author);
       await flagState?.getValue()?.add(PermFlagModerators, author);
       await flagState?.getValue()?.save()
-      console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
+      // console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
     } else if (flag === PermFlagOwners) {
       await flagState?.getValue()?.delete(PermFlagEveryone, author);
       await flagState?.getValue()?.delete(PermFlagMembers, author);
       await flagState?.getValue()?.delete(PermFlagModerators, author);
       await flagState?.getValue()?.save()
-      console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
+      // console.log('wiki permissions set', props.name, [...flagState?.getValue()?.values()!])
     }
   };
   const flag =
@@ -183,7 +182,7 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
       { flag === PermFlagEveryone ? <Public/> :
         flag === PermFlagMembers ? <SupervisedUserCircle/> : 
         flag === PermFlagModerators ? <AdminPanelSettings/> : 
-        flag === PermFlagOwners ? <Lock/> : 
+        flag === PermFlagOwners ? <LockPerson/> : 
         <LockPerson/> 
       }
     </>
@@ -191,8 +190,7 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
 }
 
 function MemberList() {
-  const { spaceContext, wiki } = useOutletContext<WikiContext>();
-  const author = spaceContext?.home?.getAuthor();
+  const { wiki } = useOutletContext<WikiContext>();
   const membersState = useObjectState(wiki?.permissionLogic?.members)
   const moderatorsState = useObjectState(wiki?.permissionLogic?.moderators)
   const owners = wiki.owners!
@@ -205,20 +203,20 @@ function MemberList() {
         {[...owners.values()!].map(id =>
           <ListItem key={id.getLastHash()!}>
             <ContactListDisplay contact={ProfileUtils.createContact(id)!} chips={[
-              <Chip size="small" label="owner" color="primary" icon={<Lock/>}/>
+              <Chip size="small" label="Owner" color="primary" icon={<LockPerson/>}/>
             ]}/>
           </ListItem>)}
         {sortBy([...membersState?.value?.values()!], [
           // id => moderatorsState?.value?.has(id) ? -1 : 1,
           id => ProfileUtils.createContact(id).name,
         ]).map(id => {
-          return <ListItem key={id.getLastHash()!}>
+          return <ListItemButton disableRipple={true} key={id.getLastHash()!}>
             <ContactListDisplay contact={ProfileUtils.createContact(id)!} chips={
               moderatorsState?.value?.has(id) ? [
-              <Chip size="small" label="moderator" color="secondary" icon={<AdminPanelSettings/>}/>
+              <Chip size="small" label="Moderator" color="secondary" icon={<AdminPanelSettings/>}/>
             ] : []}/>
             <MemberActionMenu memberId={id}/>
-          </ListItem>
+          </ListItemButton>
         }
           )}
       </List>
@@ -248,7 +246,7 @@ export default function WikiSpacePermissionSettings() {
         resourcesForDiscovery={resources!}
         selectedHashes={[...membersState?.getValue()?.values()!, ...owners.values()!].map(id => id.getLastHash())}
         handleSelect={async (contact: Contact | Identity) => {
-          console.log('attempting to select', contact)
+          // console.log('attempting to select', contact)
           const identity = contact instanceof Identity ?
             contact :
             await homeResources?.store.load(contact.hash)! as Identity
