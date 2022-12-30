@@ -31,7 +31,7 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
                     }).run()
                 }
             }}
-            variant={editor.isActive('link') ? 'contained' : 'outlined'}
+            variant={editor.isActive('link') ? 'contained' : 'text'}
             aria-label="bold">
           <LinkIcon/>
         </Button>
@@ -39,61 +39,61 @@ const BlockStyleBar = ({ editor }: { editor: Editor }) => {
             onClick={(e) => {
                 editor.chain().focus().toggleHeading({ level: 1 }).run()
             }}
-            variant={editor.isActive('heading', { level: 1 }) ? 'contained' : 'outlined'}
+            variant={editor.isActive('heading', { level: 1 }) ? 'contained' : 'text'}
             aria-label="bold">
           h1
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            variant={editor.isActive('heading', { level: 2 }) ? 'contained' : 'outlined'}
+            variant={editor.isActive('heading', { level: 2 }) ? 'contained' : 'text'}
             aria-label="bold">
           h2
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            variant={editor.isActive('heading', { level: 3 }) ? 'contained' : 'outlined'}
+            variant={editor.isActive('heading', { level: 3 }) ? 'contained' : 'text'}
             aria-label="bold">
           h3
         </Button>
         {/* <Button
             onClick={() => editor.chain().focus().setParagraph().run()} 
-            variant={editor.isActive('paragraph') ? 'contained' : 'outlined'}
+            variant={editor.isActive('paragraph') ? 'contained' : 'text'}
             aria-label="paragraph">
             p
         </Button> */}
         <Button
             onClick={() => editor.chain().focus().toggleBold().run()} 
-            variant={editor.isActive('bold') ? 'contained' : 'outlined'}
+            variant={editor.isActive('bold') ? 'contained' : 'text'}
             aria-label="bold">
             <b style={{fontWeight: 'bolder'}}>b</b>
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleItalic().run()} 
-            variant={editor.isActive('italic') ? 'contained' : 'outlined'}
+            variant={editor.isActive('italic') ? 'contained' : 'text'}
             aria-label="italic">
             <i>i</i>
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleUnderline().run()} 
-            variant={editor.isActive('underline') ? 'contained' : 'outlined'}
+            variant={editor.isActive('underline') ? 'contained' : 'text'}
             aria-label="underline">
             <u>u</u>
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleStrike().run()} 
-            variant={editor.isActive('strike') ? 'contained' : 'outlined'}
+            variant={editor.isActive('strike') ? 'contained' : 'text'}
             aria-label="strikethrough selection">
             <s>s</s>
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleHighlight().run()} 
-            variant={editor.isActive('highlight') ? 'contained' : 'outlined'}
+            variant={editor.isActive('highlight') ? 'contained' : 'text'}
             aria-label="highlight selection">
             {!editor.isActive('highlight') && <span style={{backgroundColor: 'yellow', padding: '0px 2px'}}>h</span>}{editor.isActive('highlight') && <span style={{padding: '0px 2px'}}>h</span>}{/*<HighlightIcon/>*/}
         </Button>
         <Button
             onClick={() => editor.chain().focus().toggleCodeBlock().run()} 
-            variant={editor.isActive('codeBlock') ? 'contained' : 'outlined'}
+            variant={editor.isActive('codeBlock') ? 'contained' : 'text'}
             aria-label="code block">
             <CodeIcon/>
         </Button>
