@@ -252,7 +252,7 @@ export default function WikiSpacePermissionSettings() {
     <Divider/> */}
       <Box sx={{ m: 1 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
-          <PermFlagToggle flag={wiki.permissionLogic?.readConfig!} name='read' info={ReadInfo} />
+          {/* <PermFlagToggle flag={wiki.permissionLogic?.readConfig!} name='read' info={ReadInfo} /> */}
           <PermFlagToggle flag={wiki.permissionLogic?.writeConfig!} name='write' info={WriteInfo} />
         </div>
       </Box>
