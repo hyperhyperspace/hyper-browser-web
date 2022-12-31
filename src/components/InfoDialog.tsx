@@ -15,7 +15,7 @@ function InfoDialog(props: {onClose?: () => void, title: string, content: string
     }
 
     return (<Dialog
-        open={open}
+        open={props.open != undefined ? props.open : open}
         onClose={onClose}
       >
     

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Chip, Divider, FormControl, IconButton, InputLabel, List, ListItem, ListItemButton, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
+import { Box, Chip, Divider, FormControl, IconButton, InputLabel, Link, List, ListItem, ListItemButton, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material';
 import { useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import { useObjectState } from '@hyper-hyper-space/react';
@@ -13,6 +13,8 @@ import { AdminPanelSettings, SupervisedUserCircle, LockPerson, Public } from '@m
 import Menu from '@mui/material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { size, sortBy } from 'lodash-es';
+import InfoDialog from '../../../components/InfoDialog';
+import { ReadInfo, WriteInfo } from './WikiSpaceInfoTips';
 
 
 const ITEM_HEIGHT = 48;
@@ -125,10 +127,11 @@ export function MemberActionMenu(props: {memberId: Identity}) {
   );
 }
 
-function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
+function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String, info?: JSX.Element }) {
   const { spaceContext } = useOutletContext<WikiContext>();
   const flagState = useObjectState(props.flag);
   const author = spaceContext?.home?.getAuthor();
+  const [infoTipOpen, setInfoTipOpen] = React.useState(false);
 
   const handleChange = async (
     event: SelectChangeEvent,
@@ -167,12 +170,18 @@ function PermFlagToggle(props: { flag: CausalSet<PermFlag>, name: String }) {
     flagState?.getValue()?.has(PermFlagModerators) ? PermFlagModerators :
     PermFlagOwners
 
-  const statusText = `Who can ${props.name}:`
+  const statusText = ( props.info ?
+    <Typography>
+      Who can <Link component="button" variant="body1" onClick={() => setInfoTipOpen(true)}>{ props.name }</Link>:
+      <InfoDialog content={props.info!} title={`Who can ${props.name}?`} open={infoTipOpen} onClose={() => setInfoTipOpen(false)}/>
+    </Typography> :
+    <Typography>
+      Who can { props.name}:
+    </Typography> 
+  )
   return (
     <>
-      <Typography>
         { statusText }
-      </Typography>
       <FormControl fullWidth>
         <Select
           value={flag}
@@ -241,8 +250,8 @@ export default function WikiSpacePermissionSettings() {
     <Divider/> */}
       <Box sx={{ m: 1 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'max-content max-content auto', alignItems: "center", gap: "1em" }}>
-          <PermFlagToggle flag={wiki.permissionLogic?.readConfig!} name='read' />
-          <PermFlagToggle flag={wiki.permissionLogic?.writeConfig!} name='write' />
+          <PermFlagToggle flag={wiki.permissionLogic?.readConfig!} name='read' info={ReadInfo} />
+          <PermFlagToggle flag={wiki.permissionLogic?.writeConfig!} name='write' info={WriteInfo} />
         </div>
       </Box>
       <MemberList />
