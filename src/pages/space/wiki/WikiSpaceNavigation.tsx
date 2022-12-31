@@ -136,7 +136,11 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                 <Tooltip hidden={!canEditPageArray} title="Click to remove this page">
                   <IconButton
                     className="delete-page"
-                    onClick={() => pageArrayState?.getValue()?.deleteElement(page, home?.getAuthor())}
+                    onClick={() => {
+                      pageArrayState?.value?.deleteElement(page, home?.getAuthor())
+                      pageArrayState?.value?.save()
+                    }
+                  }
                     style={{
                       cursor: "pointer",
                       height: "default",
