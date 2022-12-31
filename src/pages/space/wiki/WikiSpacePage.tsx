@@ -6,7 +6,7 @@ import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautif
 import { CausalArray, Identity, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import WikiSpaceNavigation from './WikiSpaceNavigation';
 
 function WikiSpacePage() {
@@ -20,7 +20,7 @@ function WikiSpacePage() {
 
     const [page, setPage] = useState<Page>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
-    const [latestNewBlockHash, setlatestNewBlockHash] = useState<string>();
+    const [focusOnBlockWithHash, setfocusOnBlockWithHash] = useState<string>();
 
     const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
 
@@ -118,7 +118,7 @@ function WikiSpacePage() {
 
         const newBlock = page?.addBlock(idx, undefined, (home?.getAuthor() as Identity)!);
         newBlock?.then(block => {
-            setlatestNewBlockHash(block?.getLastHash())
+            setfocusOnBlockWithHash(block?.getLastHash())
         })
     }
 
@@ -130,6 +130,17 @@ function WikiSpacePage() {
             await b.save();
         });
     }
+
+    const focusOnAdjacentBlock = 
+    // useCallback(
+        (thisBlock: Block, distance=1) => {
+        const adjacent = blocksListState?.value?.lookup(blocksListState?.value?.indexOf(thisBlock) + distance)
+        setfocusOnBlockWithHash(adjacent?.getLastHash())
+    }
+    
+    const addBlockAfter = (thisBlock: Block) => {
+        return addTextBlock(blocksListState?.value?.indexOf(thisBlock)! + 1);
+    };
 
     const blockElements = blocksListState?.getValue()?.contents().map((block, index) => 
         (
@@ -143,10 +154,9 @@ function WikiSpacePage() {
                                         block={block} {...{startedEditing, stoppedEditing}}
                                         idx={index} showAddBlockMenu={showAddBlockMenu}
                                         removeBlock={() => page?.removeBlock(block, home?.getAuthor())}
-                                        latestNewBlockHash={latestNewBlockHash}
-                                        onEnter={() => {
-                                            addTextBlock(page?.blocks?.indexOf(block)!+1);
-                                        }}
+                                        focusOnBlockWithHash={focusOnBlockWithHash}
+                                        addBlockAfter={addBlockAfter}
+                                        focusOnAdjacentBlock={focusOnAdjacentBlock}
                                     ></WikiSpaceBlock>
                                 </div>
                     

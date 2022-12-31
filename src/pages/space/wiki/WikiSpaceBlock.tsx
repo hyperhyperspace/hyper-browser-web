@@ -26,27 +26,22 @@ import {
   CausalReference,
   MutationEvent,
 } from "@hyper-hyper-space/core";
-import { debounce } from "lodash-es";
+import { debounce, map, mapValues } from "lodash-es";
 import { Icon, IconButton, Tooltip } from "@mui/material";
 import { useOutletContext } from "react-router";
 import { WikiContext } from "./WikiSpaceView";
 import { Box } from "@mui/system";
 import { Extension } from "@tiptap/core";
 
-const NewBlockOnEnter = Extension.create({
+const BlockEditorShortcuts = Extension.create({
   addOptions() {
     return {
       ...this.parent?.(),
-      onEnter: () => console.log("ENTER PRESSED"),
+      shortcuts: {}
     };
   },
   addKeyboardShortcuts() {
-    return {
-      Enter: () => {
-        this.options.onEnter();
-        return true;
-      },
-    };
+    return mapValues(this.options.shortcuts, fn => fn.bind(this));
   },
 });
 
@@ -57,8 +52,9 @@ function WikiSpaceBlock(props: {
   idx: number;
   showAddBlockMenu: (newAnchorEl: HTMLElement, newBlockIdx?: number) => void;
   removeBlock: () => void;
-  onEnter: () => void;
-  latestNewBlockHash?: string;
+  addBlockAfter: Function;
+  focusOnBlockWithHash?: string;
+  focusOnAdjacentBlock?: (block: Block, distance?: number) => void
 }) {
   const { spaceContext } = useOutletContext<WikiContext>();
   const { home } = spaceContext;
@@ -185,8 +181,40 @@ function WikiSpaceBlock(props: {
       Highlight,
       TextAlign,
       Underline,
-      NewBlockOnEnter.configure({
-        onEnter: props.onEnter,
+      BlockEditorShortcuts.configure({
+        shortcuts: {
+          Enter: () => {
+            props.addBlockAfter(props.block)
+            return true
+          },
+          Backspace: function(){
+            const selection = this.editor.view.state.selection
+            const length = this.editor.state.doc.textContent.length
+            // console.log('backspace', selection, length)
+            if (selection.empty && selection.head == 1 && length === 0 ) {
+              props.focusOnAdjacentBlock!(props.block, -1)
+              props.removeBlock()
+              return true
+            }
+          },
+          ArrowUp: function(){
+            const selection = this.editor.view.state.selection
+            // console.log('arrow up', selection)
+            if (selection.empty && selection.head == 1) {
+              props.focusOnAdjacentBlock!(props.block, -1)
+              return true
+            }
+          },
+          ArrowDown: function(){
+            const selection = this.editor.view.state.selection
+            const length = this.editor.state.doc.textContent.length
+            // console.log('arrow down', selection, length)
+            if (selection.empty && selection.head == length + 1) {
+              props.focusOnAdjacentBlock!(props.block, 1)
+              return true
+            }
+          }
+        }
       }),
       WikiLinkSuggestion.configure({
         HTMLAttributes: {
@@ -216,10 +244,7 @@ function WikiSpaceBlock(props: {
       preserveWhitespace: "full",
     },
     onUpdate: async ({ editor }) => {
-      // console.log("UPDATE");
-      // console.log(blockContentsState);
       if (blockContentsState && !editor.isDestroyed) {
-        // const existingContent = blockContentsState.getValue()?.getValue()
         const attemptedContent = editor.getHTML();
         updateBlockWithHtml
           .current(blockContentsState.getValue()!, editor.getHTML())
@@ -241,10 +266,10 @@ function WikiSpaceBlock(props: {
   });
 
   useEffect(() => {
-    if (props.block.getLastHash() === props.latestNewBlockHash) {
+    if (props.block.getLastHash() === props.focusOnBlockWithHash) {
       editor?.commands.focus();
     }
-  }, [props.latestNewBlockHash]);
+  }, [props.focusOnBlockWithHash]);
 
   /*editor?.on('focus', () => {
         console.log('focusing editor')
