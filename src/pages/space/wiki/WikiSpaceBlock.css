@@ -89,15 +89,15 @@ pre code {
   mix-blend-mode: normal;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 640px) {
   .wiki-toolbar {
-    top: calc(-2.4*2em);
+    top: calc(-2.5*2em);
   }
 }
 
 @media only screen and (max-width: 410px) {
   .wiki-toolbar {
-    top: calc(-2.4*3em);
+    top: calc(-2.5*3em);
   }
 }
 

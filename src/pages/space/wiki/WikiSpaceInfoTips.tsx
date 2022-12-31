@@ -1,6 +1,4 @@
 import { Typography } from "@mui/material";
-import { useState } from "react";
-import InfoDialog from "../../../components/InfoDialog";
 
 export const ReadInfo = (
   <Typography>
@@ -28,5 +26,16 @@ export const WriteInfo = (
       <b>Important:</b> If this permission is revoked but the revocation information hasn't made its way to all peers, it's possible that someone's additions
       could appear to be valid until the revocation notice is recieved.  In order to prevent this, please try and ensure that all peers are sharing updates regularly.
     </p>
+  </Typography>
+);
+
+export const MemberInfo = (
+  <Typography>
+    <p>Wiki <b>membership</b> can be used to control various permissions in the wiki.  For example, editing the wiki can be restricted to members only.</p>
+    <p>Additionally, two special kinds of members can be designated:</p>
+    <ul>
+        <li><b>Owners</b> are designated at the time of the wiki's creation and cannot be changed.  Owners have the ability to add and remove members and to designate certain members as moderators.</li>
+        <li><b>Moderators</b> are members who can add and remove members.  Moderators can only be designated by the wiki's owners</li>
+    </ul>
   </Typography>
 );

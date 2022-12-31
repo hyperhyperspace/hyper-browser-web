@@ -14,7 +14,7 @@ import Menu from '@mui/material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { size, sortBy } from 'lodash-es';
 import InfoDialog from '../../../components/InfoDialog';
-import { ReadInfo, WriteInfo } from './WikiSpaceInfoTips';
+import { MemberInfo, ReadInfo, WriteInfo } from './WikiSpaceInfoTips';
 
 
 const ITEM_HEIGHT = 48;
@@ -208,9 +208,11 @@ function MemberList() {
   const membersState = useObjectState(wiki?.permissionLogic?.members)
   const moderatorsState = useObjectState(wiki?.permissionLogic?.moderators)
   const owners = wiki.owners!
+  const [infoTipOpen, setInfoTipOpen] = React.useState(false);
 
   return <Box>
-    <Typography variant="overline">Members</Typography>
+    <Link component="button" variant="overline" onClick={() => setInfoTipOpen(true)}>Members</Link>
+    <InfoDialog content={MemberInfo} title={`Who are members?`} open={infoTipOpen} onClose={() => setInfoTipOpen(false)}/>
     <Divider/>
     <Box>
       <List>
