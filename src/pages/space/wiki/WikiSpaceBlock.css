@@ -93,6 +93,20 @@ pre code {
   mix-blend-mode: normal;
 }
 
+@media only screen and (max-width: 650px) {
+  .wiki-block-wrapper {
+    position: inherit;
+  }
+  .wiki-toolbar {
+    /* bottom: 0px;
+    left: 0px; */
+    right: unset;
+    top: unset;
+    max-width: 100%;
+    position:sticky;
+  }
+}
+
 .wiki-toolbar .MuiButtonGroup-root {
   display: flex !important;
   flex-wrap: wrap !important;
