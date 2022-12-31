@@ -78,6 +78,10 @@ pre code {
   padding: 0;
 }
 
+.wiki-block-wrapper {
+  position: relative;
+}
+
 .wiki-toolbar {
   position: absolute;
   top: -2.5em;
@@ -89,15 +93,17 @@ pre code {
   mix-blend-mode: normal;
 }
 
-@media only screen and (max-width: 640px) {
-  .wiki-toolbar {
-    top: calc(-2.5*2em);
+@media only screen and (max-width: 650px) {
+  .wiki-block-wrapper {
+    position: inherit;
   }
-}
-
-@media only screen and (max-width: 410px) {
   .wiki-toolbar {
-    top: calc(-2.5*3em);
+    /* bottom: 0px;
+    left: 0px; */
+    right: unset;
+    top: unset;
+    max-width: 100%;
+    position:sticky;
   }
 }
 

@@ -340,9 +340,8 @@ function WikiSpaceBlock(props: {
 
         <div>
           {props.block?.type === BlockType.Text && (
-            <div style={{ position: "relative" }}>
+            <div className='wiki-block-wrapper'>
               <EditorContent editor={editor} />
-              {/* {editor?.isEditable && isEditing && !editor?.state.selection?.empty && <BlockStyleBar editor={editor}></BlockStyleBar>} */}
               {editor?.isEditable && isEditing && (
                 <BlockStyleBar editor={editor}></BlockStyleBar>
               )}
