@@ -37,6 +37,10 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
 
   const wikiState = useObjectState(wiki);
   const pageArrayState = useObjectState<PageArray>(wiki?.pages, { debounceFreq: 250 });
+  // const pageNamesState = useObjectState<MutableReference<string>[]>([...wiki?.pages!.values()].map(page => page.name), { debounceFreq: 250 });
+
+  // pagesNamesState = pageArrayState
+
 
   const [canEditPageArray, setCanEditPageArray] = useState<boolean>(false);
 
@@ -76,14 +80,14 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
 
   const filterPage = (p: Page, filterText: string) =>
     filterText.trim() === "" ||
-    (p.name
+    (p.name?.getValue()
       ?.toLowerCase()
       ?.indexOf(filterText.trim().toLocaleLowerCase()) as number) >= 0;
 
   useEffect(() => {
     if (props.redirect) {
       if (pageArrayState?.getValue()?.size() || 0 > 0) {
-        nav.goToPage(pageArrayState?.getValue()?.values().next().value.name);
+        nav.goToPage(pageArrayState?.getValue()?.values().next().value.name?.getValue());
       }
     }
   }, [pageArrayState]);
@@ -101,8 +105,8 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
         {(provided) => (
           <>
             <ListItemButton
-              selected={pageName === page.name}
-              onClick={() => nav.goToPage(page.name as string)}
+              selected={pageName === page.name?.getValue()}
+              onClick={() => nav.goToPage(page.name?.getValue() as string)}
               key={"navigation-for-" + page.getLastHash()}
               className={
                 canEditPageArray ? "editable-tab page-tab" : "page-tab"
@@ -127,9 +131,9 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                 </Icon>
               )}
               <Typography
-                className={page.name === pageName ? "currently-selected" : ""}
+                className={page.name?.getValue() === pageName ? "currently-selected" : ""}
               >
-                {page.name}
+                {page.name?.getValue()}
               </Typography>
               </Stack>
               {canEditPageArray && (
@@ -233,7 +237,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
         {/* unsaved pages */}
         {pageName &&
           !Array.from(wikiState?.getValue()?.getAllowedPages()!)
-            .map((p) => p.name)
+            .map((p) => p.name?.getValue())
             .includes(pageName) && (
             <ListItemButton
               selected={true}

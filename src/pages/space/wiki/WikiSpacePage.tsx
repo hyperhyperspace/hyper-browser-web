@@ -3,7 +3,7 @@ import { Block, BlockType, Page, WikiSpace } from '@hyper-hyper-space/wiki-colla
 import WikiSpaceBlock from './WikiSpaceBlock';
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
-import { CausalArray, Identity, MutationEvent } from '@hyper-hyper-space/core';
+import { CausalArray, Identity, MutableReference, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, useParams } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,7 +11,7 @@ import WikiSpaceNavigation from './WikiSpaceNavigation';
 
 function WikiSpacePage() {
     const { pageName } = useParams();
-    const { wiki, nav, spaceContext}     = useOutletContext<WikiContext>();
+    const { wiki, spaceContext}     = useOutletContext<WikiContext>();
     const { home } = spaceContext;
 
     //const wikiState = useObjectState<WikiSpace>(wiki, {debounceFreq: 250});
@@ -19,10 +19,11 @@ function WikiSpacePage() {
     const pageArrayState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
     const [page, setPage] = useState<Page>();
+    const [pageNameState, setPageNameState] = useState<MutableReference<string>>();
     const [pageIsSaved, setPageIsSaved] = useState<boolean>();
     const [focusOnBlockWithHash, setfocusOnBlockWithHash] = useState<string>();
 
-    const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
+    const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 50});
 
     // check if blocks are draggable
     const wikiWriteFlags = useObjectState(wiki?.permissionLogic?.writeConfig, {debounceFreq: 250})
@@ -36,7 +37,7 @@ function WikiSpacePage() {
             setEditable(canUpdate)
         })
         return () => { cancel = true }
-    }, [wikiWriteFlags, wikiMembers])
+    }, [wikiWriteFlags, wikiMembers, page, home])
     
     // remove debouncing after loading:
 
@@ -55,13 +56,13 @@ function WikiSpacePage() {
                 
                 console.log('PAGE IS "' + pageName + '"')
 
-                if (page?.name !== pageName || !pageIsSaved) {
+                if (pageNameState?.getValue() !== pageName || !pageIsSaved) {
                     const existingPage = pageArrayState?.getValue()?.getPage(pageName);
                     if (existingPage !== undefined) {
                         setPage(existingPage);
                         setPageIsSaved(true);
                         console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
-                    } else if (page === undefined || page?.name !== pageName){
+                    } else if (page === undefined || pageNameState?.getValue() !== pageName){
                         setPage(pageArrayState?.getValue()?.createPage(pageName));
                         setPageIsSaved(false);
                         console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')

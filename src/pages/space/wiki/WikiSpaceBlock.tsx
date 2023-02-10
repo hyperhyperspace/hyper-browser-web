@@ -141,6 +141,7 @@ function WikiSpaceBlock(props: {
     if (lostFocusTimeout.current !== undefined) {
       window.clearTimeout(lostFocusTimeout.current);
     }
+    console.log('stopped editing')
 
     lostFocusTimeout.current = window.setTimeout(() => {
       setIsEditing((old: boolean) => {
@@ -224,7 +225,7 @@ function WikiSpaceBlock(props: {
           ...suggestion,
           items: ({ query }: { query: string }) => {
             return [...pageArrayState?.getValue()?.pages?.values()!]
-              .map((page) => page.name!)
+              .map((page) => page.name?.getValue()!)
               .filter((item) =>
                 item.toLowerCase().includes(query.toLowerCase())
               )
@@ -235,7 +236,7 @@ function WikiSpaceBlock(props: {
       Emoji.configure(),
       WikiLink.configure({
         definedPageNames: [...pageArrayState?.getValue()?.pages?.values()!].map(
-          (page) => page.name!
+          (page) => page.name?.getValue()!
         ),
       }),
       CodeBlockLowlight.configure({ lowlight }),
