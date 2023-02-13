@@ -116,9 +116,18 @@ function WikiSpacePage() {
         console.log('adding text block with author:', home?.getAuthor(), '...')
         console.log('hasKeyPair()=', home?.getAuthor()?.hasKeyPair(), '...')
 
-        const newBlock = page?.addBlock(idx, undefined, (home?.getAuthor() as Identity)!);
+        console.log('before adding block ' + Date.now());
+        const newBlock = page?.addBlockNoSave(idx, undefined, (home?.getAuthor() as Identity)!);
+        console.log('after adding block ' + Date.now());
         newBlock?.then(block => {
+            console.log('before set focus ' + Date.now());
             setfocusOnBlockWithHash(block?.getLastHash())
+            console.log('after set focus ' + Date.now());
+        }).then(() => {
+            console.log('before save ' + Date.now());
+            page?.blocks?.saveQueuedOps().then(() => {
+                console.log('after save ' + Date.now());
+            })
         })
     }
 

@@ -184,6 +184,7 @@ function WikiSpaceBlock(props: {
       BlockEditorShortcuts.configure({
         shortcuts: {
           Enter: () => {
+            console.log('enter was at ' + Date.now());
             props.addBlockAfter(props.block)
             return true
           },
