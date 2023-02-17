@@ -1,16 +1,6 @@
-import {
-  useTheme,
-  useMediaQuery,
-  Stack,
-  Paper,
-  Typography,
-  Button,
-  Box,
-  Divider,
-} from "@mui/material";
-import { useEffect, Fragment, ReactElement, ReactChildren } from "react";
+import { useTheme, useMediaQuery, Stack, Paper, Typography, Button, Box } from "@mui/material";
+import { useEffect, Fragment, ReactElement } from "react";
 import { WikiSpace } from "@hyper-hyper-space/wiki-collab";
-import WikiSpacePage from "./WikiSpacePage";
 import {
   Outlet,
   Route,
@@ -24,6 +14,7 @@ import WikiSpaceNavigation from "./WikiSpaceNavigation";
 import { SpaceContext } from "../SpaceFrame";
 import "./WikiSpaceView.css";
 import WikiSpaceSettingsPage from "./WikiSpaceSettingsPage";
+import WikiSpacePagesForRoute from "./WikiSpacePagesForRoute";
 
 type WikiNav = {
   goToPage: (pageName: string) => void;
@@ -125,7 +116,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
     </>
   );
 
-  const Frame: React.FC<{ title?: string }> = ({ children, title }) => {
+  const Frame: React.FC<{ title?: string | ReactElement }> = ({ children, title }) => {
     const { pageName } = useParams();
     return (
       <div className="wiki-container">
@@ -145,9 +136,9 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
             <div
               style={{ padding: noNavigation ? "0" : "0 2rem", width: "100%" }}
             >
-              <Typography variant="h6" align="center">
-                {title || pageName}
-              </Typography>
+              {title && (<Typography variant="h6" align="center">
+                {title}
+              </Typography>)}
               <Box sx={{marginTop: pageName ? 5 : 0}}>
                 {children}
               </Box>
@@ -205,7 +196,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
           path="contents/:pageName"
           element={
             <Frame>
-              <WikiSpacePage />
+              <WikiSpacePagesForRoute />
             </Frame>
           }
         />

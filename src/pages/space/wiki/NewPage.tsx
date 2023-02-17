@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography} from '@mui/material';
+import { Button, Stack, TextField } from '@mui/material';
 
-import { WikiSpace } from '@hyper-hyper-space/wiki-collab';
 import { useNavigate, useOutletContext } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 
