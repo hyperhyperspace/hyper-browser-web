@@ -360,6 +360,7 @@ function WikiSpaceBlock(props: {
           {editable && (
             <Tooltip hidden={!editable} title="Click to remove this block">
               <IconButton
+                size="small"
                 onClick={handleRemoveBlock}
                 className="delete-block"
                 style={{
