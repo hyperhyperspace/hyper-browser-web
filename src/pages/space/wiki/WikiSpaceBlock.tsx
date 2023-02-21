@@ -89,7 +89,7 @@ function WikiSpaceBlock(props: {
       ?.canUpdate(selfAuthor)
       .then((canUpdate) => {
         if (cancel) return;
-        editor?.setEditable(canUpdate);
+        editor?.setEditable(canUpdate, false);
         setEditable(canUpdate);
       });
       return () => { cancel = true; }
