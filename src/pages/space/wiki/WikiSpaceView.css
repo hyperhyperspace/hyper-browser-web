@@ -12,3 +12,9 @@
     padding-top: 60px;
   }
 }
+/* 
+.emoji-mart-emoji, .emoji-mart-emoji > * {
+  vertical-align: text-bottom;
+  padding: 0 !important;
+  margin: 0 !important;
+} */

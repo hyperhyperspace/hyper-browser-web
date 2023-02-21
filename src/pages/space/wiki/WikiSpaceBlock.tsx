@@ -32,6 +32,7 @@ import { useOutletContext } from "react-router";
 import { WikiContext } from "./WikiSpaceView";
 import { Box } from "@mui/system";
 import { Extension } from "@tiptap/core";
+import Emoji from "./Emoji";
 
 const BlockEditorShortcuts = Extension.create({
   addOptions() {
@@ -208,9 +209,9 @@ function WikiSpaceBlock(props: {
           },
           ArrowDown: function(){
             const selection = this.editor.view.state.selection
-            const length = this.editor.state.doc.textContent.length
-            // console.log('arrow down', selection, length)
-            if (selection.empty && selection.head == length + 1) {
+            const length = this.editor.state.doc.content.size
+            console.log('arrow down', selection, length, this.editor.state.doc)
+            if (selection.empty && selection.head + 1 === length) {
               props.focusOnAdjacentBlock!(props.block, 1)
               return true
             }
@@ -233,6 +234,7 @@ function WikiSpaceBlock(props: {
           },
         },
       }),
+      Emoji.configure(),
       WikiLink.configure({
         definedPageNames: [...pageArrayState?.getValue()?.pages?.values()!].map(
           (page) => page.name!
