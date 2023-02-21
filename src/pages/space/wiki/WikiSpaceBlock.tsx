@@ -120,8 +120,6 @@ function WikiSpaceBlock(props: {
   const lostFocusTimeout = useRef<number | undefined>();
 
   const startedEditing = (editor?: any, event?: any /*FocusEvent*/) => {
-    // console.log("STARTED EDITING", editor, event);
-
     if (lostFocusTimeout.current !== undefined) {
       window.clearTimeout(lostFocusTimeout.current);
     }
@@ -161,7 +159,7 @@ function WikiSpaceBlock(props: {
 
   const updateBlockWithHtml = useRef(
     debounce(async (blockContents: CausalReference<string>, html: string) => {
-      // console.log("attempting to update block...");
+      // console.log("attempting to update block...", html);
       await blockContents.setValue(html, selfAuthor);
       blockContents.setResources(resources!);
       blockContents.saveQueuedOps();
@@ -274,11 +272,6 @@ function WikiSpaceBlock(props: {
     }
   }, [props.focusOnBlockWithHash]);
 
-  /*editor?.on('focus', () => {
-        console.log('focusing editor')
-        startedEditing!(editor)
-    });*/
-
   useEffect(() => {
     const newText = blockContentsState?.getValue()?.getValue();
 
@@ -287,10 +280,6 @@ function WikiSpaceBlock(props: {
     }
 
     if (!editor?.isDestroyed && newText !== editor?.getHTML()) {
-      // console.log(
-      //   "setting contents of block " + props.block.getLastHash() + " to:"
-      // );
-      // console.log(newText);
       editor?.commands.setContent(newText, false, {
         preserveWhitespace: "full",
       });
