@@ -18,14 +18,83 @@ import { useEffect, useState } from "react";
 import {
   DragDropContext,
   Draggable,
+  DraggableProvided,
   Droppable,
   DropResult,
 } from "react-beautiful-dnd";
 import { useLocation, useOutletContext, useParams } from "react-router";
 import { WikiContext } from "./WikiSpaceView";
-import { Delete, DragIndicator, Remove } from "@mui/icons-material";
+import { Delete, DragIndicator } from "@mui/icons-material";
 import "./WikiSpaceNavigation.css";
 import { PageArray } from "@hyper-hyper-space/wiki-collab";
+import { MutationEvent } from "@hyper-hyper-space/core";
+
+function PageListItem(props: { page: Page, pageArray: PageArray, canEditPageArray: boolean, provided: DraggableProvided }) {
+  const { page, canEditPageArray, provided, pageArray } = props;
+  const { pageName: pageNameFromRoute } = useParams();
+  const pageName = useObjectState(page.name)?.getValue()?.getValue();
+  const pageArrayState = useObjectState(pageArray);
+  const { nav, spaceContext } = useOutletContext<WikiContext>();
+  const { home } = spaceContext;
+  return <ListItemButton
+    selected={pageNameFromRoute === pageName}
+    onClick={() => nav.goToPage(pageName as string)}
+    key={"navigation-for-" + page.getLastHash()}
+    className={
+      canEditPageArray ? "editable-tab page-tab" : "page-tab"
+    }
+    {...provided.draggableProps}
+    {...provided.dragHandleProps}
+    ref={provided.innerRef}
+  >
+    <Stack direction="row" style={{alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
+      <Stack direction="row" style={{alignItems: 'center', justifyContent: 'flex-start'}}>
+    {canEditPageArray && (
+      <Icon
+        style={{
+          height: "default",
+          width: "default",
+          marginRight: "0.25rem",
+          overflow: "visible",
+          marginTop: "-3px"
+        }}
+      >
+        <DragIndicator />
+      </Icon>
+    )}
+    <Typography
+      className={pageName === pageNameFromRoute ? "currently-selected" : ""}
+    >
+      {page.name?.getValue()}
+    </Typography>
+    </Stack>
+    {canEditPageArray && (
+      <Tooltip hidden={!canEditPageArray} title="Click to remove this page">
+        <IconButton
+          className="delete-page"
+          onClick={(evt: React.MouseEvent<any>) => {
+            evt.stopPropagation()
+            pageArrayState?.value?.deleteElement(page, home?.getAuthor())
+            pageArrayState?.value?.save()
+            if (page.name === pageName) {
+              nav.goToIndex()
+            }
+          }
+        }
+          style={{
+            cursor: "pointer",
+            height: "default",
+            width: "default",
+            overflow: "visible",
+          }}
+        >
+          <Delete/>
+        </IconButton>
+      </Tooltip>
+    )}
+    </Stack>
+  </ListItemButton>
+}
 
 function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   const { nav, wiki, spaceContext } = useOutletContext<WikiContext>();
@@ -36,7 +105,8 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   const onAddPage = pathname.includes("/add-page");
 
   const wikiState = useObjectState(wiki);
-  const pageArrayState = useObjectState<PageArray>(wiki?.pages, { debounceFreq: 250 });
+  // const pageArrayState = useObjectState<PageArray>(wiki?.pages);
+  const pageArrayState = useObjectState<PageArray>(wiki?.pages, {filterMutations: (ev: MutationEvent) => [...wiki.pages?.values()!].map(page => page.name).includes(ev.emitter), debounceFreq: 50});
 
   const [canEditPageArray, setCanEditPageArray] = useState<boolean>(false);
 
@@ -49,7 +119,6 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
 
     wiki.movePage(from, to, home?.getAuthor()!);
   };
-  
 
   useEffect(() => {
     let cancel = false;
@@ -76,14 +145,14 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
 
   const filterPage = (p: Page, filterText: string) =>
     filterText.trim() === "" ||
-    (p.name
+    (p.name?.getValue()
       ?.toLowerCase()
       ?.indexOf(filterText.trim().toLocaleLowerCase()) as number) >= 0;
 
   useEffect(() => {
     if (props.redirect) {
       if (pageArrayState?.getValue()?.size() || 0 > 0) {
-        nav.goToPage(pageArrayState?.getValue()?.values().next().value.name);
+        nav.goToPage(pageArrayState?.getValue()?.values().next().value.name?.getValue());
       }
     }
   }, [pageArrayState]);
@@ -93,72 +162,13 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   )
     .filter((page: Page) => filterPage(page, filterText))
     .map((page: Page, index: any) => (
-      <Draggable
+      page.name?.getValue() && <Draggable
         draggableId={page.getLastHash()}
         index={index}
         key={page.getLastHash()}
       >
         {(provided) => (
-          <>
-            <ListItemButton
-              selected={pageName === page.name}
-              onClick={() => nav.goToPage(page.name as string)}
-              key={"navigation-for-" + page.getLastHash()}
-              className={
-                canEditPageArray ? "editable-tab page-tab" : "page-tab"
-              }
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              ref={provided.innerRef}
-            >
-              <Stack direction="row" style={{alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
-                <Stack direction="row" style={{alignItems: 'center', justifyContent: 'flex-start'}}>
-              {canEditPageArray && (
-                <Icon
-                  style={{
-                    height: "default",
-                    width: "default",
-                    marginRight: "0.25rem",
-                    overflow: "visible",
-                    marginTop: "-3px"
-                  }}
-                >
-                  <DragIndicator />
-                </Icon>
-              )}
-              <Typography
-                className={page.name === pageName ? "currently-selected" : ""}
-              >
-                {page.name}
-              </Typography>
-              </Stack>
-              {canEditPageArray && (
-                <Tooltip hidden={!canEditPageArray} title="Click to remove this page">
-                  <IconButton
-                    className="delete-page"
-                    onClick={(evt: React.MouseEvent<any>) => {
-                      evt.stopPropagation()
-                      pageArrayState?.value?.deleteElement(page, home?.getAuthor())
-                      pageArrayState?.value?.save()
-                      if (page.name === pageName) {
-                        nav.goToIndex()
-                      }
-                    }
-                  }
-                    style={{
-                      cursor: "pointer",
-                      height: "default",
-                      width: "default",
-                      overflow: "visible",
-                    }}
-                  >
-                    <Delete/>
-                  </IconButton>
-                </Tooltip>
-              )}
-              </Stack>
-            </ListItemButton>
-          </>
+          <PageListItem page={page} provided={provided} pageArray={pageArrayState?.getValue()!} canEditPageArray={canEditPageArray}/>
         )}
       </Draggable>
     ));
@@ -233,7 +243,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
         {/* unsaved pages */}
         {pageName &&
           !Array.from(wikiState?.getValue()?.getAllowedPages()!)
-            .map((p) => p.name)
+            .map((p) => p.name?.getValue())
             .includes(pageName) && (
             <ListItemButton
               selected={true}

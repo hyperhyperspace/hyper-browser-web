@@ -4,25 +4,23 @@ import WikiSpaceBlock from './WikiSpaceBlock';
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { CausalArray, Identity, MutationEvent } from '@hyper-hyper-space/core';
-import { useOutletContext, useParams } from 'react-router';
+import { useOutletContext, } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import WikiSpaceNavigation from './WikiSpaceNavigation';
+import React, { useEffect, useRef, useState } from 'react';
 
-function WikiSpacePage() {
-    const { pageName } = useParams();
-    const { wiki, nav, spaceContext}     = useOutletContext<WikiContext>();
+function WikiSpacePage(props: {page: Page}) {
+    // const { pageName } = useParams();
+    const { page } = props;
+    const { wiki, spaceContext} = useOutletContext<WikiContext>();
     const { home } = spaceContext;
 
-    //const wikiState = useObjectState<WikiSpace>(wiki, {debounceFreq: 250});
     const wikiTitleState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.title, debounceFreq: 250});
-    const pageArrayState = useObjectState<WikiSpace>(wiki, {filterMutations: (ev: MutationEvent) => ev.emitter === wiki?.pages, debounceFreq: 250});
 
-    const [page, setPage] = useState<Page>();
-    const [pageIsSaved, setPageIsSaved] = useState<boolean>();
+    // we need to maintain a map of all the pages with a given page name
+
     const [focusOnBlockWithHash, setfocusOnBlockWithHash] = useState<string>();
 
-    const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 250});
+    const blocksListState = useObjectState<CausalArray<Block>>(page?.blocks, {debounceFreq: 50});
 
     // check if blocks are draggable
     const wikiWriteFlags = useObjectState(wiki?.permissionLogic?.writeConfig, {debounceFreq: 250})
@@ -36,7 +34,7 @@ function WikiSpacePage() {
             setEditable(canUpdate)
         })
         return () => { cancel = true }
-    }, [wikiWriteFlags, wikiMembers])
+    }, [wikiWriteFlags, wikiMembers, page, home])
     
     // remove debouncing after loading:
 
@@ -46,50 +44,6 @@ function WikiSpacePage() {
             blocksListState?.setDebounceFreq(undefined);
         }
     }, [blocksListState]);
-
-    useEffect(() => {
-
-        if (pageName !== undefined && pageArrayState?.getValue() !== undefined) {
-            let cancel = false
-            const updateCurrentPage = async () => {
-                
-                console.log('PAGE IS "' + pageName + '"')
-
-                if (page?.name !== pageName || !pageIsSaved) {
-                    const existingPage = pageArrayState?.getValue()?.getPage(pageName);
-                    if (existingPage !== undefined) {
-                        setPage(existingPage);
-                        setPageIsSaved(true);
-                        console.log('NAVIGATING TO EXISTING PAGE "' + pageName + '"')
-                    } else if (page === undefined || page?.name !== pageName){
-                        setPage(pageArrayState?.getValue()?.createPage(pageName));
-                        setPageIsSaved(false);
-                        console.log('NAVIGATING TO NEW PAGE "' + pageName + '"')
-                    } else {
-                        console.log('NOT NAVIGATING 1')
-                    }
-                } else {
-                    if (!pageIsSaved && pageArrayState?.getValue()?.hasPage(pageName)) {
-                        await page?.save();
-                        if (cancel) return;
-                        const foundPage = pageArrayState?.getValue()?.getPage(pageName);
-                        if (page !== undefined) {
-                            setPage(page);
-                            setPageIsSaved(true);
-                            console.log('FOUND PAGE "' + page + '", USING SAVED VERSION INSTEAD')
-                        } else {
-                            console.log('NOT NAVIGATING 2')
-                        }
-                    } else {
-                        console.log('NOT NAVIGATING 3')
-                    }
-                }
-            }
-
-            updateCurrentPage();
-            return () => {cancel = true}
-        }
-    }, [pageName, page, pageArrayState]);
 
     const onDragEnd = async (result: DropResult) => {
         const from = result.source.index;
