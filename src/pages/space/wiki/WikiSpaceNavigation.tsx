@@ -105,8 +105,8 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
   const onAddPage = pathname.includes("/add-page");
 
   const wikiState = useObjectState(wiki);
-  const pageArrayState = useObjectState<PageArray>(wiki?.pages);
-  // const pageArrayState = useObjectState<PageArray>(wiki?.pages, {filterMutations: (ev: MutationEvent) => [...wiki.pages?.values()!].map(page => page.name).includes(ev.emitter), debounceFreq: 50});
+  // const pageArrayState = useObjectState<PageArray>(wiki?.pages);
+  const pageArrayState = useObjectState<PageArray>(wiki?.pages, {filterMutations: (ev: MutationEvent) => [...wiki.pages?.values()!].map(page => page.name).includes(ev.emitter), debounceFreq: 50});
 
   const [canEditPageArray, setCanEditPageArray] = useState<boolean>(false);
 

@@ -14,7 +14,7 @@ function WikiSpacePagesForRoute() {
     const { wiki } = useOutletContext<WikiContext>();
 
     const pageArrayState = useObjectState<PageArray>(wiki?.pages, {filterMutations: (ev: MutationEvent) => [...wiki.pages?.values()!].map(page => page.name).includes(ev.emitter), debounceFreq: 50});
-    const [pages, setPages] = useState<(Page | undefined)[]>([]);
+    const [pages, setPages] = useState<Page[]>([]);
 
     useEffect(() => {
         setPages([...pageArrayState?.getValue()?.values()!].filter((p) => p?.name?.getValue() === pageName));
