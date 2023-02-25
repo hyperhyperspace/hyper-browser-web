@@ -298,42 +298,38 @@ function WikiSpaceBlock(props: {
   const blockContentView = (
     <Fragment>
       <Box className="wiki-block">
-        <div>
-          {editable && (
-            <Tooltip title="Click to add a block below">
-              <Icon
-                onClick={handleAddBlock}
-                style={{
-                  cursor: "pointer",
-                  height: "default",
-                  width: "default",
-                  overflow: "visible",
-                }}
-              >
-                <Add></Add>
-              </Icon>
-            </Tooltip>
-          )}
-        </div>
-
-        <div>
-          {editable && (
+        {editable && (
+          <Tooltip title="Click to add a block below">
             <Icon
+              onClick={handleAddBlock}
               style={{
+                cursor: "pointer",
                 height: "default",
                 width: "default",
-                marginRight: "0.25rem",
                 overflow: "visible",
               }}
             >
-              <DragIndicator></DragIndicator>
+              <Add></Add>
             </Icon>
-          )}
-        </div>
+          </Tooltip>
+        )}
+
+        {editable && (
+          <Icon
+            style={{
+              height: "default",
+              width: "default",
+              marginRight: "0.25rem",
+              overflow: "visible",
+            }}
+          >
+            <DragIndicator></DragIndicator>
+          </Icon>
+        )}
 
         <div>
           {props.block?.type === BlockType.Text && (
-            <div className='wiki-block-wrapper'>
+            <div className="wiki-block-wrapper">
               <EditorContent editor={editor} />
               {editor?.isEditable && isEditing && (
                 <BlockStyleBar editor={editor}></BlockStyleBar>
@@ -345,26 +341,6 @@ function WikiSpaceBlock(props: {
               style={{ width: "100%" }}
               src={blockState?.getValue()?.getValue()}
             />
-          )}
-        </div>
-
-        <div>
-          {editable && (
-            <Tooltip hidden={!editable} title="Click to remove this block">
-              <IconButton
-                size="small"
-                onClick={handleRemoveBlock}
-                className="delete-block"
-                style={{
-                  cursor: "pointer",
-                  height: "default",
-                  width: "default",
-                  overflow: "visible",
-                }}
-              >
-                <Delete></Delete>
-              </IconButton>
-            </Tooltip>
           )}
         </div>
       </Box>
