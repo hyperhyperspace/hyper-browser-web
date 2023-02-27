@@ -1,4 +1,4 @@
-import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, WorkerSafeIdbBackend, Resources, WebWorkerMeshProxy, Mesh, Store, Backend, MemoryBackend, IdbBackend } from '@hyper-hyper-space/core';
+import { HashedObject, MutableSet, Hash, ClassRegistry, RSAKeyPair, Identity, WorkerSafeIdbBackend, Resources, WebWorkerMeshProxy, Mesh, Store, Backend, MemoryBackend, IdbBackend, MemoryBackendHost } from '@hyper-hyper-space/core';
 import { Device, Home, SpaceLink } from '@hyper-hyper-space/home';
 
 //yadda yadda import / no - webpack - loader - syntax
@@ -226,11 +226,23 @@ class HyperBrowserConfig extends HashedObject {
     }
 
     static async initTransientSpaceResources(spaceHash: Hash, entryPoint?: HashedObject): Promise<Resources> {
-        const backend = new MemoryBackend(HyperBrowserConfig.backendNameForTransientSpace(spaceHash));
 
-        const store = new Store(backend);
-        const mesh = new Mesh();
-    
+        const backend = new MemoryBackendHost(HyperBrowserConfig.backendNameForTransientSpace(spaceHash));
+
+        //const backend = new MemoryBackend(HyperBrowserConfig.backendNameForTransientSpace(spaceHash));
+
+        const store = new Store(backend.getProxy());
+            
+        const worker = new Worker(new URL('../mesh.worker', import.meta.url));
+
+        const webWorkerMesh = new WebWorkerMeshProxy(worker);
+
+        await webWorkerMesh.ready; // The MeshHost in the web worker will send a message once it is fully
+                                    // operational. We don't want to send any control messages before that,
+                                    // so we'll wait here until we get the 'go' message from the MeshHost.
+
+        const mesh = webWorkerMesh.getMesh();
+        
         const resources = await Resources.create({mesh: mesh, store: store});
 
         store.setResources(resources);
