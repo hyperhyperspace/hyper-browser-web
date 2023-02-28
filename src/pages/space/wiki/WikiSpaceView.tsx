@@ -15,6 +15,7 @@ import { SpaceContext } from "../SpaceFrame";
 import "./WikiSpaceView.css";
 import WikiSpaceSettingsPage from "./WikiSpaceSettingsPage";
 import WikiSpacePagesForRoute from "./WikiSpacePagesForRoute";
+import WikiSpaceEditablePageName from "./WikiSpaceEditablePageName";
 
 type WikiNav = {
   goToPage: (pageName: string) => void;
@@ -136,12 +137,15 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
             <div
               style={{ padding: noNavigation ? "0" : "0 2rem", width: "100%" }}
             >
-              {title && (<Typography variant="h6" align="center">
-                {title}
-              </Typography>)}
-              <Box sx={{marginTop: pageName ? 5 : 0}}>
-                {children}
-              </Box>
+              {/* // check if title is a string or a react element */}
+              {typeof title === "string" ? (
+                <Typography variant="h6" align="center">
+                  {title}
+                </Typography>
+              ) : (
+                title
+              )}
+              <Box sx={{ marginTop: pageName ? 5 : 0 }}>{children}</Box>
             </div>
           </Stack>
         </Stack>
@@ -195,7 +199,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
         <Route
           path="contents/:pageName"
           element={
-            <Frame>
+            <Frame title={<WikiSpaceEditablePageName/>}>
               <WikiSpacePagesForRoute />
             </Frame>
           }
