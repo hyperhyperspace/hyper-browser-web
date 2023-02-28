@@ -12,7 +12,9 @@ const WikiSpaceEditablePageName = (props: {}) => {
   // const [name, setName] = useState(props.page.name);
   // const name = useObjectState(props.page.name)?.value?.getValue()!;
   const { pageName } = useParams();
-  const { wiki, nav } = useOutletContext<WikiContext>();
+  const { wiki, nav, spaceContext } = useOutletContext<WikiContext>();
+  const { home } = spaceContext;
+  const selfAuthor = home?.getAuthor();
 
   const pageArrayState = useObjectState<PageArray>(wiki?.pages, {
     filterMutations: (ev: MutationEvent) =>
@@ -20,6 +22,7 @@ const WikiSpaceEditablePageName = (props: {}) => {
     debounceFreq: 50,
   });
   const [pages, setPages] = useState<Page[]>([]);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
 
   const [pendingName, setPendingName] = useState<string | null>(null);
 
@@ -31,6 +34,10 @@ const WikiSpaceEditablePageName = (props: {}) => {
     );
   }, [pageArrayState, pageName]);
 
+  pageArrayState?.getValue()?.values().next()?.value?.canUpdate(selfAuthor)!.then((canUpdate: boolean) => {
+      setCanEdit(canUpdate);
+  });
+
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   return (
@@ -38,7 +45,8 @@ const WikiSpaceEditablePageName = (props: {}) => {
       ref={inputRef}
       variant="h6"
       align="center"
-      suppressContentEditableWarning={true} contentEditable={true}
+      suppressContentEditableWarning={true}
+      contentEditable={canEdit}
     //   value={pendingName || pageName}
       onBlur={async (e) => {
         const pendingName = inputRef.current?.innerText;
