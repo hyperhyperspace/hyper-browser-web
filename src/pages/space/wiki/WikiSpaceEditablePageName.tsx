@@ -43,11 +43,12 @@ const WikiSpaceEditablePageName = (props: {}) => {
   return (
     <Typography
       ref={inputRef}
-      variant="h6"
+      variant="h4"
+      style={{ padding: "0.25rem"}}
+      fontWeight="bold"
       align="center"
       suppressContentEditableWarning={true}
       contentEditable={canEdit}
-    //   value={pendingName || pageName}
       onBlur={async (e) => {
         const pendingName = inputRef.current?.innerText;
         if (!pendingName || pendingName?.length === 0) {

@@ -145,7 +145,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
               ) : (
                 title
               )}
-              <Box sx={{ marginTop: pageName ? 5 : 0 }}>{children}</Box>
+              <Box>{children}</Box>
             </div>
           </Stack>
         </Stack>
@@ -199,7 +199,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
         <Route
           path="contents/:pageName"
           element={
-            <Frame title={<WikiSpaceEditablePageName/>}>
+            <Frame>
               <WikiSpacePagesForRoute />
             </Frame>
           }

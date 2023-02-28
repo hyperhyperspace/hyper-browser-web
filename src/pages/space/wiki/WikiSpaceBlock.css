@@ -20,10 +20,14 @@
 
 .wiki-block {
   display: grid;
-  grid-template-columns: min-content min-content auto min-content;
+  grid-template-columns: auto;
   align-items: center;
   padding: 0.05rem;
   margin: 0.05rem 0;
+}
+
+.wiki-block.block-editable {
+  grid-template-columns: min-content min-content auto min-content;
 }
 
 .wiki-block .material-icons {

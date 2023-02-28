@@ -34,6 +34,13 @@ import { Box } from "@mui/system";
 import { Extension } from "@tiptap/core";
 import Emoji from "./Emoji";
 
+function classNames(classes: { [key: string]: boolean }) {
+  return Object.entries(classes)
+    .filter(([key, value]) => value)
+    .map(([key, value]) => key)
+    .join(' ');
+}
+
 const BlockEditorShortcuts = Extension.create({
   addOptions() {
     return {
@@ -288,8 +295,12 @@ function WikiSpaceBlock(props: {
 
   const blockContentView = (
     <Fragment>
-      <Box className="wiki-block">
-        {editable && (
+      <Box className={classNames({
+        "wiki-block": true,
+        "block-editable": editable,
+      })}>
+      
+        {editable && <>
           <Tooltip title="Click to add a block below">
             <Icon
               onClick={handleAddBlock}
@@ -303,9 +314,7 @@ function WikiSpaceBlock(props: {
               <Add></Add>
             </Icon>
           </Tooltip>
-        )}
 
-        {editable && (
           <Icon
             style={{
               height: "default",
@@ -316,7 +325,7 @@ function WikiSpaceBlock(props: {
           >
             <DragIndicator></DragIndicator>
           </Icon>
-        )}
+        </>}
 
         <div>
           {props.block?.type === BlockType.Text && (
