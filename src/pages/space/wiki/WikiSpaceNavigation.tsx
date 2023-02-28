@@ -49,7 +49,7 @@ function PageListItem(props: { page: Page, pageArray: PageArray, canEditPageArra
   >
     <Stack direction="row" style={{alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
       <Stack direction="row" style={{alignItems: 'center', justifyContent: 'flex-start'}}>
-    {canEditPageArray && (
+    {/* {canEditPageArray && (
       <Icon
         style={{
           height: "default",
@@ -61,7 +61,7 @@ function PageListItem(props: { page: Page, pageArray: PageArray, canEditPageArra
       >
         <DragIndicator />
       </Icon>
-    )}
+    )} */}
     <Typography
       className={pageName === pageNameFromRoute ? "currently-selected" : ""}
     >
@@ -218,6 +218,17 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
           ></TextField>
         </ListItem>
       </List>
+        {canEditPageArray && (
+          <ListItemButton
+            selected={onSettingsPage}
+            onClick={nav.goToPermissionSettings}
+          >
+            <Typography className={onSettingsPage ? "currently-selected" : ""}>
+              Settings
+            </Typography>
+          </ListItemButton>
+        )}
+      <Divider />
       {/* saved pages */}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId={wiki.getId()!}>
@@ -289,17 +300,6 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
             ></Icon>
             <Typography className={onAddPage ? "currently-selected" : ""}>
               + add page
-            </Typography>
-          </ListItemButton>
-        )}
-        <Divider />
-        {canEditPageArray && (
-          <ListItemButton
-            selected={onSettingsPage}
-            onClick={nav.goToPermissionSettings}
-          >
-            <Typography className={onSettingsPage ? "currently-selected" : ""}>
-              Settings
             </Typography>
           </ListItemButton>
         )}
