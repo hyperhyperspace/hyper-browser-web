@@ -224,8 +224,9 @@ function WikiSpaceBlock(props: {
           items: ({ query }: { query: string }) => {
             return [...pageArrayState?.getValue()?.pages?.values()!]
               .map((page) => page.name?.getValue()!)
+              .filter(item => item)
               .filter((item) =>
-                item.toLowerCase().includes(query.toLowerCase())
+                item?.toLowerCase().includes(query.toLowerCase())
               )
               .slice(0, 5);
           },

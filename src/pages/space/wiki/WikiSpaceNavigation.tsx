@@ -1,7 +1,9 @@
 import { useObjectState } from "@hyper-hyper-space/react";
 import { Page } from "@hyper-hyper-space/wiki-collab";
 import {
+  Box,
   Divider,
+  Drawer,
   Icon,
   IconButton,
   InputAdornment,
@@ -175,10 +177,14 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
 
   const currentPageStyle = { fontWeight: "bold" };
   return (
-    <Paper
-      style={{ minWidth: props.width, maxWidth: props.width, height: "100%" }}
-    >
-      <List style={{ width: "100%", paddingTop: "0px" }} dense>
+    <Box>
+      <List style={{
+        width: "100%", 
+        paddingTop: "0px",
+        margin: "0px",
+        padding: "0px",
+      }}
+      dense>
         <ListItem>
           <Typography
             variant="h5"
@@ -204,6 +210,7 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
               endAdornment: (
                 <InputAdornment position="end">
                   <img
+                    alt="search icon"
                     src="icons/streamline-icon-search@48x48.png"
                     style={{
                       width: "24px",
@@ -217,17 +224,18 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
             }}
           ></TextField>
         </ListItem>
-      </List>
         {canEditPageArray && (
           <ListItemButton
             selected={onSettingsPage}
             onClick={nav.goToPermissionSettings}
+            className="page-tab"
           >
             <Typography className={onSettingsPage ? "currently-selected" : ""}>
               Settings
             </Typography>
           </ListItemButton>
         )}
+      </List>
       <Divider />
       {/* saved pages */}
       <DragDropContext onDragEnd={onDragEnd}>
@@ -262,17 +270,6 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
                 canEditPageArray ? "editable-tab page-tab" : "page-tab"
               }
             >
-              {canEditPageArray && (
-                <Icon
-                  style={{
-                    height: "default",
-                    width: "default",
-                    marginRight: "0.25rem",
-                    overflow: "visible",
-                    color: "light-grey",
-                  }}
-                ></Icon>
-              )}
               <Typography
                 className="currently-selected"
                 style={{
@@ -290,21 +287,14 @@ function WikiSpaceNavigation(props: { width: string; redirect?: boolean }) {
             selected={onAddPage}
             className={canEditPageArray ? "editable-tab page-tab" : "page-tab"}
           >
-            <Icon
-              style={{
-                height: "default",
-                width: "default",
-                marginRight: "0.25rem",
-                overflow: "visible",
-              }}
-            ></Icon>
             <Typography className={onAddPage ? "currently-selected" : ""}>
               + add page
             </Typography>
           </ListItemButton>
         )}
       </List>
-    </Paper>
+    {/* </Drawer> */}
+    </Box>
   );
 }
 

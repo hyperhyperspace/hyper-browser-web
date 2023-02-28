@@ -8,6 +8,7 @@ import { useObjectState } from '@hyper-hyper-space/react';
 import { MutationEvent } from '@hyper-hyper-space/core';
 import WikiSpacePage from './WikiSpacePage';
 import { Stack } from '@mui/material';
+import WikiSpaceEditablePageName from './WikiSpaceEditablePageName';
 
 function WikiSpacePagesForRoute() {
     const { pageName } = useParams();
@@ -21,9 +22,12 @@ function WikiSpacePagesForRoute() {
     }, [pageArrayState, pageName]);
 
     return (
-        <Stack style={{width: "100%"}} spacing={2} direction="column">
-            {pages.map((p) => <WikiSpacePage page={p!} key={p?.getLastHash()}/>)}
-        </Stack>
+        <>
+            <WikiSpaceEditablePageName/>
+            <Stack style={{width: "100%"}} spacing={2} direction="column">
+                {pages.map((p) => <WikiSpacePage page={p!} key={p?.getLastHash()}/>)}
+            </Stack>
+        </>
     );
 }
 

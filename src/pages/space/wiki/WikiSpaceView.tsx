@@ -1,4 +1,4 @@
-import { useTheme, useMediaQuery, Stack, Paper, Typography, Button, Box } from "@mui/material";
+import { useTheme, useMediaQuery, Stack, Paper, Typography, Button, Box, Link, IconButton, Drawer } from "@mui/material";
 import { useEffect, Fragment, ReactElement } from "react";
 import { WikiSpace } from "@hyper-hyper-space/wiki-collab";
 import {
@@ -91,11 +91,12 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
   const BackToIndexButton = () => (
     <>
       <Stack direction="row" spacing="3px" style={{ alignItems: "center" }}>
-        <a
+        <IconButton
           onClick={context.nav.goToIndex}
           style={{ cursor: "pointer", paddingTop: "6px", paddingRight: "3px" }}
         >
           <img
+            alt="back to index"
             src="icons/streamlinehq-arrow-thick-left-arrows-diagrams-48x48.png"
             style={{
               width: "24px",
@@ -104,7 +105,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
               padding: "2px",
             }}
           ></img>
-        </a>
+        </IconButton>
         <Button
           size="small"
           style={{ textTransform: "none", textAlign: "left" }}
@@ -118,38 +119,56 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
   );
 
   const Frame: React.FC<{ title?: string | ReactElement }> = ({ children, title }) => {
-    const { pageName } = useParams();
     return (
-      <div className="wiki-container">
-        <Stack
-          style={{ height: "100%", width: "100%" }}
-          spacing="0.1rem"
-          sx={{ maxWidth: "lg" }}
-        >
-          {noNavigation && <BackToIndexButton />}
+      <>
+        <div className="wiki-container">
+          {!noNavigation &&
+            <Paper
+              // variant="permanent"
+              sx={{
+                width: navigationWidth,
+                margin: 0,
+                padding: 0,
+                flexShrink: 0,
+                '& .MuiDrawer-paper': {
+                  width: navigationWidth,
+                  boxSizing: 'border-box',
+                },
+              }}
+              // anchor="left"
+            >
+              <WikiSpaceNavigation width={navigationWidth} />
+            </Paper>
+          }
           <Stack
-            direction="row"
             style={{ height: "100%", width: "100%" }}
             spacing="0.1rem"
             sx={{ maxWidth: "lg" }}
           >
-            {!noNavigation && <WikiSpaceNavigation width={navigationWidth} />}
-            <div
-              style={{ padding: noNavigation ? "0" : "0 2rem", width: "100%" }}
+            {noNavigation && <BackToIndexButton />}
+            <Stack
+              direction="row"
+              style={{ height: "100%", width: "100%" }}
+              spacing="0.1rem"
+              sx={{ maxWidth: "lg" }}
             >
-              {/* // check if title is a string or a react element */}
-              {typeof title === "string" ? (
-                <Typography variant="h6" align="center">
-                  {title}
-                </Typography>
-              ) : (
-                title
-              )}
-              <Box>{children}</Box>
-            </div>
+              <div
+                style={{ padding: noNavigation ? "0" : "0 2rem", width: "100%" }}
+              >
+                {/* // check if title is a string or a react element */}
+                {typeof title === 'string' ? (
+                  <Typography variant="h6" align="center">
+                    {title}
+                  </Typography>
+                ) : (
+                  title
+                )}
+                <Box>{children}</Box>
+              </div>
+            </Stack>
           </Stack>
-        </Stack>
-      </div>
+        </div>
+      </>
     );
   };
 

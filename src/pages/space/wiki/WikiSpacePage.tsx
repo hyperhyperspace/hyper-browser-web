@@ -7,7 +7,6 @@ import { CausalArray, Identity, MutationEvent } from '@hyper-hyper-space/core';
 import { useOutletContext, } from 'react-router';
 import { WikiContext } from './WikiSpaceView';
 import React, { useEffect, useRef, useState } from 'react';
-import WikiSpaceEditablePageName from './WikiSpaceEditablePageName';
 
 function WikiSpacePage(props: {page: Page}) {
     // const { pageName } = useParams();
@@ -173,7 +172,6 @@ function WikiSpacePage(props: {page: Page}) {
         <Stack direction="row" style={{height: '100%', minWidth: '100%'}} spacing='0.1rem' width="100%">
             <Box style={{minWidth: '100%', height: '100%'}} width="100%">
                         
-                <WikiSpaceEditablePageName/>
                 {page === undefined &&
                     <Typography>Loading...</Typography>
                 }

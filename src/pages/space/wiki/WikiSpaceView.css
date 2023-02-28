@@ -1,6 +1,7 @@
 .wiki-container {
-  padding: 1rem;
-  padding-top: 60px;
+  /* padding: 1rem; */
+  padding: 0;
+  padding-top: 40px;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -9,8 +10,12 @@
 @media only screen and (max-width: 650px) {
   .wiki-container {
     padding: 0;
-    padding-top: 60px;
+    padding-top: 40px;
   }
+}
+
+.wiki-container > * {
+  padding-top: 20px !important;
 }
 /* 
 .emoji-mart-emoji, .emoji-mart-emoji > * {
