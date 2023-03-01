@@ -130,6 +130,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
                 margin: 0,
                 padding: 0,
                 flexShrink: 0,
+                maxWidth: '300px',
                 '& .MuiDrawer-paper': {
                   width: navigationWidth,
                   boxSizing: 'border-box',
@@ -141,7 +142,7 @@ function WikiSpaceView(props: { entryPoint: WikiSpace; path?: string }) {
             </Paper>
           }
           <Stack
-            style={{ height: "100%", width: "100%" }}
+            style={{ height: "100%", width: "100%", maxWidth: "100vw" }}
             spacing="0.1rem"
             sx={{ maxWidth: "lg" }}
           >
