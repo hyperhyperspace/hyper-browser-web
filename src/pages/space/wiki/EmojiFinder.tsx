@@ -3,6 +3,7 @@ import React, { forwardRef, KeyboardEvent, useEffect, useImperativeHandle, useSt
 
 import data from '@emoji-mart/data'
 import { init, SearchIndex } from 'emoji-mart'
+import { Button, grid2Classes } from "@mui/material";
 
 declare global {
     namespace JSX {
@@ -52,12 +53,12 @@ const Picker = forwardRef((props: {query: string, command: Function}, ref) => {
 
       useImperativeHandle(ref, () => ({
         onKeyDown: ({ event }: {event: KeyboardEvent}) => {
-          if (event.key === 'ArrowUp') {
+          if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
             upHandler()
             return true
           }
 
-          if (event.key === 'ArrowDown') {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
             downHandler()
             return true
           }
@@ -74,18 +75,26 @@ const Picker = forwardRef((props: {query: string, command: Function}, ref) => {
       }))
     
     return <>
-        <div className="emoji-finder">
+        <div
+          className="emoji-finder"
+          style={{
+            width: '500px',
+            maxWidth: '100%',
+            gridTemplateColumns: 'min-content min-content min-content min-content',
+            display: 'grid',
+          }}
+        >
           {emojis
             ? emojis.map((emoji, index) => (
-              <button
+              <Button
                 className={`item ${index === selectedIndex ? 'is-selected' : ''}`}
                 key={index}
-                onClick={() => enterHandler()}
+                onClick={(e) => props.command(emoji)}
               >
                 <em-emoji id={emoji.id} skin={0} size="2em" />
-              </button>
+              </Button>
             ))
-            : <div className="emojis"><i>Type to select an emoji...</i></div>
+            : null //<div className="emojis"><i>Type to select an emoji...</i></div>
           }
         </div>
     </>

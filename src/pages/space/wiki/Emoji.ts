@@ -19,10 +19,15 @@ export const suggestion = {
 
     return {
       onStart: (props: any) => {
+        // console.log('rendering emoji picker', props)
+        if(!props.editor.isFocused) {
+          return;
+        }
         component = new ReactRenderer(EmojiPicker, {
           props,
           editor: props.editor,
         })
+        
 
         if (!props.clientRect) {
           return

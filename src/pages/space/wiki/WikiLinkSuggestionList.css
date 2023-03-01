@@ -22,6 +22,7 @@
   }
 
 .item.is-selected {
-  border-color: #000;
+  /* border-color: #000 !important; */
+  outline: solid
 }
   
