@@ -76,6 +76,12 @@ export const FloatingToolbar = ({ editor, isEditing }: {editor: Editor, isEditin
                 top: y || '',
                 left: x || '',
               }}
+              onMouseDownCapture={(e) => {
+                e.preventDefault();
+              }}
+              onPointerDownCapture={(e) => {
+                e.preventDefault();
+              }}
             >
                 <BlockToolbar editor={editor}/>
             </div>,
