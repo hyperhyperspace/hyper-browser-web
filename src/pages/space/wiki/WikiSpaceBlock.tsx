@@ -12,7 +12,7 @@ import Heading from "@tiptap/extension-heading";
 import Italic from "@tiptap/extension-italic";
 import Strike from "@tiptap/extension-strike";
 import Placeholder from "@tiptap/extension-placeholder";
-import BlockStyleBar from "./BlockToolbar";
+// import BlockStyleBar from "./BlockToolbar";
 import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
@@ -33,6 +33,7 @@ import { WikiContext } from "./WikiSpaceView";
 import { Box } from "@mui/system";
 import { Extension } from "@tiptap/core";
 import Emoji from "./Emoji";
+import { FloatingToolbar } from "./FloatingToolbar";
 
 function classNames(classes: { [key: string]: boolean }) {
   return Object.entries(classes)
@@ -165,7 +166,7 @@ function WikiSpaceBlock(props: {
       // console.log("SAVED BLOCK");
     }, 1500)
   );
-
+  
   const editor = useEditor({
     extensions: [
       Document,
@@ -333,7 +334,7 @@ function WikiSpaceBlock(props: {
             <div className="wiki-block-wrapper">
               <EditorContent editor={editor} />
               {editor?.isEditable && isEditing && (
-                <BlockStyleBar editor={editor}></BlockStyleBar>
+                <FloatingToolbar isEditing={isEditing} editor={editor}/>
               )}
             </div>
           )}

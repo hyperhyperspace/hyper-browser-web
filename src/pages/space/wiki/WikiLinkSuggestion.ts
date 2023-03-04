@@ -4,8 +4,7 @@ import Suggestion, { SuggestionKeyDownProps, SuggestionOptions, SuggestionProps 
 import { Node as ProseMirrorNode } from 'prosemirror-model'
 import { PluginKey } from 'prosemirror-state'
 import tippy, { GetReferenceClientRect } from 'tippy.js'
-import WikiLink from './WikiLink'
-import WikiLinkSuggestionList, { WikiLinkSuggestionListProps } from './WikiLinkSuggestionList'
+import WikiLinkSuggestionList from './WikiLinkSuggestionList'
 
 export type WikiLinkSuggestionOptions = {
   HTMLAttributes: Record<string, any>,
@@ -18,16 +17,7 @@ export type WikiLinkSuggestionOptions = {
 
 type propType = SuggestionProps
 
-// {
-//     editor: any,
-//     clientRect: any,
-//     event: any
-// }
-
 export const suggestion = {
-  // items: ({ query }: { query: string }) => {
-  //   return []
-  // },
 
   render: () => {
     let component: any
